@@ -1,0 +1,7 @@
+.cursor-pointer {
+    cursor: pointer;
+}
+
+html[data-theme-dark] {
+    filter: hue-rotate(180deg) invert(1);
+}
