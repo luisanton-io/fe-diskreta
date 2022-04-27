@@ -133,7 +133,7 @@ export default function Register() {
     return <Container>
         <Row>
             <Col lg={4} className="mx-auto p-5 bg-secondary">
-                <Diskreta />
+                <div className="text-white"><Diskreta /></div>
                 <h6 className="text-white text-center">Register</h6>
 
                 <Form onSubmit={handleSubmit}>

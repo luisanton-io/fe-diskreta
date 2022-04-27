@@ -57,7 +57,7 @@ export default function Login() {
                         } catch {
                             console.log("Error decrypting")
                             console.log(cipher, digest)
-                            debugger;
+                            // debugger;
                             return null
                         }
                     })

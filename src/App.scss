@@ -5,3 +5,28 @@
 html[data-theme-dark] {
     filter: hue-rotate(180deg) invert(1);
 }
+
+#conversations .delete-btn {
+    transition: opacity 0.4s;
+    opacity: 0;
+}
+
+#conversations .conversation:hover .delete-btn {
+    opacity: 1;
+}
+
+.message {
+    min-width: 35%;
+    &.received {
+        background-color: #cbcbcb;
+        border: 1px solid transparent;
+        margin-right: auto;
+        align-items: start;
+    }
+    &.sent {
+        background-color: white;
+        border: 1px solid #cbcbcb;
+        margin-left: auto;
+        align-items: flex-end;
+    }
+}

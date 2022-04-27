@@ -7,8 +7,9 @@ import { userState } from "../atoms/user";
 import { chatsState } from "../atoms/chats";
 import { dialogState } from "../atoms/dialog";
 import createChatId from "../util/createChatId";
-import { Arrow90degUp, Moon, Send, Sun } from "react-bootstrap-icons";
+import { Arrow90degUp, Moon, Send, Sun, Trash3 } from "react-bootstrap-icons";
 import Diskreta from "../components/Diskreta";
+import { pki } from "node-forge";
 
 
 
@@ -80,7 +81,7 @@ function UserModal() {
             <Col className="p-5">
                 <h2 className="font-monospace mb-4">Search users</h2>
 
-                <Form className="d-flex position-relative">
+                <Form className="d-flex position-relative" onSubmit={e => { e.preventDefault() }}>
                     <Form.Control
                         placeholder="Nickname..."
                         className="rounded-0"
@@ -105,7 +106,7 @@ function UserModal() {
                 </ListGroup>
             </Col>
         </Row>
-    </Container>
+    </Container >
 }
 
 export default function Main() {
@@ -116,39 +117,92 @@ export default function Main() {
     const [Dialog, setDialog] = useRecoilState(dialogState)
     const [user, setUser] = useRecoilState(userState)
 
+    const privateKey = useMemo(() => user && pki.privateKeyFromPem(user.privateKey), [user])
+
     const { activeChat } = useParams()
 
 
 
-    const [message, setMessage] = useState('')
+    const [text, setText] = useState('')
 
     const showStore = () => {
         console.log(chats)
     }
 
-    const socket = useMemo(() => user && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token: user.token } }), [user])
+    const socket = useMemo(() => {
+        const socket = user && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token: user.token } })
+        console.log({ socket })
+
+        return socket
+    }, [user])
+
+    // console.log({ socket })
 
     useEffect(() => {
-        if (!socket) return
+        if (!socket || !privateKey) return
 
-        socket.on('in-msg', (message: Message) => {
-            console.log(message)
-        })
+        const archiveMessage = (encryptedMessage: Message) => {
+
+            console.table({ encryptedMessage })
+            const message = {
+                ...encryptedMessage,
+                content: {
+                    text: privateKey.decrypt(encryptedMessage.content.text).toString()
+                }
+            }
+
+            console.table({ message })
+
+            const { chatId } = message
+
+            if (!chats?.[chatId]) {
+                setChats(chats => ({
+                    ...chats,
+                    [chatId]: {
+                        id: chatId,
+                        messages: [message],
+                        members: [...message.to, message.sender]
+                    }
+                }))
+
+            } else {
+
+                setChats(chats => ({
+                    ...chats,
+                    [chatId]: {
+                        ...chats![chatId],
+                        messages: [
+                            ...(chats![chatId].messages || []),
+                            message
+                        ]
+                    }
+                }))
+            }
+
+        }
+
+        socket.on('in-msg', archiveMessage)
 
         socket.on('dequeue', (messages: Message[]) => {
-            console.log(messages)
+            messages.forEach(archiveMessage)
         })
 
     }, [socket])
-    console.log(user)
 
-    const recipients = chats && activeChat && chats[activeChat]?.members.filter(m => m._id !== user?._id)
+    const recipients = chats && activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
 
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
         if (recipients) {
+            const message: Message = {
+                sender: user!,
+                to: recipients,
+                chatId: activeChat,
+                content: { text },
+                timestamp: Date.now()
+            }
 
             setChats(chats => ({
                 ...chats,
@@ -156,20 +210,24 @@ export default function Main() {
                     ...chats![activeChat],
                     messages: [
                         ...chats![activeChat].messages,
-                        {
-                            sender: user!._id,
-                            to: recipients.map(r => r._id),
-                            chatId: activeChat,
-                            content: {
-                                text: message
-                            },
-                            timestamp: Date.now()
-                        }
+                        message
                     ]
                 }
             }))
 
-            socket?.emit("out-msg", message)
+            for (const recipient of recipients) {
+
+                const publicKey = pki.publicKeyFromPem(recipient.publicKey)
+
+                socket?.emit("out-msg", {
+                    ...message,
+                    content: {
+                        text: publicKey.encrypt(text)
+                    }
+                })
+            }
+
+            setText('')
 
         }
 
@@ -181,6 +239,14 @@ export default function Main() {
             onClose: () => setDialog(null),
             submitLabel: "Search"
         })
+    }
+
+    const handleDeleteChat = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this chat?")) {
+            const _chats = { ...chats }
+            delete _chats![id]
+            setChats({ ..._chats })
+        }
     }
 
 
@@ -199,10 +265,11 @@ export default function Main() {
             <Col xs={4} className="d-flex flex-column">
                 <Button variant="outline-secondary" className="rounded-0" onClick={handleShowSearchModal}>New Chat</Button>
                 <hr />
-                <ListGroup>
+                <ListGroup id="conversations">
 
                     {
                         chats && Object.values(chats).map(chat => {
+                            console.log("CHAT", { chat })
                             const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
                             const latestMessage = chat.messages[chat.messages.length - 1]
                             // #region
@@ -216,7 +283,7 @@ export default function Main() {
                             // }
                             // #endregion
                             return <ListGroup.Item
-                                className="cursor-pointer rounded-0 d-flex align-items-center"
+                                className="conversation position-relative d-flex flex-column align-items-start justify-content-center cursor-pointer rounded-0"
                                 style={{ minHeight: 90 }}
                                 key={chat.id}
                                 onClick={() => navigate(`/${chat.id}`)}
@@ -224,12 +291,18 @@ export default function Main() {
                                 <h6>{recipients}</h6>
                                 {latestMessage && (
                                     <div className="d-flex align-items-center">
-                                        {latestMessage.sender === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
+                                        {latestMessage.sender._id === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
                                         <span>
                                             {latestMessage.content.text}
                                         </span>
                                     </div>
                                 )}
+                                <Button variant="outline-danger"
+                                    onClick={() => handleDeleteChat(chat.id)}
+                                    className="delete-btn position-absolute rounded-0"
+                                    style={{ inset: 'auto 1em auto auto' }}>
+                                    <Trash3 />
+                                </Button>
                             </ListGroup.Item>
                         })
                     }
@@ -250,13 +323,15 @@ export default function Main() {
                                 {
                                     chats[activeChat].messages.map((message, i) => {
                                         const sender =
-                                            message.sender === user!._id
+                                            message.sender._id === user!._id
                                                 ? "You"
-                                                : chats[activeChat].members.find(m => message.to.includes(m._id))!.nick
+                                                : chats[activeChat].members.find(m => message.sender._id === m._id)?.nick
 
-                                        return <div key={`msg-${i}`} className="d-flex align-items-center">
-                                            <span>{sender}</span>
+                                        return <div key={`msg-${i}`} className={`message ${message.sender._id === user!._id ? "sent" : "received"} d-flex flex-column p-3 my-2 rounded-0`}>
+
+                                            <strong>{sender}</strong>
                                             <span>{message.content.text}</span>
+                                            <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
                                         </div>
                                     })
                                 }
@@ -264,9 +339,9 @@ export default function Main() {
 
 
                             <Form onSubmit={handleSubmit}>
-                                <Form.Control className="rounded-0" type="text" placeholder="Type a message..." onChange={e => setMessage(e.target.value)} />
-                                <Form.Control className="rounded-0" type="button" onClick={showStore} value="Show store" />
-                                <Form.Control className="rounded-0" type="submit" value="click me" />
+                                <Form.Control className="rounded-0" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
+                                {/* <Form.Control className="rounded-0" type="button" onClick={showStore} value="Show store" /> */}
+                                {/* <Form.Control className="rounded-0" type="submit" value="click me" /> */}
                             </Form>
                         </>
                         :

@@ -10,8 +10,8 @@ interface User {
 }
 
 interface Message {
-    sender: User["_id"]
-    to: User["_id"][]
+    sender: User
+    to: User[]
     chatId: string
     content: {
         text: string;

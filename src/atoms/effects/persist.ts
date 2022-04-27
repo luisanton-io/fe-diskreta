@@ -32,7 +32,7 @@ export const encryptedStorage = () => {
         },
         getItem: (key: string) => {
             const a = localStorage.getItem(key)
-            console.table({ decrypted: a && decrypt(a) })
+            // console.table({ decrypted: a && decrypt(a) })
             return a && decrypt(a)
         },
         clear: () => {
