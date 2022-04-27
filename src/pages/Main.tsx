@@ -262,7 +262,7 @@ export default function Main() {
 
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
-            <Col xs={4} className="d-flex flex-column">
+            <Col xs={4} className="d-flex flex-column h-100" style={{ overflow: 'auto' }}>
                 <Button variant="outline-secondary" className="rounded-0" onClick={handleShowSearchModal}>New Chat</Button>
                 <hr />
                 <ListGroup id="conversations">
@@ -308,7 +308,7 @@ export default function Main() {
                     }
                 </ListGroup>
             </Col>
-            <Col xs={8} className="d-flex flex-column">
+            <Col xs={8} className="d-flex flex-column h-100">
                 {
                     chats && activeChat && chats![activeChat]
                         ? <>
@@ -319,7 +319,7 @@ export default function Main() {
 
                             <hr />
 
-                            <div className="d-flex flex-column flex-grow-1">
+                            <div className="d-flex flex-column-reverse flex-grow-1" style={{ overflow: 'auto' }}>
                                 {
                                     chats[activeChat].messages.map((message, i) => {
                                         const sender =
@@ -333,7 +333,7 @@ export default function Main() {
                                             <span>{message.content.text}</span>
                                             <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
                                         </div>
-                                    })
+                                    }).reverse()
                                 }
                             </div>
 
