@@ -15,8 +15,8 @@ export default function Login() {
 
     const navigate = useNavigate()
 
-    const [nick, setNick] = useState("johnDoe");
-    const [password, setPassword] = useState("123456");
+    const [nick, setNick] = useState("");
+    const [password, setPassword] = useState("");
 
     const setUser = useSetRecoilState(userState)
     const setChats = useSetRecoilState(chatsState)
