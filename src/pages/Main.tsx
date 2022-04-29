@@ -236,7 +236,7 @@ export default function Main() {
     const handleShowSearchModal = () => {
         setDialog({
             Content: UserModal,
-            onClose: () => setDialog(null),
+            onConfirm: () => setDialog(null),
             submitLabel: "Search"
         })
     }
@@ -262,7 +262,7 @@ export default function Main() {
 
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
-            <Col xs={4} className="d-flex flex-column h-100" style={{ overflow: 'auto' }}>
+            <Col xs={4} className="position-relative d-flex flex-column h-100" style={{ overflow: 'auto' }}>
                 <Button variant="outline-secondary" className="rounded-0" onClick={handleShowSearchModal}>New Chat</Button>
                 <hr />
                 <ListGroup id="conversations">
@@ -307,6 +307,9 @@ export default function Main() {
                         })
                     }
                 </ListGroup>
+                {/* <Button variant="outline-danger" className="position-absolute bottom-0 start-0 end-0 rounded-0">
+                    Delete data
+                </Button> */}
             </Col>
             <Col xs={8} className="d-flex flex-column h-100">
                 {

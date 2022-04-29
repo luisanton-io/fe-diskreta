@@ -76,7 +76,7 @@ export default function Register() {
         const mnemonic = generateMnemonic(256)
         setDialog({
             Content: () => { return <SeedDialog seed={mnemonic} /> },
-            onClose: () => {
+            onConfirm: () => {
 
                 toast.promise(new Promise<void>((resolve) => {
                     setTimeout(async () => {
@@ -108,7 +108,7 @@ export default function Register() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ password, nick, publicKey: pki.publicKeyToPem(publicKey) })
+            body: JSON.stringify({ digest, nick, publicKey: pki.publicKeyToPem(publicKey) })
         })
 
         if (response.ok) {
@@ -136,7 +136,7 @@ export default function Register() {
                 <div className="text-white"><Diskreta /></div>
                 <h6 className="text-white text-center">Register</h6>
 
-                <Form onSubmit={handleSubmit}>
+                <Form onSubmit={handleSubmit} className="enter-form">
                     <Form.Control
                         type="text"
                         className="rounded-0 mb-2"
