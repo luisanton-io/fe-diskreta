@@ -1,5 +1,11 @@
 interface Dialog {
     Content: () => JSX.Element
     submitLabel: string | null
-    onClose: () => void
+    onConfirm: () => void
+}
+
+interface LoggedUser extends User {
+    token: string
+    privateKey: string
+    digest: string
 }
