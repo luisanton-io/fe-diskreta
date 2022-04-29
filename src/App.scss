@@ -1,3 +1,5 @@
+@import "~bootstrap/scss/bootstrap";
+
 .cursor-pointer {
     cursor: pointer;
 }
@@ -28,5 +30,24 @@ html[data-theme-dark] {
         border: 1px solid #cbcbcb;
         margin-left: auto;
         align-items: flex-end;
+    }
+}
+
+.enter-form {
+    input {
+        &[type="text"],
+        &[type="password"] {
+            border: 3px solid white;
+            &::placeholder {
+                color: white;
+            }
+        }
+    }
+
+    .forgot,
+    .login {
+        &:not(:hover) {
+            color: white !important;
+        }
     }
 }
