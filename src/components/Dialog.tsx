@@ -6,7 +6,7 @@ export default function Dialog() {
     const [Dialog, setDialog] = useRecoilState(dialogState)
 
     const handleSubmit = () => {
-        Dialog?.onClose()
+        Dialog?.onConfirm()
         setDialog(null)
     }
 
