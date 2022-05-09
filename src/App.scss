@@ -8,13 +8,19 @@ html[data-theme-dark] {
     filter: hue-rotate(180deg) invert(1);
 }
 
-#conversations .delete-btn {
-    transition: opacity 0.4s;
-    opacity: 0;
-}
+#conversations {
+    .conversation {
+        .delete-btn {
+            transition: opacity 0.4s;
+            opacity: 0;
+        }
 
-#conversations .conversation:hover .delete-btn {
-    opacity: 1;
+        &:hover {
+            .delete-btn {
+                opacity: 1;
+            }
+        }
+    }
 }
 
 .message {
@@ -45,7 +51,8 @@ html[data-theme-dark] {
     }
 
     .forgot,
-    .login {
+    .login,
+    .register {
         &:not(:hover) {
             color: white !important;
         }

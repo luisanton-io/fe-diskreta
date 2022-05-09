@@ -15,8 +15,8 @@ export default function Dialog() {
             Dialog && (<>
                 <Dialog.Content />
                 <Container className="d-flex justify-content-end px-5 pb-4">
-                    <Button variant="light" className="rounded-0 me-4 w-25" onClick={() => setDialog(null)}>Cancel</Button>
-                    <Button variant="outline-secondary" className="rounded-0 w-25" onClick={handleSubmit}>{Dialog.submitLabel || "Ok"}</Button>
+                    <Button variant="light" className="rounded-0 me-4" onClick={() => setDialog(null)}>Cancel</Button>
+                    <Button variant="outline-dark" className="rounded-0" onClick={handleSubmit}>{Dialog.submitLabel || "Ok"}</Button>
                 </Container>
 
             </>

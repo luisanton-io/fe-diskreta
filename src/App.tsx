@@ -44,7 +44,7 @@ function App() {
         <Route path="/:activeChat" element={<Main />} />
       </Routes>
       <Dialog />
-      <ToastContainer position="bottom-center" theme="colored" />
+      <ToastContainer position="bottom-center" theme="dark" />
       <Button variant="dark" className="rounded-0" onClick={toggleTheme} style={{ position: 'absolute', inset: '1em 1em auto auto ' }}>
         {darkTheme ?
           <Sun /> : <Moon />

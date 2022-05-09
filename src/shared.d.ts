@@ -1,6 +1,7 @@
 interface LoginResponse {
-    token: string
     user: User
+    token: string
+    refreshToken: string
 }
 
 interface User {
