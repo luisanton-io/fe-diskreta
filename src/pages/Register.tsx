@@ -7,9 +7,10 @@ import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { dialogState } from "../atoms/dialog";
 import { userState } from "../atoms/user";
+import { dialogState } from "../atoms/dialog";
 import Diskreta from "../components/Diskreta";
+import { USER_DIGEST } from "../constants";
 import generateKeyPair from "../util/generateKeypair";
 
 function SeedDialog({ seed }: { seed: string }) {
@@ -101,7 +102,11 @@ export default function Register() {
         const { privateKey, publicKey } = await generateKeyPair(mnemonic)
         const digest = SHA512(nick + password).toString()
 
-        localStorage.setItem('digest', publicKey.encrypt(digest))
+        const encryptedDigest = publicKey.encrypt(digest)
+
+        localStorage.setItem(USER_DIGEST, encryptedDigest)
+
+        console.table({ encryptedDigest, digest, eq: privateKey.decrypt(encryptedDigest) === digest })
 
         const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users`, {
             method: 'POST',
@@ -112,14 +117,15 @@ export default function Register() {
         })
 
         if (response.ok) {
-            const { token: plainToken, user } = await response.json() as LoginResponse
+            const { token: encryptedToken, user, refreshToken: encryptedRefreshToken } = await response.json() as LoginResponse
 
-            const token = privateKey.decrypt(plainToken)
+            const [token, refreshToken] = [encryptedToken, encryptedRefreshToken].map(enc => privateKey.decrypt(enc))
 
             const newUserState = {
                 ...user,
                 digest,
                 token,
+                refreshToken,
                 privateKey: pki.privateKeyToPem(privateKey)
             }
 
@@ -132,25 +138,25 @@ export default function Register() {
 
     return <Container>
         <Row>
-            <Col lg={4} className="mx-auto p-5 bg-secondary">
+            <Col lg={4} className="mx-auto p-5 bg-dark">
                 <div className="text-white"><Diskreta /></div>
                 <h6 className="text-white text-center">Register</h6>
 
-                <Form onSubmit={handleSubmit} className="enter-form">
+                <Form onSubmit={handleSubmit} className="enter-form d-flex flex-column">
                     <Form.Control
                         type="text"
-                        className="rounded-0 mb-2"
+                        className="rounded-0 mb-4 bg-transparent text-white"
                         value={nick}
                         onChange={e => setNick(e.target.value)}
                         placeholder="Nickname"
                         required
                     />
 
-                    <InputGroup className="mb-5 rounded-0">
+                    <InputGroup className="rounded-0">
 
                         <Form.Control
                             required
-                            className="rounded-0"
+                            className="rounded-0 bg-transparent text-white me-2"
                             type={showPwd ? "text" : "password"}
                             onChange={e => setPassword(e.target.value)}
                             value={password}
@@ -158,19 +164,21 @@ export default function Register() {
                         />
 
                         <InputGroup.Text
-                            className="rounded-0"
+                            className="rounded-0 btn btn-outline-secondary text-white d-flex align-items-center"
                             onClick={handleToggleShowPwd}
-                            style={{ cursor: "pointer" }}
+                            style={{ cursor: "pointer", borderWidth: 3 }}
                         >
                             {
                                 showPwd
-                                    ? <Eye />
-                                    : <EyeSlash />
+                                    ? <Eye className="text-warning" style={{ transform: 'scale(1.25)' }} />
+                                    : <EyeSlash style={{ transform: 'scale(1.25)' }} />
                             }
                         </InputGroup.Text>
                     </InputGroup>
 
-                    <Form.Control className="rounded-0 mb-2" type="submit" value="Register" />
+                    <Form.Control className="btn btn-outline-primary ms-auto w-50 my-3 rounded-0 font-monospace register"
+                        style={{ borderWidth: 3 }}
+                        type="submit" value="Register" />
 
                     <Link className="text-white" to={'/login'}>Already have an account?</Link>
                 </Form>
