@@ -11,12 +11,13 @@ import { chatsState, defaultChats } from "../atoms/chats";
 import Diskreta from "../components/Diskreta";
 import { CHATS, USER, USER_DIGEST } from "../constants";
 import generateKeyPair from "../util/generateKeypair";
+import { rejects } from "assert";
 
 interface DecryptionResult {
     error: Error | null
     chats: Record<string, Chat> | null
     user: LoggedUser
-    previousUser: boolean
+    // previousUser: boolean
 }
 
 const decryptLocalStorage = (digest: string): DecryptionResult => {
@@ -44,7 +45,7 @@ const decryptLocalStorage = (digest: string): DecryptionResult => {
             })
             .map((json, i) => json && JSON.parse(json)[localKeys[i]])
 
-    return { error, chats, user, previousUser }
+    return { error, chats, user }
 
 }
 
@@ -61,6 +62,9 @@ export default function Login() {
 
     const mnemonic = useRef("")
     const newPassword = useRef("")
+    const errorRef = useRef("")
+
+    const oldDigestEncrypted = localStorage.getItem(USER_DIGEST)
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -86,7 +90,7 @@ export default function Login() {
                 // We try to decrypt the store with the current user digest
                 const digest = SHA512(nick + password).toString()
 
-                const { error, chats, user, previousUser } = decryptLocalStorage(digest)
+                const { error, chats, user } = decryptLocalStorage(digest)
 
 
                 // If decrypt fails we try to decrypt with the previous user digest. 
@@ -97,8 +101,7 @@ export default function Login() {
                 // - another user was previously logged in
 
                 if (!chats || !user) {
-                    console.log({ previousUser })
-                    if (previousUser && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
+                    if (oldDigestEncrypted && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
                         return
                     }
 
@@ -158,18 +161,17 @@ export default function Login() {
         }
     }
 
-    const handleForgotPassword = () => {
+    const handleForgotPassword = async () => {
         console.log("handleForgotPassword")
 
         if (!nick) {
             return toast.error("Please enter your nickname")
         }
-        const oldDigestEncrypted = localStorage.getItem(USER_DIGEST)
 
-        console.log(oldDigestEncrypted)
+        const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users?nick=${nick}`)
 
-        if (!oldDigestEncrypted && !window.confirm("No previous data found on this device. Continue?")) {
-            return
+        if (response.status === 404) {
+            return toast.error("User not found")
         }
 
         const handleDialogSubmit = async (e?: React.FormEvent) => {
@@ -178,17 +180,28 @@ export default function Login() {
 
             console.log(mnemonic.current)
 
-            toast.promise(new Promise<void>((resolve) => {
+            toast.promise(new Promise<void>((resolve, reject) => {
                 setTimeout(async () => {
                     try {
 
                         var { privateKey, publicKey } = await generateKeyPair(mnemonic.current)
                         console.log("private key generated")
 
+                        const responseUser = await response.json()
+
+                        if (responseUser.publicKey !== pki.publicKeyToPem(publicKey)) {
+                            reject()
+                            setTimeout(() => {
+                                toast.update("key-toast", { render: nick + " keys were not generated using this mnemonic." })
+                                setDialog(null)
+                            }, 5)
+                            return
+                        }
+
                         if (oldDigestEncrypted) {
 
                             const oldDigest = privateKey.decrypt(oldDigestEncrypted)
-                            var { error, chats, user, previousUser } = decryptLocalStorage(oldDigest)
+                            var { error, chats, user } = decryptLocalStorage(oldDigest)
 
                             if (error) throw error
 
@@ -206,66 +219,72 @@ export default function Login() {
 
                     // enter new password, calc new digest.
 
+                    const handlePasswordSubmit = async (e?: React.FormEvent) => {
+                        const digest = SHA512(nick + newPassword.current).toString()
+                        localStorage.setItem(USER_DIGEST, digest)
+
+                        // PUT user's digest sending the new digest signed with the PRIVATE key
+                        // the server will be able to verify the sender identity verifying with the PUBLIC key.
+
+                        // TODO on the server side: 
+
+                        // find user by nick
+                        // const digest = user.publicKey.verify(signedDigest)
+                        // update user digest with digest
+
+                        const signedDigest = privateKey.sign(digest)
+
+                        console.log({ signedDigest })
+
+                        // const responseUser = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users`, {
+                        //     method: "PUT",
+                        //     headers: {
+                        //         "Content-Type": "application/json"
+                        //     },
+                        //     body: JSON.stringify({
+                        //         nick,
+                        //         digest: signedDigest,
+                        //         publicKey: pki.publicKeyToPem(publicKey)
+                        //     })
+                        // })
+
+
+
+
+                        // login with new digest and setUser
+
+                        // setUser({
+                        //     ...responseUser, // the newly downloaded data from the server
+                        //     token: privateKey.decrypt(plainToken),
+                        //     privateKey: pki.privateKeyToPem(privateKey),
+                        //     digest
+                        // })
+
+                        // setChats(chats || defaultChats) // either the old chats or the default if error
+                        // navigate("/")
+                        resolve()
+                    }
+
                     setDialog({
                         submitLabel: "Confirm",
                         Content: () => {
                             return (
-                                <Form className="p-5">
+                                <Form className="p-5" onSubmit={handlePasswordSubmit}>
                                     <Form.Control type="password" placeholder="New password" onChange={e => { newPassword.current = e.target.value }} />
                                 </Form>
                             )
                         },
-                        onConfirm: async () => {
-                            const digest = SHA512(nick + newPassword.current).toString()
-                            localStorage.setItem(USER_DIGEST, digest)
-
-                            // PUT user's digest sending the new digest signed with the PRIVATE key
-                            // the server will be able to verify the sender identity verifying with the PUBLIC key.
-
-                            // TODO on the server side: 
-
-                            // find user by nick
-                            // const digest = user.publicKey.verify(signedDigest)
-                            // update user digest with digest
-
-                            const signedDigest = privateKey.sign(digest)
-
-                            const responseUser = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users`, {
-                                method: "PUT",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    nick,
-                                    digest: signedDigest,
-                                    publicKey: pki.publicKeyToPem(publicKey)
-                                })
-                            })
-
-
-
-
-                            // login with new digest and setUser
-
-                            // setUser({
-                            //     ...responseUser, // the newly downloaded data from the server
-                            //     token: privateKey.decrypt(plainToken),
-                            //     privateKey: pki.privateKeyToPem(privateKey),
-                            //     digest
-                            // })
-
-                            // setChats(chats || defaultChats) // either the old chats or the default if error
-                            // navigate("/")
-                            resolve()
-                        }
+                        onConfirm: handlePasswordSubmit
                     })
 
 
                 }, 1000)
             }), {
                 pending: "Generating your keys...",
-                error: "Error generating your keys. Please try again.",
+                error: "Your keys were not generated",
                 success: "Your keys have been generated"
+            }, {
+                toastId: "key-toast"
             })
         }
 
@@ -274,8 +293,19 @@ export default function Login() {
             Content: () => {
                 return (
                     <Form className="p-5" onSubmit={handleDialogSubmit}>
-                        <p>If you were previously logged in this device, you can recover your data here.</p>
-                        <p>You need to regenerate your keypair in order to do so.</p>
+                        {
+                            oldDigestEncrypted
+                                ?
+                                <>
+                                    <p>If you were previously logged in this device, you can recover your data here.</p>
+                                    <p>You need to regenerate your keypair in order to do so.</p>
+                                </>
+                                :
+                                <>
+                                    <p>No previous user data was found on this device. In order to restore your message you will need to export them from the device your were previously using.</p>
+                                    <p>This feature is planned for a future release of Diskreta.</p>
+                                </>
+                        }
                         <strong>Please insert your 24 words mnemonic here separated by white space.</strong>
                         <Form.Control className="d-inline-block rounded-0 my-4" type="text" placeholder="Seed" onChange={e => { mnemonic.current = e.target.value }} />
                     </Form>
@@ -303,6 +333,7 @@ export default function Login() {
                             className="rounded-0 btn btn-outline-secondary forgot"
                             style={{ borderWidth: 3 }}
                             onClick={handleForgotPassword}
+                            tabIndex={0}
                         >
                             Forgot?
                         </InputGroup.Text>
