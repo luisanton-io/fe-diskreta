@@ -263,7 +263,7 @@ export default function Main() {
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
             <Col xs={4} className="position-relative d-flex flex-column h-100" style={{ overflow: 'auto' }}>
-                <Button variant="outline-secondary" className="rounded-0" onClick={handleShowSearchModal}>New Chat</Button>
+                <Button variant="outline-secondary" className="rounded-0 mt-3" onClick={handleShowSearchModal}>New Chat</Button>
                 <hr />
                 <ListGroup id="conversations">
 
