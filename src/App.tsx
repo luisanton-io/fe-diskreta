@@ -9,8 +9,8 @@ import Register from './pages/Register';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.scss';
-import { AES, enc } from 'crypto-js';
-import { pki } from 'node-forge';
+import { AES, enc, SHA512 } from 'crypto-js';
+import { md, pki } from 'node-forge';
 import { Button } from 'react-bootstrap';
 import { Sun, Moon } from 'react-bootstrap-icons';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,8 @@ import { useEffect, useState } from 'react';
 (window as any).AES = AES;
 (window as any).pki = pki;
 (window as any).enc = enc;
+(window as any).SHA512 = SHA512;
+(window as any).md = md;
 
 function App() {
 
