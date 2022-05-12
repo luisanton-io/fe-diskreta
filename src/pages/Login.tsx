@@ -344,7 +344,6 @@ export default function Login() {
                             Forgot?
                         </Button>
                     </InputGroup>
-                    {/* <Badge bg="transparent" text="white" onClick={handleForgotPassword} className="cursor-pointer rounded-0 p-2 me-auto my-2" style={{ border: '3px solid white' }}>Forgot password</Badge> */}
 
                     <Form.Control type="submit"
                         className="btn btn-outline-info ms-auto w-50 my-3 rounded-0 font-monospace login"
