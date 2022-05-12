@@ -1,8 +1,8 @@
 import { generateMnemonic } from "bip39";
 import { SHA512 } from "crypto-js";
-import { pki } from "node-forge";
+import { pki, util } from "node-forge";
 import { useEffect, useState } from "react";
-import { Col, Container, Form, InputGroup, Row } from "react-bootstrap";
+import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -12,6 +12,7 @@ import { dialogState } from "../atoms/dialog";
 import Diskreta from "../components/Diskreta";
 import { USER_DIGEST } from "../constants";
 import generateKeyPair from "../util/generateKeypair";
+import { createDigest } from "../util/createDigest";
 
 function SeedDialog({ seed }: { seed: string }) {
     return <Container>
@@ -100,9 +101,9 @@ export default function Register() {
     const handleContinue = async (mnemonic: string) => {
 
         const { privateKey, publicKey } = await generateKeyPair(mnemonic)
-        const digest = SHA512(nick + password).toString()
+        const digest = createDigest(nick, password)
 
-        const encryptedDigest = publicKey.encrypt(digest)
+        const encryptedDigest = util.encode64(publicKey.encrypt(digest))
 
         localStorage.setItem(USER_DIGEST, encryptedDigest)
 
@@ -163,8 +164,9 @@ export default function Register() {
                             placeholder="Password"
                         />
 
-                        <InputGroup.Text
-                            className="rounded-0 btn btn-outline-secondary text-white d-flex align-items-center"
+                        <Button
+                            variant="outline-secondary"
+                            className="rounded-0 text-white d-flex align-items-center"
                             onClick={handleToggleShowPwd}
                             style={{ cursor: "pointer", borderWidth: 3 }}
                         >
@@ -173,7 +175,7 @@ export default function Register() {
                                     ? <Eye className="text-warning" style={{ transform: 'scale(1.25)' }} />
                                     : <EyeSlash style={{ transform: 'scale(1.25)' }} />
                             }
-                        </InputGroup.Text>
+                        </Button>
                     </InputGroup>
 
                     <Form.Control className="btn btn-outline-primary ms-auto w-50 my-3 rounded-0 font-monospace register"
