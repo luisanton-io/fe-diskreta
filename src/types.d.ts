@@ -4,8 +4,11 @@ interface Dialog {
     onConfirm: () => void
 }
 
-interface LoggedUser extends User {
-    token: string
+interface CurrentUser extends User {
     privateKey: string
+}
+
+interface LoggedUser extends CurrentUser {
+    token: string
     digest: string
 }
