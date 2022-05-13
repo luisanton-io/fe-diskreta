@@ -107,7 +107,7 @@ export default function Register() {
 
         localStorage.setItem(USER_DIGEST, encryptedDigest)
 
-        console.table({ encryptedDigest, digest, eq: privateKey.decrypt(encryptedDigest) === digest })
+        console.table({ encryptedDigest, digest, eq: privateKey.decrypt(util.decode64(encryptedDigest)) === digest })
 
         const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users`, {
             method: 'POST',
@@ -118,9 +118,14 @@ export default function Register() {
         })
 
         if (response.ok) {
-            const { token: encryptedToken, user, refreshToken: encryptedRefreshToken } = await response.json() as LoginResponse
+            const {
+                token: encryptedToken,
+                refreshToken: encryptedRefreshToken,
+                user
+            } = await response.json() as LoginResponse
 
-            const [token, refreshToken] = [encryptedToken, encryptedRefreshToken].map(enc => privateKey.decrypt(enc))
+            const [token, refreshToken] =
+                [encryptedToken, encryptedRefreshToken].map(cipher => privateKey.decrypt(util.decode64(cipher)))
 
             const newUserState = {
                 ...user,
@@ -166,9 +171,8 @@ export default function Register() {
 
                         <Button
                             variant="outline-secondary"
-                            className="rounded-0 text-white d-flex align-items-center"
+                            className="rounded-0 text-white d-flex align-items-center border-3"
                             onClick={handleToggleShowPwd}
-                            style={{ cursor: "pointer", borderWidth: 3 }}
                         >
                             {
                                 showPwd
@@ -178,9 +182,12 @@ export default function Register() {
                         </Button>
                     </InputGroup>
 
-                    <Form.Control className="btn btn-outline-primary ms-auto w-50 my-3 rounded-0 font-monospace register"
-                        style={{ borderWidth: 3 }}
-                        type="submit" value="Register" />
+                    <Button
+                        variant="outline-primary"
+                        className="ms-auto w-50 my-3 rounded-0 font-monospace register border-3"
+                        type="submit" >
+                        Register
+                    </Button>
 
                     <Link className="text-white" to={'/login'}>Already have an account?</Link>
                 </Form>
