@@ -1,18 +1,17 @@
 import { generateMnemonic } from "bip39";
-import { SHA512 } from "crypto-js";
 import { pki, util } from "node-forge";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilState, useSetRecoilState } from "recoil";
-import { userState } from "../atoms/user";
 import { dialogState } from "../atoms/dialog";
+import { userState } from "../atoms/user";
 import Diskreta from "../components/Diskreta";
 import { USER_DIGEST } from "../constants";
-import generateKeyPair from "../util/generateKeypair";
 import { createDigest } from "../util/createDigest";
+import generateKeyPair from "../util/generateKeypair";
 
 function SeedDialog({ seed }: { seed: string }) {
     return <Container>
@@ -50,25 +49,9 @@ export default function Register() {
     const [password, setPassword] = useState('')
     const [showPwd, setShowPwd] = useState(false)
 
-    // useEffect(() => {
-    //     if (localStorage.getItem('_')) {
-    //         navigate('/login')
-    //     }
-    // }, [])
-
-
-
     const handleToggleShowPwd = () => {
         setShowPwd(s => !s)
     }
-
-    // useEffect(() => {
-    //     if (localStorage.getItem('_')
-    //         && !window.confirm("You previously logged in with another user on this device. Continuing will destroy all data associated with the previous user. Continue?")) {
-    //         return navigate("/login")
-    //     }
-    // }, [])
-
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
