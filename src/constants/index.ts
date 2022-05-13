@@ -1,3 +1,3 @@
-export const USER_DIGEST = 'udgst'
-export const USER = 'user'
-export const CHATS = 'chats'
+export const USER_DIGEST = '‎'
+export const USER = '‎‎'
+export const CHATS = '‎‎‎'

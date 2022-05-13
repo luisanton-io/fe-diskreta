@@ -38,7 +38,10 @@ const decryptLocalStorage = (digest: string): DecryptionResult => {
                     return null
                 }
             })
-            .map((json, i) => json && JSON.parse(json)[[CHATS, USER][i]])
+            .map((json, i) => {
+                console.log(json && JSON.parse(json))
+                return json && JSON.parse(json)[[CHATS, USER][i]]
+            })
 
     return { error, chats, user }
 
@@ -68,12 +71,15 @@ export default function Login() {
         }
 
         try {
+
+            const digest = createDigest(nick, password)
+
             const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users/session`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ nick, password })
+                body: JSON.stringify({ nick, digest })
             })
 
             if (!response.ok) {
@@ -82,11 +88,9 @@ export default function Login() {
                 const { token: encryptedToken, user: responseUser } = await response.json() as LoginResponse
 
                 // We try to decrypt the store with the current user digest
-                const digest = createDigest(nick, password)
-
                 const { error, chats, user } = decryptLocalStorage(digest)
 
-
+                console.table({ digest, error: !!error, user })
                 // If decrypt fails we try to decrypt with the previous user digest. 
                 // To retrieve it, we need to regenerate the previous user keys
 
@@ -159,8 +163,8 @@ export default function Login() {
         }
     }
 
-    const handleForgotPassword = async () => {
-        console.log("handleForgotPassword")
+    const handleRecovery = async () => {
+        console.log("handleRecovery")
 
         if (!nick) {
             return toast.error("Please enter your nickname")
@@ -201,12 +205,8 @@ export default function Login() {
                             (async () => {
                                 const responseUser = await response.json() as User
 
-                                console.log(responseUser.publicKey)
-                                console.log(pki.publicKeyToPem(publicKey))
-                                console.log("Match? ", responseUser.publicKey === pki.publicKeyToPem(publicKey))
-
                                 if (responseUser.publicKey !== pki.publicKeyToPem(publicKey)) {
-                                    Promise.reject()
+                                    return Promise.reject()
                                 }
 
                                 return { responseUser, privateKey }
@@ -217,8 +217,8 @@ export default function Login() {
                             pending: "Retrieving your user's public key...",
                             error: nick + "'s keys were not generated using this mnemonic."
                         },
-                    )
-                ).then(({ responseUser, privateKey }) => {
+                    ))
+                .then(({ responseUser, privateKey }) => {
 
                     // From now we can safely assume that the keys for user {nick} were generated using the same mnemonic
                     // Before setting recoil let's first make sure there wasn't a previous user logged in 
@@ -226,7 +226,7 @@ export default function Login() {
 
                     try {
                         if (oldDigestEncrypted) {
-                            const oldDigest = privateKey.decrypt(oldDigestEncrypted) //throws
+                            const oldDigest = privateKey.decrypt(util.decode64(oldDigestEncrypted)) //throws
                             var { error, chats } = decryptLocalStorage(oldDigest)
 
                             if (error) throw error
@@ -249,10 +249,9 @@ export default function Login() {
                         },
                         chats
                     })
-                }).then(({ user, chats }) => {
+                })
+                .then(({ user, chats }) => {
                     // Here we will calc new digest, send to server signed, get a JWT back.
-
-                    // enter new password, calc new digest.
 
                     const handlePasswordSubmit = async (e?: React.FormEvent) => {
                         e?.preventDefault()
@@ -282,7 +281,7 @@ export default function Login() {
                             alert("Error updating user")
                             return
                         }
-                        const { token: encryptedToken } = await response.json() as LoginResponse
+                        const { token: encryptedToken } = await updateResponse.json() as LoginResponse
 
                         // login with new digest and setUser
 
@@ -293,6 +292,7 @@ export default function Login() {
                         })
 
                         setChats(chats ?? defaultChats) // either the old chats or the default if error
+                        setDialog(null)
                         navigate("/")
                     }
 
@@ -349,18 +349,16 @@ export default function Login() {
 
                         <Button
                             variant="outline-secondary"
-                            className="rounded-0 forgot"
-                            style={{ borderWidth: 3 }}
-                            onClick={handleForgotPassword}
+                            className="rounded-0 forgot border-3"
+                            onClick={handleRecovery}
                         >
-                            Forgot?
+                            Recover
                         </Button>
                     </InputGroup>
 
                     <Button type="submit"
                         variant="outline-info"
-                        className=" ms-auto w-50 my-3 rounded-0 font-monospace login"
-                        style={{ borderWidth: 3 }}
+                        className=" ms-auto w-50 my-3 rounded-0 font-monospace login border-3"
                     >
                         Login
                     </Button>
