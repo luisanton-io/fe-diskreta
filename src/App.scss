@@ -54,7 +54,12 @@ html[data-theme-dark] {
     .login,
     .register {
         &:not(:hover) {
-            color: white !important;
+            color: white;
         }
+
+        // &:active:not(:hover),
+        // &:focus:not(:hover) {
+        //     color: unset;
+        // }
     }
 }
