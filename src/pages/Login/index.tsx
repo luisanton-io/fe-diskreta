@@ -1,5 +1,4 @@
-import { AES, enc, SHA512 } from "crypto-js";
-import { md, pki, util } from "node-forge";
+import { pki, util } from "node-forge";
 import { useRef, useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
@@ -14,38 +13,8 @@ import generateKeyPair from "../../util/generateKeypair";
 import { rejects } from "assert";
 import { createDigest, createSignedDigest } from "../../util/createDigest";
 import withHysteresis from "../../util/withHysteresis";
-
-interface DecryptionResult {
-    error: Error | null
-    chats: Record<string, Chat> | null
-    user: LoggedUser
-    // previousUser: boolean
-}
-
-const decryptLocalStorage = (digest: string): DecryptionResult => {
-
-    let error: Error | null = null
-
-    const [chats, user] =
-        [localStorage.getItem(CHATS), localStorage.getItem(USER)]
-            .map(cipher => {
-                try {
-                    return cipher && AES.decrypt(cipher, digest).toString(enc.Utf8)
-                } catch {
-                    console.log("Error decrypting")
-                    console.log(cipher, digest)
-                    error = new Error("Error decrypting")
-                    return null
-                }
-            })
-            .map((json, i) => {
-                console.log(json && JSON.parse(json))
-                return json && JSON.parse(json)[[CHATS, USER][i]]
-            })
-
-    return { error, chats, user }
-
-}
+import decryptLocalStorage from "../../util/decryptLocalStorage";
+import useHandleSubmit from "./handlers/useHandleSubmit";
 
 export default function Login() {
 
@@ -63,105 +32,99 @@ export default function Login() {
 
     const oldDigestEncrypted = localStorage.getItem(USER_DIGEST)
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+    const handleSubmit = useHandleSubmit(nick, password)
 
-        if (!nick || !password) {
-            return toast.error("Credentials missing")
-        }
+    // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    //     e.preventDefault()
 
-        try {
+    //     if (!nick || !password) {
+    //         return toast.error("Credentials missing")
+    //     }
 
-            const digest = createDigest(nick, password)
+    //     try {
 
-            const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users/session`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ nick, digest })
-            })
+    //         const digest = createDigest(nick, password)
 
-            if (!response.ok) {
-                toast.error("Wrong credentials!")
-            } else {
-                const { token: encryptedToken, user: responseUser } = await response.json() as LoginResponse
+    //         const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users/session`, {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json"
+    //             },
+    //             body: JSON.stringify({ nick, digest })
+    //         })
 
-                // We try to decrypt the store with the current user digest
-                const { error, chats, user } = decryptLocalStorage(digest)
+    //         if (!response.ok) {
+    //             toast.error("Wrong credentials!")
+    //         } else {
+    //             const { token: encryptedToken, user: responseUser } = await response.json() as LoginResponse
 
-                console.table({ digest, error: !!error, user })
-                // If decrypt fails we try to decrypt with the previous user digest. 
-                // To retrieve it, we need to regenerate the previous user keys
+    //             // We try to decrypt the store with the current user digest
+    //             const { error, chats, user } = decryptLocalStorage(digest)
 
-                // User digest is different if:
-                // - user changed his password
-                // - another user was previously logged in
+    //             if (!error) {
+    //                 const token = pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken))
 
-                if (!error) {
-                    const token = pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken))
+    //                 setUser({ ...user, token })
+    //                 setChats(chats)
+    //                 navigate("/")
+    //             } else {
+    //                 if (oldDigestEncrypted && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
+    //                     return
+    //                 }
 
-                    setUser({ ...user, token })
-                    setChats(chats)
-                    navigate("/")
-                } else {
-                    if (oldDigestEncrypted && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
-                        return
-                    }
+    //                 localStorage.clear()
 
-                    localStorage.clear()
+    //                 const handleRegenerate = async (e?: React.FormEvent) => {
+    //                     e?.preventDefault()
 
-                    const handleRegenerate = async (e?: React.FormEvent) => {
-                        e?.preventDefault()
+    //                     toast.promise(new Promise<void>((resolve) => {
+    //                         setTimeout(async () => {
+    //                             const { privateKey } = await generateKeyPair(mnemonic.current)
 
-                        toast.promise(new Promise<void>((resolve) => {
-                            setTimeout(async () => {
-                                const { privateKey } = await generateKeyPair(mnemonic.current)
+    //                             setUser({
+    //                                 ...responseUser,
+    //                                 token: privateKey.decrypt(util.decode64(encryptedToken)),
+    //                                 privateKey: pki.privateKeyToPem(privateKey),
+    //                                 digest: createDigest(nick, password)
+    //                             })
+    //                             setChats(defaultChats)
+    //                             navigate("/")
 
-                                setUser({
-                                    ...responseUser,
-                                    token: privateKey.decrypt(util.decode64(encryptedToken)),
-                                    privateKey: pki.privateKeyToPem(privateKey),
-                                    digest: createDigest(nick, password)
-                                })
-                                setChats(defaultChats)
-                                navigate("/")
+    //                             resolve()
+    //                         }, 1000)
+    //                     }), {
+    //                         pending: "Generating your keys...",
+    //                         error: "Error generating your keys. Please try again.",
+    //                         success: "Your keys have been generated"
+    //                     })
+    //                 }
 
-                                resolve()
-                            }, 1000)
-                        }), {
-                            pending: "Generating your keys...",
-                            error: "Error generating your keys. Please try again.",
-                            success: "Your keys have been generated"
-                        })
-                    }
+    //                 setDialog({
+    //                     submitLabel: "Generate",
+    //                     Content: () => {
+    //                         return (
+    //                             <Form className="p-5" onSubmit={handleRegenerate}>
+    //                                 <p>Welcome to a new device. You need to regenerate your keypair in order to use Diskreta here.</p>
+    //                                 <p>Please note we do not store your messages and you will need to export them from your old device.</p>
+    //                                 <p>This feature is planned for upcoming releases.</p>
+    //                                 <p><strong>If this is not your device,</strong> log out after your session to destroy your data.</p>
+    //                                 <Form.Control type="text" placeholder="Seed" onChange={e => { mnemonic.current = e.target.value }} />
+    //                             </Form>
+    //                         )
+    //                     },
+    //                     onConfirm: handleRegenerate
+    //                 })
 
-                    setDialog({
-                        submitLabel: "Generate",
-                        Content: () => {
-                            return (
-                                <Form className="p-5" onSubmit={handleRegenerate}>
-                                    <p>Welcome to a new device. You need to regenerate your keypair in order to use Diskreta here.</p>
-                                    <p>Please note we do not store your messages and you will need to export them from your old device.</p>
-                                    <p>This feature is planned for upcoming releases.</p>
-                                    <p><strong>If this is not your device,</strong> log out after your session to destroy your data.</p>
-                                    <Form.Control type="text" placeholder="Seed" onChange={e => { mnemonic.current = e.target.value }} />
-                                </Form>
-                            )
-                        },
-                        onConfirm: handleRegenerate
-                    })
-
-                }
+    //             }
 
 
 
-            }
+    //         }
 
-        } catch (error) {
-            toast.error((error as Error).message)
-        }
-    }
+    //     } catch (error) {
+    //         toast.error((error as Error).message)
+    //     }
+    // }
 
     const handleRecovery = async () => {
         console.log("handleRecovery")
@@ -215,7 +178,8 @@ export default function Login() {
                         ,
                         {
                             pending: "Retrieving your user's public key...",
-                            error: nick + "'s keys were not generated using this mnemonic."
+                            error: nick + "'s keys were not generated using this mnemonic.",
+                            success: "Please enter a new password."
                         },
                     ))
                 .then(({ responseUser, privateKey }) => {
