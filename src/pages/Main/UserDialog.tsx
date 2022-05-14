@@ -1,16 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import { chatsState } from "atoms/chats";
+import { dialogState } from "atoms/dialog";
+import { userState } from "atoms/user";
+import { useEffect, useRef, useState } from "react";
+import { Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import io from "socket.io-client";
-import { userState } from "../../atoms/user";
-import { chatsState } from "../../atoms/chats";
-import { dialogState } from "../../atoms/dialog";
-import createChatId from "../../util/createChatId";
-import { Arrow90degUp, Moon, Send, Sun, Trash3 } from "react-bootstrap-icons";
-import Diskreta from "../../components/Diskreta";
-import { pki, util } from "node-forge";
-import { USER_DIGEST } from "../../constants";
+import createChatId from "util/createChatId";
+import maskUser from "util/maskUser";
 
 export default function UserDialog() {
     const navigate = useNavigate()
@@ -25,7 +21,6 @@ export default function UserDialog() {
     const [chats, setChats] = useRecoilState(chatsState)
 
     const [loading, setLoading] = useState(false)
-    const [load, unload] = [true, false].map(v => () => setLoading(v))
 
     useEffect(() => {
         timeout.current && clearTimeout(timeout.current)
@@ -36,23 +31,25 @@ export default function UserDialog() {
     }, [query])
 
     useEffect(() => {
+        const unload = () => setLoading(false)
+
         if (!query) {
             setUsers([])
             unload()
             return
         }
 
-        console.log({ debouncedQuery })
+        // console.log({ debouncedQuery })
 
         const getUsers = async () => {
-            load()
+            setLoading(true)
             setUsers([])
             const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users?nick=${query}`)
             return await response.json() as User[]
         }
 
-        getUsers().then(setUsers).finally(unload)
-    }, [debouncedQuery])
+        query === debouncedQuery && getUsers().then(setUsers).finally(unload)
+    }, [debouncedQuery, query])
 
     const handleSelectedUser = (selectedUser: User) => {
         const chatId = createChatId(user!._id, selectedUser._id)
@@ -63,11 +60,7 @@ export default function UserDialog() {
         const exists = !!chats?.[chatId]
 
         if (!exists) {
-            const publicUser = structuredClone(user) as User & Partial<LoggedUser>
-
-            delete publicUser.digest
-            delete publicUser.privateKey
-            delete publicUser.token
+            const publicUser = maskUser(user)
 
             setChats(chats => ({
                 ...chats,

@@ -1,4 +1,4 @@
-import { Button, Container, Modal, Row } from "react-bootstrap"
+import { Button, Container, Modal } from "react-bootstrap"
 import { useRecoilState } from "recoil"
 import { dialogState } from "../atoms/dialog"
 
@@ -18,7 +18,6 @@ export default function Dialog() {
                     <Button variant="outline-dark" style={{ opacity: 0.9 }} className="rounded-0 text-white me-4" onClick={() => setDialog(null)}>Cancel</Button>
                     <Button variant="outline-light" className="rounded-0" onClick={handleSubmit}>{Dialog.submitLabel || "Ok"}</Button>
                 </Container>
-
             </>
             )
         }

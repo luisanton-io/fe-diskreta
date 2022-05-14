@@ -1,6 +1,6 @@
 import { atom } from "recoil";
 import { getRecoil } from "recoil-nexus";
-import { CHATS } from "../constants";
+import { CHATS } from "constants/localStorage";
 import persist from "./effects/persist";
 
 const { persistAtom } = persist(CHATS)

@@ -1,6 +1,6 @@
 import { atom } from "recoil";
-import { USER } from "../constants";
-import persist from "./effects/persist";
+import { USER } from "constants/localStorage";
+import persist from "atoms/effects/persist";
 
 const { persistAtom } = persist(USER);
 

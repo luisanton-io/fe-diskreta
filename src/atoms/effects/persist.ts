@@ -2,7 +2,7 @@ import { AES, enc } from "crypto-js"
 import { AtomEffect } from "recoil"
 import { getRecoil } from "recoil-nexus"
 import { recoilPersist } from "recoil-persist"
-import { userState } from "../user"
+import { userState } from "atoms/user"
 
 const encrypt = (message: string) => {
     try {

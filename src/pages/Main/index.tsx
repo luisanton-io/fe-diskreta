@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
+import { chatsState } from "atoms/chats";
+import { dialogState } from "atoms/dialog";
+import { userState } from "atoms/user";
+import Diskreta from "components/Diskreta";
+import { USER_DIGEST } from "constants/localStorage";
+import { pki } from "node-forge";
+import { useEffect, useMemo, useState } from "react";
+import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
+import { Arrow90degUp, Plus, Trash3 } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import io from "socket.io-client";
-import { userState } from "../../atoms/user";
-import { chatsState } from "../../atoms/chats";
-import { dialogState } from "../../atoms/dialog";
-import createChatId from "../../util/createChatId";
-import { Arrow90degUp, Moon, Send, Sun, Trash3, Plus } from "react-bootstrap-icons";
-import Diskreta from "../../components/Diskreta";
-import { pki, util } from "node-forge";
-import { USER_DIGEST } from "../../constants";
+import useHandleArchiveMessage from "./handlers/useHandleArchiveMessage";
+import useHandleSendMessage from "./handlers/useHandleSendMessage";
 import UserDialog from "./UserDialog";
 
 export default function Main() {
@@ -18,124 +19,38 @@ export default function Main() {
     const navigate = useNavigate()
 
     const [chats, setChats] = useRecoilState(chatsState)
-    const [Dialog, setDialog] = useRecoilState(dialogState)
-    const [user, setUser] = useRecoilState(userState)
+    const setDialog = useSetRecoilState(dialogState)
+    const user = useRecoilValue(userState)
 
     const privateKey = useMemo(() => user && pki.privateKeyFromPem(user.privateKey), [user])
 
     const { activeChat } = useParams()
 
-
-
     const [text, setText] = useState('')
-
-    const showStore = () => {
-        console.log(chats)
-    }
 
     const socket = useMemo(() => {
         const socket = user && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token: user.token } })
-        console.log({ socket })
-
+        // console.log({ socket })
         return socket
     }, [user])
 
-    // console.log({ socket })
+    const handleArchiveMessage = useHandleArchiveMessage(privateKey)
 
     useEffect(() => {
-        if (!socket || !privateKey) return
+        if (!socket) return
 
-        const archiveMessage = (encryptedMessage: Message) => {
-
-            console.table({ encryptedMessage })
-            const message = {
-                ...encryptedMessage,
-                content: {
-                    text: privateKey.decrypt(util.decode64(encryptedMessage.content.text))
-                }
-            }
-
-            console.table({ message })
-
-            const { chatId } = message
-
-            if (!chats?.[chatId]) {
-                setChats(chats => ({
-                    ...chats,
-                    [chatId]: {
-                        id: chatId,
-                        messages: [...(chats?.[chatId].messages || []), message],
-                        members: [...message.to, message.sender]
-                    }
-                }))
-
-            } else {
-
-                setChats(chats => ({
-                    ...chats,
-                    [chatId]: {
-                        ...chats![chatId],
-                        messages: [
-                            ...(chats![chatId].messages || []),
-                            message
-                        ]
-                    }
-                }))
-            }
-
-        }
-
-        socket.on('in-msg', archiveMessage)
+        socket.on('in-msg', handleArchiveMessage)
 
         socket.on('dequeue', (messages: Message[]) => {
-            messages.forEach(archiveMessage)
+            messages.forEach(handleArchiveMessage)
         })
 
-    }, [socket])
+    }, [socket, handleArchiveMessage])
 
-    const recipients = chats && activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
+    const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
 
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-
-        if (recipients) {
-            const message: Message = {
-                sender: user!,
-                to: recipients,
-                chatId: activeChat,
-                content: { text },
-                timestamp: Date.now()
-            }
-
-            setChats(chats => ({
-                ...chats,
-                [activeChat]: {
-                    ...chats![activeChat],
-                    messages: [
-                        ...chats![activeChat].messages,
-                        message
-                    ]
-                }
-            }))
-
-            for (const recipient of recipients) {
-
-                const publicKey = pki.publicKeyFromPem(recipient.publicKey)
-
-                socket?.emit("out-msg", {
-                    ...message,
-                    content: {
-                        text: util.encode64(publicKey.encrypt(text))
-                    }
-                })
-            }
-
-            setText('')
-
-        }
-
-    }
+    const handleSendMessage = useHandleSendMessage(socket, recipients, activeChat)
 
     const handleShowSearchModal = () => {
         setDialog({
@@ -153,14 +68,15 @@ export default function Main() {
         }
     }
 
+    const userExists = !!user
 
     useEffect(() => {
-        if (!user) {
+        if (!userExists) {
             !localStorage.getItem(USER_DIGEST)
                 ? navigate("/register")
                 : navigate("/login")
         }
-    }, [!!user])
+    }, [userExists, navigate])
 
     console.log(chats, activeChat)
 
@@ -250,10 +166,8 @@ export default function Main() {
                             </div>
 
 
-                            <Form onSubmit={handleSubmit} className="pt-4">
+                            <Form onSubmit={handleSendMessage(text, setText)} className="pt-4">
                                 <Form.Control id="msg-input" autoComplete="off" className="rounded-0 text-white p-3" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
-                                {/* <Form.Control className="rounded-0" type="button" onClick={showStore} value="Show store" /> */}
-                                {/* <Form.Control className="rounded-0" type="submit" value="click me" /> */}
                             </Form>
                         </>
                         :

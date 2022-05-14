@@ -1,16 +1,11 @@
+import { chatsState } from "atoms/chats"
+import { userState } from "atoms/user"
 import { pki, util } from "node-forge"
-import { useRef } from "react"
-import { Form } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useSetRecoilState } from "recoil"
-import { chatsState, defaultChats } from "../../../atoms/chats"
-import { dialogState } from "../../../atoms/dialog"
-import { userState } from "../../../atoms/user"
-import { USER_DIGEST } from "../../../constants"
-import { createDigest } from "../../../util/createDigest"
-import decryptLocalStorage from "../../../util/decryptLocalStorage"
-import generateKeyPair from "../../../util/generateKeypair"
+import { createDigest } from "util/createDigest"
+import decryptLocalStorage from "util/decryptLocalStorage"
 import useHandleRegenerate from "./useHandleRegenerate"
 
 export default function useHandleSubmit(nick: string, password: string) {
@@ -47,16 +42,16 @@ export default function useHandleSubmit(nick: string, password: string) {
                 const { token: encryptedToken, user: responseUser } = await response.json() as LoginResponse
 
                 // We try to decrypt the store with the current user digest
-                const { error, chats, user } = decryptLocalStorage(digest)
-
-                if (!error) {
+                try {
+                    const { chats, user } = decryptLocalStorage(digest)
                     const token = pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken))
 
                     setUser({ ...user, token })
                     setChats(chats)
                     navigate("/")
-                } else handleRegenerate(encryptedToken, responseUser)
-
+                } catch {
+                    handleRegenerate(encryptedToken, responseUser)
+                }
             }
 
         } catch (error) {

@@ -1,17 +1,17 @@
+import { dialogState } from "atoms/dialog";
+import { userState } from "atoms/user";
 import { generateMnemonic } from "bip39";
+import Diskreta from "components/Diskreta";
+import { USER_DIGEST } from "constants/localStorage";
 import { pki, util } from "node-forge";
 import { useState } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
 import { Eye, EyeSlash } from "react-bootstrap-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useRecoilState, useSetRecoilState } from "recoil";
-import { dialogState } from "../../atoms/dialog";
-import { userState } from "../../atoms/user";
-import Diskreta from "../../components/Diskreta";
-import { USER_DIGEST } from "../../constants";
-import { createDigest } from "../../util/createDigest";
-import generateKeyPair from "../../util/generateKeypair";
+import { useSetRecoilState } from "recoil";
+import { createDigest } from "util/createDigest";
+import generateKeyPair from "util/generateKeypair";
 import SeedDialog from "./SeedDialog";
 
 export default function Register() {
@@ -19,7 +19,7 @@ export default function Register() {
     const navigate = useNavigate()
 
     const setUser = useSetRecoilState(userState)
-    const [dialog, setDialog] = useRecoilState(dialogState)
+    const setDialog = useSetRecoilState(dialogState)
 
     const [nick, setNick] = useState('')
     const [password, setPassword] = useState('')

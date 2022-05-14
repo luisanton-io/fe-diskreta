@@ -1,15 +1,15 @@
+import { chatsState, defaultChats } from "atoms/chats"
+import { dialogState } from "atoms/dialog"
+import { userState } from "atoms/user"
+import { USER_DIGEST } from "constants/localStorage"
 import { pki, util } from "node-forge"
 import { useRef } from "react"
 import { Form } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useSetRecoilState } from "recoil"
-import { chatsState, defaultChats } from "../../../atoms/chats"
-import { dialogState } from "../../../atoms/dialog"
-import { userState } from "../../../atoms/user"
-import { USER_DIGEST } from "../../../constants"
-import { createDigest } from "../../../util/createDigest"
-import generateKeyPair from "../../../util/generateKeypair"
+import { createDigest } from "util/createDigest"
+import generateKeyPair from "util/generateKeypair"
 
 export default function useHandleRegenerate(nick: string, password: string) {
     const mnemonic = useRef("")

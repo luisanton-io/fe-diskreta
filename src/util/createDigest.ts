@@ -1,5 +1,5 @@
 import forge, { pki, util } from "node-forge"
-import { USER_DIGEST } from "../constants"
+import { USER_DIGEST } from "constants/localStorage"
 
 
 export function createDigest(nick: string, password: string) {
