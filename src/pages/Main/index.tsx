@@ -7,7 +7,7 @@ import { userState } from "../../atoms/user";
 import { chatsState } from "../../atoms/chats";
 import { dialogState } from "../../atoms/dialog";
 import createChatId from "../../util/createChatId";
-import { Arrow90degUp, Moon, Send, Sun, Trash3 } from "react-bootstrap-icons";
+import { Arrow90degUp, Moon, Send, Sun, Trash3, Plus } from "react-bootstrap-icons";
 import Diskreta from "../../components/Diskreta";
 import { pki, util } from "node-forge";
 import { USER_DIGEST } from "../../constants";
@@ -167,7 +167,11 @@ export default function Main() {
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
             <Col xs={4} className="position-relative d-flex flex-column h-100" style={{ overflow: 'auto' }}>
-                <Button variant="outline-secondary" className="rounded-0 mt-3" onClick={handleShowSearchModal}>New Chat</Button>
+                <Button variant="outline-secondary" className="rounded-0 d-flex align-items-center justify-content-center mt-3 text-white font-monospace" onClick={handleShowSearchModal}>
+                    {/* New Chat */}
+                    <Plus style={{ fontSize: '1.5em' }} />
+                    <span>New</span>
+                </Button>
                 <hr />
                 <ListGroup id="conversations">
 
@@ -187,10 +191,11 @@ export default function Main() {
                             // }
                             // #endregion
                             return <ListGroup.Item
-                                className="conversation position-relative d-flex flex-column align-items-start justify-content-center cursor-pointer rounded-0"
+                                className="conversation"
                                 style={{ minHeight: 90 }}
                                 key={chat.id}
                                 onClick={() => navigate(`/${chat.id}`)}
+                                data-active={chat.id === activeChat}
                             >
                                 <h6>{recipients}</h6>
                                 {latestMessage && (
@@ -229,24 +234,24 @@ export default function Main() {
                             <div className="d-flex flex-column-reverse flex-grow-1" style={{ overflow: 'auto' }}>
                                 {
                                     chats[activeChat].messages.map((message, i) => {
-                                        const sender =
-                                            message.sender._id === user!._id
-                                                ? "You"
-                                                : chats[activeChat].members.find(m => message.sender._id === m._id)?.nick
+                                        // const sender =
+                                        //     message.sender._id === user!._id
+                                        //         ? "You"
+                                        //         : chats[activeChat].members.find(m => message.sender._id === m._id)?.nick
 
-                                        return <div key={`msg-${i}`} className={`message ${message.sender._id === user!._id ? "sent" : "received"} d-flex flex-column p-3 my-2 rounded-0`}>
+                                        return <div key={`msg-${i}`} className={`message ${message.sender._id === user!._id ? "sent" : "received"} p-3 my-2 rounded-0`}>
 
-                                            <strong>{sender}</strong>
+                                            {/* <strong>{sender}</strong> */}
                                             <span>{message.content.text}</span>
-                                            <span>{new Date(message.timestamp).toLocaleTimeString()}</span>
+                                            <small>{new Date(message.timestamp).toLocaleTimeString()}</small>
                                         </div>
                                     }).reverse()
                                 }
                             </div>
 
 
-                            <Form onSubmit={handleSubmit}>
-                                <Form.Control className="rounded-0" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
+                            <Form onSubmit={handleSubmit} className="pt-4">
+                                <Form.Control id="msg-input" autoComplete="off" className="rounded-0 text-white p-3" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
                                 {/* <Form.Control className="rounded-0" type="button" onClick={showStore} value="Show store" /> */}
                                 {/* <Form.Control className="rounded-0" type="submit" value="click me" /> */}
                             </Form>

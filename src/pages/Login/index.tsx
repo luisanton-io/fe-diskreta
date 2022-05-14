@@ -303,12 +303,12 @@ export default function Login() {
         <Row className="h-100">
             <Col lg={4} className="mx-auto p-5 bg-dark">
                 <div className="text-white"><Diskreta /></div>
-                <h6 className="text-white text-center">Login</h6>
+                <h6 className="text-white text-center mb-3">Login</h6>
 
                 {/* <div style={{ width: 100, height: 100, backgroundColor: `#${digest.slice(-6)}` }}></div> */}
                 <Form className="enter-form d-flex flex-column" onSubmit={handleSubmit}>
-                    <Form.Control onChange={e => { setNick(e.target.value) }} value={nick} className="bg-transparent text-white rounded-0 mb-4" type="text" placeholder="Username" />
-                    <InputGroup>
+                    <Form.Control onChange={e => { setNick(e.target.value) }} value={nick} className="bg-transparent text-white rounded-0 mb-3" type="text" placeholder="Username" />
+                    <InputGroup className="mb-1">
                         <Form.Control onChange={e => { setPassword(e.target.value) }} value={password} className="bg-transparent text-white rounded-0 mb-0 me-2" type="password" placeholder="Password" />
 
                         <Button

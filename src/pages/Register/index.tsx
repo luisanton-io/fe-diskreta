@@ -105,19 +105,19 @@ export default function Register() {
         <Row>
             <Col lg={4} className="mx-auto p-5 bg-dark">
                 <div className="text-white"><Diskreta /></div>
-                <h6 className="text-white text-center">Register</h6>
+                <h6 className="text-white text-center mb-3">Register</h6>
 
                 <Form onSubmit={handleSubmit} className="enter-form d-flex flex-column">
                     <Form.Control
                         type="text"
-                        className="rounded-0 mb-4 bg-transparent text-white"
+                        className="rounded-0 mb-3 bg-transparent text-white"
                         value={nick}
                         onChange={e => setNick(e.target.value)}
                         placeholder="Nickname"
                         required
                     />
 
-                    <InputGroup className="rounded-0">
+                    <InputGroup className="rounded-0 mb-1">
 
                         <Form.Control
                             required

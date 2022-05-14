@@ -85,30 +85,32 @@ export default function UserDialog() {
     }
 
 
-    return <Container>
+    return <Container id="user-dialog">
         <Row>
             <Col className="p-5">
                 <h2 className="font-monospace mb-4">Search users</h2>
 
-                <Form className="d-flex position-relative" onSubmit={e => { e.preventDefault() }}>
+                <hr />
+
+                <Form className="d-flex position-relative my-5" onSubmit={e => { e.preventDefault() }}>
                     <Form.Control
                         placeholder="Nickname..."
-                        className="rounded-0"
+                        className="rounded-0 border-3 font-monospace"
                         type="text"
                         value={query}
                         onChange={e => { setQuery(e.target.value) }} />
                     {
                         (loading) &&
-                        <div className="position-absolute" style={{ inset: '2px 0 0 auto', transform: 'scale(0.65)' }}>
-                            <Spinner animation="border" variant="secondary" />
+                        <div className="position-absolute" style={{ inset: '0.2em 0.7ch 0.1em auto', transform: 'scale(0.65)' }}>
+                            <Spinner animation="border" variant="light" />
                         </div>
 
                     }
                 </Form>
 
-                <ListGroup className="mt-3">
+                <ListGroup >
                     {users.map((u, i) =>
-                        <ListGroup.Item key={`user-${i}`} style={{ cursor: "pointer" }} className="rounded-0" onClick={() => handleSelectedUser(u)}>
+                        <ListGroup.Item key={`user-${i}`} style={{ borderColor: 'white' }} className="user-result rounded-0 mb-3 py-3 cursor-pointer text-white border-1" onClick={() => handleSelectedUser(u)}>
                             {u.nick}
                         </ListGroup.Item>
                     )}
