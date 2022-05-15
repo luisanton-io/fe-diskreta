@@ -36,7 +36,15 @@ export default function Register() {
         e.preventDefault()
 
         const userExists = await toast.promise(
-            withHysteresis(API.get<User>(`/users?nick=${nick}&exact=true`)),
+            withHysteresis((async () => {
+                try {
+                    await API.get<User>(`/users?nick=${nick}&exact=true`)
+                    return true
+                } catch {
+                    return false
+                }
+
+            })()),
             {
                 pending: "Checking availability...",
             }
