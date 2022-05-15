@@ -20,39 +20,44 @@ export default function Conversations() {
             setChats({ ..._chats })
         }
     }
+    const latestTimestamp = (chat: Chat) => chat.messages[chat.messages.length - 1]?.timestamp || Date.now()
 
     return <ListGroup id="conversations">
         {
-            chats && Object.values(chats).map(chat => {
+            chats && Object.values(chats)
+                .sort((a, b) => latestTimestamp(b) - latestTimestamp(a))
+                .map(chat => {
 
-                const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
-                console.log(chat.members)
-                const latestMessage = chat.messages[chat.messages.length - 1]
+                    const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
+                    const latestMessage = chat.messages[chat.messages.length - 1]
 
-                return <ListGroup.Item
-                    className="conversation"
-                    style={{ minHeight: 90 }}
-                    key={chat.id}
-                    onClick={() => navigate(`/${chat.id}`)}
-                    data-active={chat.id === activeChat}
-                >
-                    <h6>{recipients}</h6>
-                    {latestMessage && (
-                        <div className="d-flex align-items-center">
-                            {latestMessage.sender._id === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
-                            <span>
-                                {latestMessage.content.text}
-                            </span>
-                        </div>
-                    )}
-                    <Button variant="outline-danger"
-                        onClick={() => handleDeleteChat(chat.id)}
-                        className="delete-btn position-absolute rounded-0"
-                        style={{ inset: 'auto 1em auto auto' }}>
-                        <Trash3 />
-                    </Button>
-                </ListGroup.Item>
-            })
+                    return <ListGroup.Item
+                        className="conversation"
+                        style={{ minHeight: 90 }}
+                        key={chat.id}
+                        onClick={() => navigate(`/${chat.id}`)}
+                        data-active={chat.id === activeChat}
+                    >
+                        <h6>{recipients}</h6>
+                        {latestMessage && (
+                            <div
+                                className="d-flex align-items-center"
+                                style={{ width: "95%" }}
+                            >
+                                {latestMessage.sender._id === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
+                                <p className="m-0" style={{ whiteSpace: "nowrap", textOverflow: 'ellipsis', overflow: "hidden" }}>
+                                    {latestMessage.content.text}
+                                </p>
+                            </div>
+                        )}
+                        <Button variant="outline-danger"
+                            onClick={() => handleDeleteChat(chat.id)}
+                            className="delete-btn position-absolute rounded-0"
+                            style={{ inset: 'auto 1em auto auto' }}>
+                            <Trash3 />
+                        </Button>
+                    </ListGroup.Item>
+                })
         }
     </ListGroup>
 }
