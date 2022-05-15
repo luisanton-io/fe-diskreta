@@ -1,18 +1,14 @@
+import { userState } from "atoms/user";
 import { chatsState } from "atoms/chats";
 import { dialogState } from "atoms/dialog";
-import { userState } from "atoms/user";
-import Diskreta from "components/Diskreta";
 import { USER_DIGEST } from "constants/localStorage";
-import { pki } from "node-forge";
-import { useEffect, useMemo, useState } from "react";
-import { Button, Col, Container, Form, ListGroup, Row } from "react-bootstrap";
-import { Arrow90degUp, Plus, Trash3 } from "react-bootstrap-icons";
+import { useEffect } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
+import { Plus } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
-import io from "socket.io-client";
-import useHandleArchiveMessage from "./handlers/useHandleArchiveMessage";
-import useHandleSendMessage from "./handlers/useHandleSendMessage";
-import Message from "./Message";
+import Chat from "./Chat";
+import Conversations from "./Conversations";
 import UserDialog from "./UserDialog";
 
 export default function Main() {
@@ -23,41 +19,36 @@ export default function Main() {
     const setDialog = useSetRecoilState(dialogState)
     const user = useRecoilValue(userState)
 
-    const privateKey = useMemo(() => user && pki.privateKeyFromPem(user.privateKey), [user])
+    // const privateKey = useMemo(() => user && pki.privateKeyFromPem(user.privateKey), [user])
 
     const { activeChat } = useParams()
 
-    const [text, setText] = useState('')
+    // const [text, setText] = useState('')
 
-    const socket = useMemo(() => {
-        const socket = user && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token: user.token } })
-        // console.log({ socket })
-        return socket
-    }, [user])
+    // const socket = useMemo(() => {
+    //     const socket = user && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token: user.token } })
+    //     // console.log({ socket })
+    //     return socket
+    // }, [user])
 
-    const handleArchiveMessage = useHandleArchiveMessage(privateKey)
+    // const handleArchiveMessage = useHandleArchiveMessage(privateKey)
 
-    useEffect(() => {
-        if (!socket) return
+    // useEffect(() => {
+    //     if (!socket) return
 
-        const handleDequeue = (messages: Message[]) => {
-            messages.forEach(handleArchiveMessage)
-        }
+    //     const handleDequeue = (messages: Message[]) => {
+    //         messages.forEach(handleArchiveMessage)
+    //     }
 
-        socket.on('in-msg', handleArchiveMessage)
-        socket.on('dequeue', handleDequeue)
+    //     socket.on('in-msg', handleArchiveMessage)
+    //     socket.on('dequeue', handleDequeue)
 
-        return () => {
-            socket.off('in-msg', handleArchiveMessage)
-            socket.off('dequeue', handleDequeue)
-        }
+    //     return () => {
+    //         socket.off('in-msg', handleArchiveMessage)
+    //         socket.off('dequeue', handleDequeue)
+    //     }
 
-    }, [socket, handleArchiveMessage])
-
-    const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
-
-
-    const handleSendMessage = useHandleSendMessage(socket, recipients, activeChat)
+    // }, [socket, handleArchiveMessage])
 
     const handleShowSearchModal = () => {
         setDialog({
@@ -65,14 +56,6 @@ export default function Main() {
             onConfirm: () => setDialog(null),
             cancelLabel: "Close"
         })
-    }
-
-    const handleDeleteChat = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this chat?")) {
-            const _chats = { ...chats }
-            delete _chats![id]
-            setChats({ ..._chats })
-        }
     }
 
     const userExists = !!user
@@ -89,90 +72,20 @@ export default function Main() {
 
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
-            <Col xs={4} className="position-relative d-flex flex-column h-100" style={{ overflow: 'auto' }}>
-                <Button variant="outline-info" className="rounded-0 d-flex align-items-center justify-content-center mt-3 font-monospace border-3 mx-auto py-2 px-5" onClick={handleShowSearchModal}>
+            <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChat}>
+                <Button variant="outline-info" className="btn-submit d-flex align-items-center justify-content-center mt-3 mx-auto py-2 px-5" onClick={handleShowSearchModal}>
                     {/* New Chat */}
                     <Plus style={{ fontSize: '1.5em' }} />
                     <span>New</span>
                 </Button>
                 <hr />
-                <ListGroup id="conversations">
-
-                    {
-                        chats && Object.values(chats).map(chat => {
-                            console.log("CHAT", { chat })
-                            const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
-                            const latestMessage = chat.messages[chat.messages.length - 1]
-                            // #region
-                            // const latestMessage = {
-                            //     content: {
-                            //         text: "Hello"
-                            //     },
-                            //     sender: user!._id,
-                            //     recipients: chat.members.filter(m => m._id !== user?._id),
-                            //     timestamp: Date.now()
-                            // }
-                            // #endregion
-                            return <ListGroup.Item
-                                className="conversation"
-                                style={{ minHeight: 90 }}
-                                key={chat.id}
-                                onClick={() => navigate(`/${chat.id}`)}
-                                data-active={chat.id === activeChat}
-                            >
-                                <h6>{recipients}</h6>
-                                {latestMessage && (
-                                    <div className="d-flex align-items-center">
-                                        {latestMessage.sender._id === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
-                                        <span>
-                                            {latestMessage.content.text}
-                                        </span>
-                                    </div>
-                                )}
-                                <Button variant="outline-danger"
-                                    onClick={() => handleDeleteChat(chat.id)}
-                                    className="delete-btn position-absolute rounded-0"
-                                    style={{ inset: 'auto 1em auto auto' }}>
-                                    <Trash3 />
-                                </Button>
-                            </ListGroup.Item>
-                        })
-                    }
-                </ListGroup>
+                <Conversations />
                 {/* <Button variant="outline-danger" className="position-absolute bottom-0 start-0 end-0 rounded-0">
                     Delete data
                 </Button> */}
             </Col>
-            <Col xs={8} className="d-flex flex-column h-100">
-                {
-                    chats && activeChat && chats![activeChat]
-                        ? <>
-
-                            {recipients && <h4 className="font-monospace">
-                                {recipients.map(r => r.nick).join(", ")}
-                            </h4>}
-
-                            <hr />
-
-                            <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2" style={{ overflow: 'auto' }}>
-                                {
-                                    chats[activeChat].messages.map((message, i) => (
-                                        <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
-                                    )).reverse()
-                                }
-                            </div>
-
-
-                            <Form onSubmit={handleSendMessage(text, setText)} className="pt-3">
-                                <Form.Control id="msg-input" autoComplete="off" className="rounded-0 text-white p-3" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
-                            </Form>
-                        </>
-                        :
-                        <div className="flex-grow-1 d-flex align-items-center">
-                            <Diskreta />
-                        </div>
-
-                }
+            <Col xs={12} md={8} id="main-right" className="d-flex flex-column h-100">
+                <Chat />
             </Col>
         </Row>
     </Container>

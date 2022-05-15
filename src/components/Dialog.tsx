@@ -15,14 +15,14 @@ export default function Dialog() {
             Dialog && (<>
                 <Dialog.Content />
                 <Container className="d-flex justify-content-end px-5 pb-4">
-                    <Button variant="outline-dark" style={{ opacity: 0.9 }} className="rounded-0 text-white me-4" onClick={() => setDialog(null)}>
+                    <Button variant="outline-light" style={{ opacity: 0.9 }} className="rounded-0" onClick={() => setDialog(null)}>
                         {
                             Dialog.cancelLabel || "Cancel"
                         }
                     </Button>
                     {
                         Dialog.submitLabel &&
-                        <Button variant="outline-info" className="btn-submit" onClick={handleSubmit}>{Dialog.submitLabel}</Button>
+                        <Button variant="outline-info" className="btn-submit ms-4" onClick={handleSubmit}>{Dialog.submitLabel}</Button>
                     }
                 </Container>
             </>

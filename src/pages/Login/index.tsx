@@ -40,7 +40,7 @@ export default function Login() {
                         Login
                     </Button>
 
-                    <Link to="/register" className="text-white">Don't have an account?</Link>
+                    <Link to="/register" className="text-warning text-decoration-none">Don't have an account?</Link>
 
                 </Form>
             </Col>

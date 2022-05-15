@@ -13,7 +13,6 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
 
         if (!privateKey) return
 
-        // console.table({ encryptedMessage })
         const message = {
             ...encryptedMessage,
             content: {
@@ -21,33 +20,25 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
             }
         }
 
-        // console.table({ message })
-
         const { chatId } = message
 
-        if (chatIds?.includes(chatId)) {
-            setChats(chats => ({
-                ...chats,
-                [chatId]: {
-                    id: chatId,
-                    messages: [...(chats?.[chatId].messages || []), message],
-                    members: [...message.to, message.sender]
-                }
-            }))
-
-        } else {
-
-            setChats(chats => ({
-                ...chats,
-                [chatId]: {
-                    ...chats![chatId],
-                    messages: [
-                        ...(chats![chatId].messages || []),
-                        message
-                    ]
-                }
-            }))
-        }
+        setChats(chats => ({
+            ...chats,
+            [chatId]:
+                chatIds?.includes(chatId)
+                    ? {
+                        id: chatId,
+                        members: [...message.to, message.sender],
+                        messages: [...(chats?.[chatId].messages || []), message]
+                    }
+                    : {
+                        ...chats![chatId],
+                        messages: [
+                            ...(chats![chatId].messages || []),
+                            message
+                        ]
+                    }
+        }))
 
     }, [privateKey, chatIds, setChats])
 

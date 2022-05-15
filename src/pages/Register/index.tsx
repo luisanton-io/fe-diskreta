@@ -148,7 +148,7 @@ export default function Register() {
                         Register
                     </Button>
 
-                    <Link className="text-white" to={'/login'}>Already have an account?</Link>
+                    <Link className="text-warning text-decoration-none" to={'/login'}>Already have an account?</Link>
                 </Form>
             </Col>
         </Row>
