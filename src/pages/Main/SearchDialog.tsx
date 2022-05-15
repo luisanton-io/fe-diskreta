@@ -1,3 +1,5 @@
+import API from "API";
+import { AxiosError } from "axios"
 import { chatsState } from "atoms/chats";
 import { dialogState } from "atoms/dialog";
 import { userState } from "atoms/user";
@@ -7,8 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import createChatId from "util/createChatId";
 import maskUser from "util/maskUser";
+import { toast } from "react-toastify";
 
-export default function UserDialog() {
+export default function SearchDialog() {
     const navigate = useNavigate()
     const [query, setQuery] = useState("")
     const setDialog = useSetRecoilState(dialogState)
@@ -17,6 +20,7 @@ export default function UserDialog() {
     const [debouncedQuery, setDebouncedQuery] = useState("")
 
     const [users, setUsers] = useState<User[]>([])
+
     const user = useRecoilValue(userState)
     const [chats, setChats] = useRecoilState(chatsState)
 
@@ -39,13 +43,16 @@ export default function UserDialog() {
             return
         }
 
-        // console.log({ debouncedQuery })
-
         const getUsers = async () => {
             setLoading(true)
             setUsers([])
-            const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users?nick=${query}`)
-            return await response.json() as User[]
+            let users: User[] = []
+            try {
+                ({ data: users } = await API.get<User[]>(`/users?nick=${query}`))
+            } catch (error) {
+                toast.error(error instanceof AxiosError ? error.response?.data?.error : (error as Error).message)
+            }
+            return users
         }
 
         query === debouncedQuery && getUsers().then(setUsers).finally(unload)

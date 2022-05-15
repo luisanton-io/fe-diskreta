@@ -4,6 +4,8 @@ interface LoginResponse {
     refreshToken: string
 }
 
+type RefreshResponse = Omit<LoginResponse, "user">
+
 interface User {
     _id: string
     nick: string

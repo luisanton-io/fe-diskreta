@@ -23,7 +23,7 @@ export default function useHandleRegenerate(nick: string, password: string) {
     const oldDigestEncrypted = localStorage.getItem(USER_DIGEST)
 
 
-    const handleRegenerate = (encryptedToken: string, responseUser: User) => {
+    const handleRegenerate = (encryptedToken: string, encryptedRefreshToken: string, responseUser: User) => {
         if (oldDigestEncrypted && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
             return
         }
@@ -40,10 +40,12 @@ export default function useHandleRegenerate(nick: string, password: string) {
                     setUser({
                         ...responseUser,
                         token: privateKey.decrypt(util.decode64(encryptedToken)),
+                        refreshToken: privateKey.decrypt(util.decode64(encryptedRefreshToken)),
                         privateKey: pki.privateKeyToPem(privateKey),
                         digest: createDigest(nick, password)
                     })
                     setChats(defaultChats)
+                    setDialog(null)
                     navigate("/")
 
                     resolve()
@@ -64,7 +66,7 @@ export default function useHandleRegenerate(nick: string, password: string) {
                         <p>Please note we do not store your messages and you will need to export them from your old device.</p>
                         <p>This feature is planned for upcoming releases.</p>
                         <p><strong>If this is not your device,</strong> log out after your session to destroy your data.</p>
-                        <Form.Control type="text" placeholder="Seed" onChange={e => { mnemonic.current = e.target.value }} />
+                        <Form.Control className="rounded-0 border-3" type="text" placeholder="Seed" onChange={e => { mnemonic.current = e.target.value }} />
                     </Form>
                 )
             },

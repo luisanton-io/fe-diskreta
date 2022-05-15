@@ -1,3 +1,4 @@
+import API from "API";
 import { dialogState } from "atoms/dialog";
 import { USER_DIGEST } from "constants/localStorage";
 import { useRef } from "react";
@@ -25,18 +26,19 @@ export default function useHandleRecovery(nick: string, password: string) {
             return toast.error("Please enter your nickname")
         }
 
-        const response = await toast.promise(
-            withHysteresis(fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users?nick=${nick}&exact=true`)),
-            {
-                pending: `Looking for ${nick}...`,
-                error: `Can't reach server. Please try again later.`,
-            })
+        let responseUser: User
 
-        if (response.status === 404) {
+        try {
+            ({ data: responseUser } = await toast.promise(
+                withHysteresis(API.get<User>(`/users?nick=${nick}&exact=true`)),
+                {
+                    pending: `Looking for ${nick}...`,
+                    error: `Can't reach server. Please try again later.`,
+                }))
+
+        } catch {
             return toast.error("User not found")
         }
-
-        const responseUser = await response.json() as User
 
         setDialog({
             submitLabel: "Generate",

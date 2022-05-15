@@ -1,3 +1,5 @@
+import API from "API";
+import { AxiosError } from "axios"
 import { dialogState } from "atoms/dialog";
 import { userState } from "atoms/user";
 import { generateMnemonic } from "bip39";
@@ -66,22 +68,14 @@ export default function Register() {
 
         localStorage.setItem(USER_DIGEST, encryptedDigest)
 
-        console.table({ encryptedDigest, digest, eq: privateKey.decrypt(util.decode64(encryptedDigest)) === digest })
+        // console.table({ encryptedDigest, digest, eq: privateKey.decrypt(util.decode64(encryptedDigest)) === digest })
 
-        const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ digest, nick, publicKey: pki.publicKeyToPem(publicKey) })
-        })
-
-        if (response.ok) {
-            const {
+        try {
+            const { data: {
                 token: encryptedToken,
                 refreshToken: encryptedRefreshToken,
                 user
-            } = await response.json() as LoginResponse
+            } } = await API.post<LoginResponse>("/users", { digest, nick, publicKey: pki.publicKeyToPem(publicKey) })
 
             const [token, refreshToken] =
                 [encryptedToken, encryptedRefreshToken].map(cipher => privateKey.decrypt(util.decode64(cipher)))
@@ -98,6 +92,8 @@ export default function Register() {
 
             setUser(newUserState)
             navigate("/")
+        } catch (error) {
+            toast.error(error instanceof AxiosError ? error.response?.data?.message : (error as Error).message)
         }
     }
 

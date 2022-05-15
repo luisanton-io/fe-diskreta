@@ -11,5 +11,6 @@ interface CurrentUser extends User {
 
 interface LoggedUser extends CurrentUser {
     token: string
+    refreshToken: string
     digest: string
 }

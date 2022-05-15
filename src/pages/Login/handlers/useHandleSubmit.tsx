@@ -1,3 +1,4 @@
+import API from "API"
 import { chatsState } from "atoms/chats"
 import { userState } from "atoms/user"
 import { pki, util } from "node-forge"
@@ -7,6 +8,7 @@ import { useSetRecoilState } from "recoil"
 import { createDigest } from "util/createDigest"
 import decryptLocalStorage from "util/decryptLocalStorage"
 import useHandleRegenerate from "./useHandleRegenerate"
+import { AxiosError } from "axios"
 
 export default function useHandleSubmit(nick: string, password: string) {
 
@@ -28,35 +30,32 @@ export default function useHandleSubmit(nick: string, password: string) {
 
             const digest = createDigest(nick, password)
 
-            const response = await fetch(`${process.env.REACT_APP_BE_DOMAIN}/api/users/session`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ nick, digest })
-            })
+            const {
+                data: { token: encryptedToken, refreshToken: encryptedRefreshToken, user: responseUser }
+            } = await API.post("/users/session", { nick, digest })
 
-            if (!response.ok) {
-                toast.error("Wrong credentials!")
-            } else {
-                const { token: encryptedToken, user: responseUser } = await response.json() as LoginResponse
+            // We try to decrypt the store with the current user digest
+            try {
+                const { chats, user } = decryptLocalStorage(digest)
 
-                // We try to decrypt the store with the current user digest
-                try {
-                    const { chats, user } = decryptLocalStorage(digest)
-                    const token = pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken))
+                const [token, refreshToken] = [encryptedToken, encryptedRefreshToken].map(
+                    (jwt: string) => pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(jwt))
+                )
 
-                    setUser({ ...user, token })
-                    setChats(chats)
-                    navigate("/")
-                    toast.dismiss()
-                } catch {
-                    handleRegenerate(encryptedToken, responseUser)
-                }
+                setUser({ ...user, token, refreshToken })
+                setChats(chats)
+                navigate("/")
+                toast.dismiss()
+            } catch {
+                handleRegenerate(encryptedToken, encryptedRefreshToken, responseUser)
             }
 
         } catch (error) {
-            toast.error((error as Error).message)
+            toast.error(
+                error instanceof AxiosError
+                    ? error.response?.data?.error
+                    : (error as Error).message
+            )
         }
     }
 

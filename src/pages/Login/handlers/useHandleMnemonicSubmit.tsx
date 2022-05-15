@@ -105,13 +105,14 @@ export default function useHandleMnemonicSubmit(mnemonic: React.MutableRefObject
                     e?.preventDefault()
                     try {
 
-                        const { token, digest } = await handleDigestUpdate(user, newPassword.current)
+                        const { token, refreshToken, digest } = await handleDigestUpdate(user, newPassword.current)
 
                         // login with new digest 
                         setUser({
                             ...user,
                             digest,
-                            token
+                            token,
+                            refreshToken
                         })
 
                         setChats(chats) // either the old chats or the default if error

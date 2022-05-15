@@ -28,6 +28,8 @@ export default function decryptLocalStorage(digest: string): DecryptionResult { 
                 return json && JSON.parse(json)[[CHATS, USER][i]]
             })
 
+    console.log({ chats, user })
+
     return { //error, 
         chats,
         user

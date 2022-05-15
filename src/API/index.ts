@@ -1,0 +1,44 @@
+import { userState } from "atoms/user";
+import axios from "axios";
+import { getRecoil } from "recoil-nexus";
+import { refreshToken } from "./refreshToken";
+const { create, defaults } = axios
+
+const API = create({ baseURL: process.env.REACT_APP_BE_DOMAIN + "/api" });
+
+API.interceptors.request.use(
+    async (config) => {
+        const accessToken = getRecoil(userState)?.token;
+
+        config.headers = {
+            Authorization: accessToken ? `Bearer ${accessToken}` : '',
+            "Content-Type": "application/json"
+        };
+
+        return config;
+    },
+    (error) => {
+        Promise.reject(error);
+    }
+);
+
+API.interceptors.response.use(
+    (response) => response,
+    async function (error) {
+        const failedRequest = error.config;
+
+        if (
+            error.response.status === 401 &&
+            !["/users/session", "/users/refreshToken"].includes(failedRequest.url)
+        ) {
+            await refreshToken();
+
+            const retryRequest = API(failedRequest);
+            return retryRequest;
+        } else {
+            return Promise.reject(error);
+        }
+    }
+);
+
+export default API;
