@@ -15,6 +15,7 @@ import { useSetRecoilState } from "recoil";
 import { createDigest } from "util/createDigest";
 import generateKeyPair from "util/generateKeypair";
 import SeedDialog from "./SeedDialog";
+import withHysteresis from "util/withHysteresis";
 
 export default function Register() {
 
@@ -34,7 +35,16 @@ export default function Register() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        console.log("Submit")
+        const userExists = await toast.promise(
+            withHysteresis(API.get<User>(`/users?nick=${nick}&exact=true`)),
+            {
+                pending: "Checking availability...",
+            }
+        )
+
+        if (userExists) {
+            return toast.error("Nick not available at this time. Please try with another one.")
+        }
 
         const mnemonic = generateMnemonic(256)
         setDialog({
