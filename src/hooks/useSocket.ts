@@ -1,3 +1,4 @@
+import { refreshToken } from "API/refreshToken"
 import { userState } from "atoms/user"
 import { pki } from "node-forge"
 import useHandleArchiveMessage from "pages/Main/handlers/useHandleArchiveMessage"
@@ -35,10 +36,12 @@ export default function useSocket() {
 
         socket.on('in-msg', handleArchiveMessage)
         socket.on('dequeue', handleDequeue)
+        socket.on('jwt-expired', refreshToken)
 
         return () => {
             socket.off('in-msg', handleArchiveMessage)
             socket.off('dequeue', handleDequeue)
+            socket.off('jwt-expired', refreshToken)
         }
 
     }, [socket, handleArchiveMessage])

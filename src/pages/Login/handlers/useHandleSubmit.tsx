@@ -9,6 +9,7 @@ import { createDigest } from "util/createDigest"
 import decryptLocalStorage from "util/decryptLocalStorage"
 import useHandleRegenerate from "./useHandleRegenerate"
 import { AxiosError } from "axios"
+import { getRecoil } from "recoil-nexus"
 
 export default function useHandleSubmit(nick: string, password: string) {
 
@@ -32,7 +33,7 @@ export default function useHandleSubmit(nick: string, password: string) {
 
             const {
                 data: { token: encryptedToken, refreshToken: encryptedRefreshToken, user: responseUser }
-            } = await API.post("/users/session", { nick, digest })
+            } = await API.post<LoginResponse>("/users/session", { nick, digest })
 
             // We try to decrypt the store with the current user digest
             try {

@@ -25,11 +25,11 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
         setChats(chats => ({
             ...chats,
             [chatId]:
-                chatIds?.includes(chatId)
+                !chatIds?.includes(chatId)
                     ? {
                         id: chatId,
                         members: [...message.to, message.sender],
-                        messages: [...(chats?.[chatId].messages || []), message]
+                        messages: [...(chats?.[chatId]?.messages || []), message]
                     }
                     : {
                         ...chats![chatId],

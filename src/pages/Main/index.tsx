@@ -34,11 +34,15 @@ export default function Main() {
     const userExists = !!user
 
     useEffect(() => {
-        if (!userExists) {
-            !localStorage.getItem(USER_DIGEST)
-                ? navigate("/register")
-                : navigate("/login")
-        }
+        console.log({ userExists })
+
+        setTimeout(() => {
+            if (!userExists) {
+                !localStorage.getItem(USER_DIGEST)
+                    ? navigate("/register")
+                    : navigate("/login")
+            }
+        }, 500)
     }, [userExists, navigate])
 
 

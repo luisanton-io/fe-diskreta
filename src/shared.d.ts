@@ -23,6 +23,11 @@ interface Message {
     timestamp: number
 }
 
+interface OutgoingMessage extends Message {
+    for: string
+    // signature: string
+}
+
 interface Chat {
     id: string
     messages: Message[];

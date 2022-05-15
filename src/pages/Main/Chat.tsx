@@ -51,14 +51,18 @@ export default function Chat() {
             for (const recipient of recipients) {
 
                 const publicKey = pki.publicKeyFromPem(recipient.publicKey)
-
-                socket.emit("out-msg", {
+                const outgoingMessage: OutgoingMessage = {
                     ...message,
-                    recipients: [recipient],
+                    for: recipient._id,
                     content: {
                         text: util.encode64(publicKey.encrypt(text))
                     }
-                })
+                }
+
+                // TODO signature
+                // const signature = pki.privateKeyFromPem(user?.privateKey).sign()
+
+                socket.emit("out-msg", outgoingMessage)
             }
 
             setText('')

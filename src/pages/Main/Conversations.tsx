@@ -26,6 +26,7 @@ export default function Conversations() {
             chats && Object.values(chats).map(chat => {
 
                 const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
+                console.log(chat.members)
                 const latestMessage = chat.messages[chat.messages.length - 1]
 
                 return <ListGroup.Item
