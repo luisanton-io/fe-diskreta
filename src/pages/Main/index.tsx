@@ -12,6 +12,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import io from "socket.io-client";
 import useHandleArchiveMessage from "./handlers/useHandleArchiveMessage";
 import useHandleSendMessage from "./handlers/useHandleSendMessage";
+import Message from "./Message";
 import UserDialog from "./UserDialog";
 
 export default function Main() {
@@ -39,11 +40,17 @@ export default function Main() {
     useEffect(() => {
         if (!socket) return
 
-        socket.on('in-msg', handleArchiveMessage)
-
-        socket.on('dequeue', (messages: Message[]) => {
+        const handleDequeue = (messages: Message[]) => {
             messages.forEach(handleArchiveMessage)
-        })
+        }
+
+        socket.on('in-msg', handleArchiveMessage)
+        socket.on('dequeue', handleDequeue)
+
+        return () => {
+            socket.off('in-msg', handleArchiveMessage)
+            socket.off('dequeue', handleDequeue)
+        }
 
     }, [socket, handleArchiveMessage])
 
@@ -56,7 +63,7 @@ export default function Main() {
         setDialog({
             Content: UserDialog,
             onConfirm: () => setDialog(null),
-            submitLabel: "Search"
+            cancelLabel: "Close"
         })
     }
 
@@ -83,7 +90,7 @@ export default function Main() {
     return <Container>
         <Row style={{ height: '90vh', margin: 'auto' }}>
             <Col xs={4} className="position-relative d-flex flex-column h-100" style={{ overflow: 'auto' }}>
-                <Button variant="outline-secondary" className="rounded-0 d-flex align-items-center justify-content-center mt-3 text-white font-monospace" onClick={handleShowSearchModal}>
+                <Button variant="outline-info" className="rounded-0 d-flex align-items-center justify-content-center mt-3 font-monospace border-3 mx-auto py-2 px-5" onClick={handleShowSearchModal}>
                     {/* New Chat */}
                     <Plus style={{ fontSize: '1.5em' }} />
                     <span>New</span>
@@ -147,26 +154,16 @@ export default function Main() {
 
                             <hr />
 
-                            <div className="d-flex flex-column-reverse flex-grow-1" style={{ overflow: 'auto' }}>
+                            <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2" style={{ overflow: 'auto' }}>
                                 {
-                                    chats[activeChat].messages.map((message, i) => {
-                                        // const sender =
-                                        //     message.sender._id === user!._id
-                                        //         ? "You"
-                                        //         : chats[activeChat].members.find(m => message.sender._id === m._id)?.nick
-
-                                        return <div key={`msg-${i}`} className={`message ${message.sender._id === user!._id ? "sent" : "received"} p-3 my-2 rounded-0`}>
-
-                                            {/* <strong>{sender}</strong> */}
-                                            <span>{message.content.text}</span>
-                                            <small>{new Date(message.timestamp).toLocaleTimeString()}</small>
-                                        </div>
-                                    }).reverse()
+                                    chats[activeChat].messages.map((message, i) => (
+                                        <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
+                                    )).reverse()
                                 }
                             </div>
 
 
-                            <Form onSubmit={handleSendMessage(text, setText)} className="pt-4">
+                            <Form onSubmit={handleSendMessage(text, setText)} className="pt-3">
                                 <Form.Control id="msg-input" autoComplete="off" className="rounded-0 text-white p-3" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
                             </Form>
                         </>

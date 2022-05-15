@@ -1,6 +1,7 @@
 interface Dialog {
     Content: () => JSX.Element
-    submitLabel: string | null
+    submitLabel?: string
+    cancelLabel?: string
     onConfirm: () => void
 }
 

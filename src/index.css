@@ -26,7 +26,3 @@ input:active,input:focus,textarea:active,textarea:focus {
   outline: none !important;
   box-shadow: none !important;
 }
-
-.modal-dialog .modal-content {
-  border-radius: 0px !important;
-}

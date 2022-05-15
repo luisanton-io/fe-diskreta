@@ -49,6 +49,7 @@ export default function useHandleSubmit(nick: string, password: string) {
                     setUser({ ...user, token })
                     setChats(chats)
                     navigate("/")
+                    toast.dismiss()
                 } catch {
                     handleRegenerate(encryptedToken, responseUser)
                 }

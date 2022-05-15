@@ -1,13 +1,15 @@
 import { chatsState } from "atoms/chats";
 import { pki, util } from "node-forge";
-import { useCallback } from "react";
 import { useRecoilState } from "recoil";
+import { useDeepCompareCallback } from "use-deep-compare"
 
 export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey | null) {
 
     const [chats, setChats] = useRecoilState(chatsState)
 
-    const handleArchiveMessage = useCallback((encryptedMessage: Message) => {
+    const chatIds = chats && Object.keys(chats)
+
+    const handleArchiveMessage = useDeepCompareCallback((encryptedMessage: Message) => {
 
         if (!privateKey) return
 
@@ -23,7 +25,7 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
 
         const { chatId } = message
 
-        if (!chats?.[chatId]) {
+        if (chatIds?.includes(chatId)) {
             setChats(chats => ({
                 ...chats,
                 [chatId]: {
@@ -47,7 +49,7 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
             }))
         }
 
-    }, [privateKey, JSON.stringify(chats), setChats])
+    }, [privateKey, chatIds, setChats])
 
     return handleArchiveMessage
 }
