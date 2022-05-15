@@ -22,6 +22,12 @@ code {
   justify-content: center;
 }
 
+@supports (-webkit-hyphens:none) {
+  #root {
+    max-height: -webkit-fill-available;
+  }
+}
+
 input:active,input:focus,textarea:active,textarea:focus {
   outline: none !important;
   box-shadow: none !important;
