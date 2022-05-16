@@ -179,7 +179,8 @@ body {
     }
 }
 
-input.form-control {
+input.form-control,
+textarea {
     background-color: transparent !important;
     color: white !important;
 
