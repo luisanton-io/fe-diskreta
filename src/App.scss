@@ -111,6 +111,9 @@ body {
 }
 
 #main-right {
+    display: flex;
+    flex-direction: column;
+
     &[data-active-chat="false"] {
         @media (max-width: 768px) {
             display: none;
