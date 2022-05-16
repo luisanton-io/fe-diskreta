@@ -111,6 +111,12 @@ body {
 }
 
 #main-right {
+    &[data-active-chat="false"] {
+        @media (max-width: 768px) {
+            display: none;
+        }
+    }
+
     #message-container {
         @extend .custom-scrollbar;
         margin-left: -0.5rem;
