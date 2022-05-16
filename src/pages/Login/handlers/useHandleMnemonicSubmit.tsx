@@ -44,7 +44,7 @@ export default function useHandleMnemonicSubmit(mnemonic: React.MutableRefObject
             }, 1000)
 
         }), {
-            pending: "Generating your keys...",
+            pending: "Generating your keys. This will take a while...",
             error: "Error generating your keys. Please make sure your seed is correct and 24 words long.",
             success: "Your keys have been generated"
         })
