@@ -126,7 +126,7 @@ export default function Chat() {
                 </Form>
             </>
             :
-            <div className="flex-grow-1 d-flex align-items-center">
+            <div className="d-flex align-items-center flex-grow-1">
                 <Diskreta />
             </div>
 
