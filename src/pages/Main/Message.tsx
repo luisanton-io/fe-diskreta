@@ -22,9 +22,11 @@ export default function Message({ message, sent, i }: Props) {
     const displayTimestamp = useDisplayTimestamp(i)
 
     return <div className="d-flex">
-        <div className={`cursor-pointer message ${sent ? "sent" : "received"} py-3 my-2`}
+        <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"} py-3 my-2`}
             onClick={displayTimestamp}>
-            <span>{message.content.text}</span>
+            {
+                message.content.text.split("\n").map((line, i) => <span key={i}>{line}</span>)
+            }
         </div>
         <span className={`timestamp ${timestampState?.index === i ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
     </div>

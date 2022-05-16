@@ -5,7 +5,7 @@ import useSocket from "hooks/useSocket";
 import { pki, util } from "node-forge";
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { ArrowLeftShort } from "react-bootstrap-icons";
+import { ArrowLeftShort, Send } from "react-bootstrap-icons";
 import { Link, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import maskUser from "util/maskUser";
@@ -91,8 +91,23 @@ export default function Chat() {
                 </div>
 
 
-                <Form onSubmit={handleSendMessage} className="pt-3">
-                    <Form.Control id="msg-input" autoComplete="off" className="rounded-0 text-white p-3" type="text" placeholder="Type a message..." onChange={e => setText(e.target.value)} value={text} />
+                <Form onSubmit={handleSendMessage} className="d-flex pt-3">
+                    <textarea id="msg-input" autoComplete="off" className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light" placeholder="Type a message..."
+                        onChange={e => {
+                            setText(e.target.value)
+                        }} value={text}
+                        onKeyDown={e => {
+                            console.log(e)
+                            if ((e.nativeEvent as any).which === 13 && !e.shiftKey) {
+                                handleSendMessage(e as any)
+                            }
+
+                            console.log((e.target as any).value.split("\n"))
+                        }}
+                    />
+                    <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text}>
+                        <Send />
+                    </Button>
                 </Form>
             </>
             :
