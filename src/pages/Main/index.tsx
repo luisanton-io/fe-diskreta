@@ -26,7 +26,7 @@ export default function Main() {
     }, [userExists, navigate])
 
 
-    return <Container>
+    return <Container className="py-5">
         <Row style={{ height: '90vh', margin: 'auto' }}>
             <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChat}>
                 <SideHeader />
