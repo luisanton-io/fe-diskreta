@@ -4,11 +4,13 @@ import Diskreta from "components/Diskreta";
 import useSocket from "hooks/useSocket";
 import { pki, util } from "node-forge";
 import { useState } from "react";
-import { Button, Form } from "react-bootstrap";
-import { ArrowLeftShort, Send } from "react-bootstrap-icons";
+import { Button, Dropdown, Form } from "react-bootstrap";
+import { ArrowLeftShort, Send, ThreeDots } from "react-bootstrap-icons";
+import DropdownMenu from "react-bootstrap/esm/DropdownMenu";
 import { Link, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import maskUser from "util/maskUser";
+import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 import Message from "./Message";
 
 
@@ -22,6 +24,7 @@ export default function Chat() {
     const [text, setText] = useState('')
 
     const socket = useSocket()
+    const handleDeleteChat = useHandleDeleteChat()
 
     const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
 
@@ -78,6 +81,20 @@ export default function Chat() {
                     {recipients && <h4 className="d-inline-block font-monospace m-0">
                         {recipients.map(r => r.nick).join(", ")}
                     </h4>}
+
+                    <Dropdown className="ms-auto">
+                        <Dropdown.Toggle variant="link" className="rounded-0 text-white border-0 shadow-none">
+                            <ThreeDots style={{ fontSize: '1.5em' }} />
+                        </Dropdown.Toggle>
+
+                        <Dropdown.Menu style={{ backdropFilter: "blur(8px)", backgroundColor: 'rgba(16,16,16,0.50)' }}>
+                            <Dropdown.Item className="bg-transparent text-white">
+                                Block/Report [coming soon]
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item className="bg-transparent text-white" onClick={() => handleDeleteChat(activeChat)}>Delete Chat</Dropdown.Item>
+                        </Dropdown.Menu>
+                    </Dropdown>
                 </div>
 
                 <hr />
@@ -92,17 +109,15 @@ export default function Chat() {
 
 
                 <Form onSubmit={handleSendMessage} className="d-flex pt-3">
-                    <textarea id="msg-input" autoComplete="off" className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light" placeholder="Type a message..."
-                        onChange={e => {
-                            setText(e.target.value)
-                        }} value={text}
+                    <textarea id="msg-input" autoComplete="off"
+                        className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
+                        placeholder="Type a message..."
+                        value={text}
+                        onChange={e => { setText(e.target.value) }}
                         onKeyDown={e => {
-                            console.log(e)
                             if ((e.nativeEvent as any).which === 13 && !e.shiftKey) {
                                 handleSendMessage(e as any)
                             }
-
-                            console.log((e.target as any).value.split("\n"))
                         }}
                     />
                     <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text}>
