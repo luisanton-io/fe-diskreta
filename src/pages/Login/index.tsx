@@ -13,7 +13,7 @@ export default function Login() {
     const handleSubmit = useHandleSubmit(nick, password)
     const handleRecovery = useHandleRecovery(nick, password)
 
-    return <Container>
+    return <Container className="my-auto">
         <Row className="h-100">
             <Col lg={4} className="mx-auto p-5 bg-dark">
                 <div className="text-white"><Diskreta /></div>
