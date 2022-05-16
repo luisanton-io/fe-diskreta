@@ -115,7 +115,7 @@ export default function Register() {
         }
     }
 
-    return <Container>
+    return <Container className="my-auto">
         <Row>
             <Col lg={4} className="mx-auto p-5 bg-dark">
                 <div className="text-white"><Diskreta /></div>
