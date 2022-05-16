@@ -4,6 +4,7 @@ import { Button, ListGroup } from "react-bootstrap";
 import { Arrow90degUp, Trash3 } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
+import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 
 export default function Conversations() {
 
@@ -13,13 +14,7 @@ export default function Conversations() {
     const user = useRecoilValue(userState)
     const { activeChat } = useParams()
 
-    const handleDeleteChat = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this chat?")) {
-            const _chats = { ...chats }
-            delete _chats![id]
-            setChats({ ..._chats })
-        }
-    }
+    const handleDeleteChat = useHandleDeleteChat()
     const latestTimestamp = (chat: Chat) => chat.messages[chat.messages.length - 1]?.timestamp || Date.now()
 
     return <ListGroup id="conversations">
@@ -45,14 +40,17 @@ export default function Conversations() {
                                     className="d-flex align-items-center"
                                     style={{ width: "95%" }}
                                 >
-                                    {latestMessage.sender._id === user!._id && <Arrow90degUp style={{ transform: 'scale(0.6)' }} />}
+                                    {latestMessage.sender._id === user!._id && <Arrow90degUp className="me-2" style={{ transform: "scale(1.2)" }} />}
                                     <p className="m-0 text-light" style={{ whiteSpace: "nowrap", textOverflow: 'ellipsis', overflow: "hidden" }}>
                                         {latestMessage.content.text}
                                     </p>
                                 </div>
                             )}
                             <Button variant="outline-danger"
-                                onClick={() => handleDeleteChat(chat.id)}
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    handleDeleteChat(chat.id)
+                                }}
                                 className="delete-btn position-absolute rounded-0"
                                 style={{ inset: 'auto 1em auto auto' }}>
                                 <Trash3 />
