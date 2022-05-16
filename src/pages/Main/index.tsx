@@ -33,7 +33,7 @@ export default function Main() {
                 <hr />
                 <Conversations />
             </Col>
-            <Col xs={12} md={8} id="main-right" className="d-flex flex-column h-100" data-active-chat={!!activeChat}>
+            <Col xs={12} md={8} id="main-right" className="h-100" data-active-chat={!!activeChat}>
                 <Chat />
             </Col>
         </Row>
