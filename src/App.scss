@@ -27,6 +27,13 @@ body {
     color: #fff;
 }
 
+@media (max-width: 768px) {
+    body {
+        background-position-x: -100%;
+        background-position-y: center;
+    }
+}
+
 .modal-dialog .modal-content {
     // @extend .gradient-bg;
 
