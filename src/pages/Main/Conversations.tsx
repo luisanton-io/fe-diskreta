@@ -51,7 +51,7 @@ export default function Conversations() {
                                     e.stopPropagation()
                                     handleDeleteChat(chat.id)
                                 }}
-                                className="delete-btn position-absolute rounded-0"
+                                className="delete-btn position-absolute rounded-0 d-none d-md-block"
                                 style={{ inset: 'auto 1em auto auto' }}>
                                 <Trash3 />
                             </Button>
