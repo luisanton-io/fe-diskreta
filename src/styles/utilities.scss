@@ -1,0 +1,16 @@
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.gradient-bg {
+    background: $background;
+    background-size: 400% 400%;
+}
+
+.btn-submit {
+    @extend .rounded-0;
+    @extend .border-3;
+    &:not(:hover) {
+        color: white;
+    }
+}

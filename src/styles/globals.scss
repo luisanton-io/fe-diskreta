@@ -1,0 +1,199 @@
+:root {
+    --toastify-font-family: var(--bs-font-monospace) !important;
+}
+
+body {
+    @extend .gradient-bg;
+    @extend .font-monospace;
+    color: #fff;
+}
+
+input:active,
+input:focus,
+textarea:active,
+textarea:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+@media (max-width: 768px) {
+    body {
+        background-position-x: -100%;
+        background-position-y: center;
+    }
+}
+
+.modal-dialog .modal-content {
+    background-color: change-color($color: $black, $alpha: 0.85);
+    backdrop-filter: blur(8px);
+
+    color: #fff;
+    border: none;
+    background-size: 800% 800%;
+    border-radius: 0px;
+}
+
+#main-left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    @media (max-width: 768px) {
+        &[data-active-chat="true"] {
+            display: none;
+        }
+    }
+
+    #conversations {
+        .conversation {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+
+            cursor: pointer;
+
+            border: none;
+            border-radius: 0;
+
+            background-color: transparent;
+            color: white;
+
+            &[data-active="true"] {
+                @extend .bg-dark;
+            }
+
+            .delete-btn {
+                transition: opacity 0.4s;
+                opacity: 0;
+            }
+
+            &:hover {
+                .delete-btn {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}
+
+#main-right {
+    display: flex;
+    flex-direction: column;
+
+    &[data-active-chat="false"] {
+        @media (max-width: 768px) {
+            display: none;
+        }
+    }
+
+    #message-container {
+        @extend .custom-scrollbar;
+        margin-left: -0.5rem;
+        .message {
+            position: relative;
+            max-width: 75%;
+            padding-left: 2ch;
+            padding-right: 2ch;
+
+            display: flex;
+            flex-direction: column;
+
+            border-radius: 16px;
+
+            &.received {
+                background-color: var(--bs-gray-800);
+                border: 1px solid var(--bs-dark);
+                align-items: start;
+                border-bottom-left-radius: 0px;
+                padding-left: 1.75ch;
+                order: 0;
+                + .timestamp {
+                    transform: translateX(-20%);
+                    margin-right: auto;
+                }
+            }
+
+            &.sent {
+                background-color: transparent;
+                // color: black;
+                border: 1px solid white;
+                border-bottom-right-radius: 0px;
+                align-items: flex-end;
+                padding-right: 1.75ch;
+                order: 1;
+                + .timestamp {
+                    transform: translateX(20%);
+                    margin-left: auto;
+                }
+            }
+
+            + .timestamp {
+                display: flex;
+                align-items: center;
+                padding-inline: 1ch;
+                opacity: 0;
+                transition: all 0.4s ease;
+                z-index: -1;
+
+                &.show {
+                    opacity: 1;
+                    transform: translateX(0%);
+                }
+            }
+        }
+    }
+
+    textarea {
+        resize: none;
+    }
+}
+
+input.form-control,
+textarea {
+    background-color: transparent !important;
+    color: white !important;
+
+    &::placeholder {
+        color: white;
+        // @extend .font-monospace;
+    }
+
+    &:active,
+    &:focus {
+        outline: none;
+        box-shadow: none;
+        border-color: var(--bs-info);
+    }
+}
+
+.enter-form {
+    input {
+        &[type="text"],
+        &[type="password"] {
+            border: 3px solid white;
+            &::placeholder {
+                color: white;
+            }
+        }
+    }
+
+    .forgot,
+    .login,
+    .register {
+        &:not(:hover) {
+            color: white;
+        }
+    }
+}
+
+#user-dialog {
+    .user-result {
+        background: transparent;
+        &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+}
