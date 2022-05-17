@@ -6,7 +6,6 @@ import { pki, util } from "node-forge";
 import { useState } from "react";
 import { Button, Dropdown, Form } from "react-bootstrap";
 import { ArrowLeftShort, Send, ThreeDots } from "react-bootstrap-icons";
-import DropdownMenu from "react-bootstrap/esm/DropdownMenu";
 import { Link, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import maskUser from "util/maskUser";
@@ -28,10 +27,10 @@ export default function Chat() {
 
     const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
 
-    const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
 
-        if (recipients && socket && activeChat) {
+        if (socket && activeChat && recipients && text) {
             const message: Message = {
                 sender: maskUser(user)!,
                 to: recipients,
@@ -113,12 +112,8 @@ export default function Chat() {
                         className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
                         placeholder="Type a message..."
                         value={text}
-                        onChange={e => { setText(e.target.value) }}
-                        onKeyDown={e => {
-                            if ((e.nativeEvent as any).which === 13 && !e.shiftKey) {
-                                handleSendMessage(e as any)
-                            }
-                        }}
+                        onChange={e => setText(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
                     />
                     <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text}>
                         <Send />

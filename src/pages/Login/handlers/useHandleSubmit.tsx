@@ -1,6 +1,7 @@
 import API from "API"
-import { chatsState } from "atoms/chats"
 import { userState } from "atoms/user"
+import { chatsState } from "atoms/chats"
+import { AxiosError } from "axios"
 import { pki, util } from "node-forge"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -8,8 +9,6 @@ import { useSetRecoilState } from "recoil"
 import { createDigest } from "util/createDigest"
 import decryptLocalStorage from "util/decryptLocalStorage"
 import useHandleRegenerate from "./useHandleRegenerate"
-import { AxiosError } from "axios"
-import { getRecoil } from "recoil-nexus"
 
 export default function useHandleSubmit(nick: string, password: string) {
 

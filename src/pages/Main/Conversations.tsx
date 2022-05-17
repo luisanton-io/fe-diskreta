@@ -1,16 +1,16 @@
-import { chatsState } from "atoms/chats";
 import { userState } from "atoms/user";
+import { chatsState } from "atoms/chats";
 import { Button, ListGroup } from "react-bootstrap";
 import { Arrow90degUp, Trash3 } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilValue } from "recoil";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 
 export default function Conversations() {
 
     const navigate = useNavigate()
 
-    const [chats, setChats] = useRecoilState(chatsState)
+    const chats = useRecoilValue(chatsState)
     const user = useRecoilValue(userState)
     const { activeChat } = useParams()
 

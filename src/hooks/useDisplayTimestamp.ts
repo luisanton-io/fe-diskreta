@@ -1,11 +1,10 @@
 import { timestampState as timestampAtom } from "atoms/timestamp";
-import { useRef } from "react";
 import { useRecoilState } from "recoil";
 
-export default function useDisplayTimestamp(index: number) {
+export default function useDisplayTimestamp(message: Message, index: number) {
     const [timestampState, setTimestampState] = useRecoilState(timestampAtom)
 
-    const displayTimestamp = () => {
+    const handleDisplayTimeStamp = () => {
         if (timestampState?.timeout) clearTimeout(timestampState.timeout)
 
         setTimestampState({
@@ -14,10 +13,20 @@ export default function useDisplayTimestamp(index: number) {
             }, 4000),
             index
         })
-
     }
 
-    return displayTimestamp
+    const time = new Date(message.timestamp)
+
+    const displayedTimestamp =
+        time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
+            ? 'Today, ' + time.toLocaleTimeString()
+            : time.toString().split('GMT')[0]
+
+
+    const show = timestampState?.index === index
+
+
+    return { handleDisplayTimeStamp, show, displayedTimestamp }
 
 
 }

@@ -1,10 +1,9 @@
 import { chatsState } from "atoms/chats";
 import { pki, util } from "node-forge";
-import { AppIndicator } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
-import { useDeepCompareCallback } from "use-deep-compare"
+import { useDeepCompareCallback } from "use-deep-compare";
 
 export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey | null) {
 
