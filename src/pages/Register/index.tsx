@@ -106,8 +106,6 @@ export default function Register() {
                 privateKey: pki.privateKeyToPem(privateKey)
             }
 
-            console.log(newUserState)
-
             setUser(newUserState)
             navigate("/")
         } catch (error) {
