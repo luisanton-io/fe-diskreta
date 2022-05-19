@@ -82,11 +82,48 @@ textarea:focus {
 #main-right {
     display: flex;
     flex-direction: column;
+    position: relative;
+
+    height: 100%;
 
     &[data-active-chat="false"] {
         @media (max-width: 768px) {
             display: none;
         }
+    }
+
+    #server-echo {
+        @extend .custom-scrollbar;
+        display: flex;
+        // background-color: rgb(0, 43, 54);
+        background-color: change-color($color: $black, $alpha: 0.8);
+        backdrop-filter: blur(8px);
+        flex-direction: column;
+        width: 100%;
+        min-height: 40vh;
+
+        @media (max-width: 576px) {
+            margin-left: calc(var(--bs-gutter-x) * -1);
+            width: calc(100% + var(--bs-gutter-x) * 2);
+            margin-top: -3rem;
+            > ul {
+                padding: 2em !important;
+            }
+        }
+
+        transition: min-height 0.4s ease;
+        &[data-server-view="false"] {
+            min-height: 42px;
+        }
+        overflow-y: auto;
+        > ul {
+            background-color: transparent !important;
+            margin: 0 !important;
+        }
+    }
+
+    .dropdown button::after {
+        content: none;
     }
 
     #message-container {

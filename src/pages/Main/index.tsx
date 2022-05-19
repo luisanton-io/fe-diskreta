@@ -25,15 +25,16 @@ export default function Main() {
         }
     }, [userExists, navigate])
 
-
     return <Container className="py-5 h-100">
-        <Row className="h-100" style={{ margin: 'auto' }}>
+        <Row className="h-100 flex-column flex-md-row" style={{ margin: 'auto' }}>
             <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChat}>
                 <SideHeader />
                 <hr />
                 <Conversations />
             </Col>
-            <Col xs={12} md={8} id="main-right" className="h-100" data-active-chat={!!activeChat}>
+            <Col xs={12} md={8} id="main-right"
+                className="flex-grow-1"
+                data-active-chat={!!activeChat}>
                 <Chat />
             </Col>
         </Row>

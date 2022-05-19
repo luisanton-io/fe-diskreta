@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { useDeepCompareCallback } from "use-deep-compare";
 
-export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey | null) {
+export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null) {
 
     const [chats, setChats] = useRecoilState(chatsState)
     const navigate = useNavigate()
@@ -14,7 +14,7 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
 
     const chatIds = chats && Object.keys(chats)
 
-    const handleArchiveMessage = useDeepCompareCallback((encryptedMessage: Message) => {
+    const archiveMessage = useDeepCompareCallback((encryptedMessage: Message) => {
 
         if (!privateKey) return
 
@@ -57,5 +57,5 @@ export default function useHandleArchiveMessage(privateKey: pki.rsa.PrivateKey |
 
     }, [privateKey, chatIds, setChats])
 
-    return handleArchiveMessage
+    return archiveMessage
 }

@@ -7,6 +7,7 @@ export default function maskUser(user: LoggedUser | null) {
     delete publicUser.digest
     delete publicUser.privateKey
     delete publicUser.token
+    delete publicUser.refreshToken
 
     return publicUser
 
