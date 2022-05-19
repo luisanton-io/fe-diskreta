@@ -43,7 +43,7 @@ export default function Chat() {
         e.preventDefault()
 
         if (socket && activeChat && recipients && text) {
-            const message: Message = {
+            const message = {
                 sender: maskUser(user)!,
                 to: recipients,
                 chatId: activeChat,
@@ -73,8 +73,7 @@ export default function Chat() {
                     }
                 }
 
-                // TODO signature
-                // const signature = pki.privateKeyFromPem(user?.privateKey).sign()
+                delete outgoingMessage.sender
 
                 socket.emit("out-msg", outgoingMessage)
             }
@@ -93,7 +92,7 @@ export default function Chat() {
                     <Button variant="outline-warning" style={{ height: 42 }} className="btn-submit" onClick={() => { setServerView(v => !v) }}> {serverView ? "Hide" : "Show"} server logs</Button>
                     {
                         serverView &&
-                        <JSONTree data={serverEcho.length ? serverEcho : { message: "No activity yet." }} hideRoot />
+                        <JSONTree data={serverEcho.length ? serverEcho : { message: "No activity detected." }} hideRoot />
                     }
                 </div>
                 <div className="d-flex flex-column flex-grow-1" style={{ minHeight: '45vh' }}>

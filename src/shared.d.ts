@@ -23,9 +23,9 @@ interface Message {
     timestamp: number
 }
 
-interface OutgoingMessage extends Message {
+interface OutgoingMessage extends Omit<Message, "sender"> {
     for: string
-    // signature: string
+    sender?: Message["sender"]
 }
 
 interface Chat {

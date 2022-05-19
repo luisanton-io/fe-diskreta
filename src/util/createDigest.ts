@@ -19,10 +19,6 @@ export function createSignedDigest(user: CurrentUser, password: string) {
     const digest = util.encode64(md.digest().bytes())
     const signedDigest = util.encode64(privateKey.sign(md))
 
-    // TODO in backend
-    console.log("sign: ", signedDigest)
-    console.log("verify: ", publicKey.verify(util.decode64(digest), util.decode64(signedDigest)))
-
     // here we are saving the current digest in localStorage encrypted with the user's public key
     const encryptedDigest = util.encode64(publicKey.encrypt(digest))
 

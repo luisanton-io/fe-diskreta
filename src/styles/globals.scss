@@ -106,17 +106,16 @@ textarea:focus {
             margin-left: calc(var(--bs-gutter-x) * -1);
             width: calc(100% + var(--bs-gutter-x) * 2);
             margin-top: -3rem;
-            > ul {
-                padding: 2em !important;
-            }
         }
 
-        transition: min-height 0.4s ease;
+        transition: all 0.4s ease;
         &[data-server-view="false"] {
             min-height: 42px;
+            background-color: transparent !important;
         }
         overflow-y: auto;
         > ul {
+            padding: 2em !important;
             background-color: transparent !important;
             margin: 0 !important;
         }
