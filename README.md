@@ -1,46 +1,49 @@
-# Getting Started with Create React App
+# `d i s k r e t a .`
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+##### <div align="right">by [Luis Antonio Canettoli Ordoñez](http://luisanton.io)</div>
+### A E2E encrypted chat system.
 
-## Available Scripts
+- Based on MongoDB, Express, React and NodeJS.
+- Using Socket.io to handle real time communication.
+- Fully written in Typescript.
 
-In the project directory, you can run:
+## Why `diskreta`?
 
-### `npm start`
+"Diskreta" is the [Esperanto](https://en.wikipedia.org/wiki/Esperanto) word for "discreet".
+The goal of `diskreta.` is an being an anonymous, discreet, encrypted and secure chat system.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Overview
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+The clients [generate deterministically](https://stackoverflow.com/questions/72047474/how-to-generate-safe-rsa-keys-deterministically-using-a-seed/72047475#72047475) (using a 24 words mnemonic) a pair of RSA keys, of which only the public is sent to the server.
+From there on, users are encrypting the messages with their recipient RSA key and storing the chat history in their own device with military grade encryption using, as the encryption _key_, the **digest (SHA512) of their username and password**. 
 
-### `npm test`
+To understand the flow, I will add some emphasis on the fact that we are encrypting the data on the local device using the **digest of the username and password** as the **encryption key**. (Why not just the password? To avoid [dictionary attacks](https://en.wikipedia.org/wiki/Dictionary_attack), even if the attacker would need physical access to the device to try so.)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Therefore, without providing the same combination of username and password, the user is not able to decrypt the data in the localStorage (at least, [not without breaking AES 256](https://crypto.stackexchange.com/questions/46559/what-are-the-chances-that-aes-256-encryption-is-cracked)). 
 
-### `npm run build`
+To exclude [MITM](https://en.wikipedia.org/wiki/Man-in-the-middle_attack) attacks, we never even send the password at all, but rather this digest, to confirm the identity of the user. (Of course a successful MITM attack would be the ultimate breach of security: yet, at least, we will not be providing the username and password combination to these attackers).
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Being an end-to-end encrypted chat, the server is not receiving plain text message contents.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Its only responsibilities are generating JWT tokens to handle the sessions and dispatching the encrypted messages to the appropriate recipient(s).
+No logs are kept either, and all messages are stored on the clients and not on an external database.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Password Recovery Mechanism
 
-### `npm run eject`
+The main challenge has been the password recovery system.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Having an email address to prove the user identity would jeopardise the anonimity of the users. 
+- Regenerating the keys from the same mnemonic and comparing the resulting public key was an option. The old digest would have been then sent back to the client to decrypt the data: however, saving the unencrypted digest on the server would allow an attacker able to read the DB to retrieve a legit JWT token and impersonate another user.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Eventually, the only way to make sure the user could safely decrypt again his/her data, was to save _separately_ in the localStorage the digest. This digest/key of course had to be encrypted, but differently, and is in fact encrypted with the user's public key (henceforth to be decrypted using the user's _private key_).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+If the user remembers the password: the computed digest is able to decrypt the application data, and we do not interact with the encrypted digest.
+Otherwise, the user can provide the 24 words mnemonic to regenerate the old key pair and try decrypting the old digest with the generated **private key**.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+In this scenario, first of all we are checking on the server whether the generated public key is matching with the provided username.
 
-## Learn More
+If so, we try to use the generated _private key_ to decrypt the old digest: assuming this user was the last one logged on this device, we'll be now able to recover the rest of the data with it (otherwise, obviously if another user's data was there, we can't recover it using this user's mnemonic).
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+After creating a new password, we can now update the server with their new credentials (actually, with the new **digest**).
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+If all goes through correctly we are finally re-encrypting the data, this time using the new digest as a key (i.e. the new SHA512 of username and new password).
