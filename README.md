@@ -1,8 +1,10 @@
 # `d i s k r e t a .`
 
 ##### <div align="right">by [Luis Antonio Canettoli Ordoñez](http://luisanton.io)</div>
-### A E2E encrypted chat system.
+## An E2E encrypted chat system.
 
+- **[Live version here](https://diskreta.vercel.app)**
+- [Backend repository](https://github.com/luisanton-io/be-diskreta)
 - Based on MongoDB, Express, React and NodeJS.
 - Using Socket.io to handle real time communication.
 - Fully written in Typescript.
