@@ -17,7 +17,7 @@ The goal of `diskreta.` is an being an anonymous, discreet, encrypted and secure
 ## Overview
 
 The clients [generate deterministically](https://stackoverflow.com/questions/72047474/how-to-generate-safe-rsa-keys-deterministically-using-a-seed/72047475#72047475) (using a 24 words mnemonic) a pair of RSA keys, of which only the public is sent to the server.
-From there on, users are encrypting the messages with their recipient RSA key and storing the chat history in their own device with military grade encryption using, as the encryption _key_, the **digest (SHA512) of their username and password**. 
+From there on, users are encrypting the messages with the recipient's RSA key and storing the chat history in their own device with military grade encryption using, as the encryption _key_, the **digest (SHA512) of their username and password**. 
 
 To understand the flow, I will add some emphasis on the fact that we are encrypting the data on the local device using the **digest of the username and password** as the **encryption key**. (Why not just the password? To avoid [dictionary attacks](https://en.wikipedia.org/wiki/Dictionary_attack), even if the attacker would need physical access to the device to try so.)
 
