@@ -139,6 +139,7 @@ export default function useHandleMnemonicSubmit(mnemonic: React.MutableRefObject
                     onConfirm: handleNewPasswordSubmit
                 })
             })
+            .catch(console.error)
     }
 
     return handleMnemonicSubmit
