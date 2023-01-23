@@ -16,11 +16,13 @@ export default function useDisplayTimestamp(message: Message, index: number) {
     }
 
     const time = new Date(message.timestamp)
+    const sent = !!message.status
+    const status = message.status?.[Object.keys(message.status)[0]] || ''
 
-    const displayedTimestamp =
-        time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
-            ? 'Today, ' + time.toLocaleTimeString()
-            : time.toString().split('GMT')[0]
+    const displayedTimestamp = status.charAt(0).toUpperCase() + status.slice(1) + ' ' +
+        (time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
+            ? (sent ? 'today, ' : 'Today, ') + time.toLocaleTimeString()
+            : time.toString().split('GMT')[0])
 
 
     const show = timestampState?.index === index

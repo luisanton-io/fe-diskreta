@@ -12,6 +12,14 @@ interface User {
     publicKey: string
 }
 
+type MessageStatus = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+
+interface MessageStatusUpdate {
+    chatId: string,
+    hash: string,
+    recipientId: string,
+    status: MessageStatus
+}
 interface Message {
     sender: User
     to: User[]
@@ -21,9 +29,11 @@ interface Message {
         media?: string
     }
     timestamp: number
+    hash: string
+    status: Record<User["_id"], MessageStatus>
 }
 
-interface OutgoingMessage extends Omit<Message, "sender"> {
+interface OutgoingMessage extends Omit<Message, "sender" | "status"> {
     for: string
     sender?: Message["sender"]
 }

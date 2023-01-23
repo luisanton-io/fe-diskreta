@@ -12,6 +12,8 @@ import { useRecoilState, useRecoilValue } from "recoil";
 import maskUser from "util/maskUser";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 import Message from "./Message";
+import { SHA256 } from "crypto-js";
+import useMessageStatus from "./handlers/useMessageStatus";
 
 export interface SocketEcho {
     event: string
@@ -32,6 +34,7 @@ export default function Chat() {
 
     const socket = useSocket(setServerEcho)
     const handleDeleteChat = useHandleDeleteChat()
+    const handleMessageStatus = useMessageStatus()
 
     useEffect(() => {
         setServerEcho([])
@@ -39,11 +42,12 @@ export default function Chat() {
 
     const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
 
+
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
 
         if (socket && activeChat && recipients && text) {
-            const message = {
+            const payload = {
                 sender: maskUser(user)!,
                 to: recipients,
                 chatId: activeChat,
@@ -51,13 +55,23 @@ export default function Chat() {
                 timestamp: Date.now()
             }
 
+            const message = {
+                ...payload,
+                hash: SHA256(JSON.stringify(payload)).toString(),
+            }
+
+            const status = recipients.reduce((acc, recipient) => ({
+                ...acc,
+                [recipient._id]: 'outgoing'
+            }), {})
+
             setChats(chats => ({
                 ...chats,
                 [activeChat]: {
                     ...chats![activeChat],
                     messages: [
                         ...chats![activeChat].messages,
-                        message
+                        { ...message, status }
                     ]
                 }
             }))
@@ -65,8 +79,10 @@ export default function Chat() {
             for (const recipient of recipients) {
 
                 const publicKey = pki.publicKeyFromPem(recipient.publicKey)
+
                 const outgoingMessage: OutgoingMessage = {
                     ...message,
+                    to: recipients,
                     for: recipient._id,
                     content: {
                         text: util.encode64(publicKey.encrypt(text))
@@ -75,11 +91,18 @@ export default function Chat() {
 
                 delete outgoingMessage.sender
 
-                socket.emit("out-msg", outgoingMessage)
+                socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                    handleMessageStatus({
+                        chatId: activeChat,
+                        hash: message.hash,
+                        recipientId,
+                        status: 'sent'
+                    })
+                })
+
+                setText('')
+
             }
-
-            setText('')
-
         }
     }
 

@@ -3,8 +3,8 @@ import { userState } from "atoms/user"
 import { pki } from "node-forge"
 import { SocketEcho } from "pages/Main/Chat"
 import useArchiveMessage from "pages/Main/handlers/useArchiveMessage"
+import useMessageStatus from "pages/Main/handlers/useMessageStatus"
 import React, { useEffect, useMemo } from "react"
-import { toast } from "react-toastify"
 import { useRecoilValue } from "recoil"
 import { io } from "socket.io-client"
 
@@ -29,20 +29,28 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
 
     const archiveMessage = useArchiveMessage(privateKey)
 
+    const handleMessageStatus = useMessageStatus()
+
     useEffect(() => {
         if (!socket) return
 
-        const handleArchiveMessage = (message: Message) => {
-            archiveMessage(message)
+        const handleArchiveMessage = (message: Message, ack: Function) => {
+            archiveMessage(message, { showToast: true })
             setServerEcho((echoes) => [...echoes, {
                 event: "in-msg",
                 payload: message
             }])
+            ack()
         }
 
-        const handleDequeue = (messages: Message[]) => {
-            messages.forEach(archiveMessage)
-            toast.dismiss()
+        const handleDequeue = (messages: Message[], ack: Function) => {
+            messages.forEach(msg => archiveMessage(msg, { showToast: false }))
+            ack()
+        }
+
+        const handleDequeueStatus = (status: MessageStatusUpdate[], ack: Function) => {
+            status.forEach(handleMessageStatus)
+            ack()
         }
 
         const handleRefreshToken = () => {
@@ -53,7 +61,9 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
         const handleEcho = (payload: SocketEcho) => { setServerEcho(echoes => [...echoes, payload]) }
 
         socket.on('in-msg', handleArchiveMessage)
+        socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
+        socket.on('dequeue-status', handleDequeueStatus)
         socket.on('jwt-expired', handleRefreshToken)
         socket.on('echo', handleEcho)
 
@@ -64,7 +74,7 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
             socket.off('echo', handleEcho)
         }
 
-    }, [socket, archiveMessage, setServerEcho])
+    }, [socket, archiveMessage, setServerEcho, handleMessageStatus])
 
     return socket
 }

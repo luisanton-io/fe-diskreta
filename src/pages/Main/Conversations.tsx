@@ -5,6 +5,7 @@ import { Arrow90degUp, Trash3 } from "react-bootstrap-icons";
 import { useNavigate, useParams } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
+import React from "react";
 
 export default function Conversations() {
 
@@ -26,11 +27,10 @@ export default function Conversations() {
                     const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
                     const latestMessage = chat.messages[chat.messages.length - 1]
 
-                    return <>
+                    return <React.Fragment key={chat.id}>
                         <ListGroup.Item
                             className="conversation"
                             style={{ minHeight: 90 }}
-                            key={chat.id}
                             onClick={() => navigate(`/${chat.id}`)}
                             data-active={chat.id === activeChat}
                         >
@@ -57,7 +57,7 @@ export default function Conversations() {
                             </Button>
                         </ListGroup.Item>
                         <hr />
-                    </>
+                    </React.Fragment>
                 })
         }
     </ListGroup>

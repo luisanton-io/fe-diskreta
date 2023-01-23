@@ -14,7 +14,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
 
     const chatIds = chats && Object.keys(chats)
 
-    const archiveMessage = useDeepCompareCallback((encryptedMessage: Message) => {
+    const archiveMessage = useDeepCompareCallback((encryptedMessage: Message, { showToast = true }) => {
 
         if (!privateKey) return
 
@@ -45,7 +45,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
                     }
         }))
 
-        if (chatId !== activeChat) {
+        if (showToast && chatId !== activeChat) {
             toast.info(`${message.sender.nick}: ${message.content.text}`, {
                 position: toast.POSITION.TOP_CENTER,
                 onClick: () => {
