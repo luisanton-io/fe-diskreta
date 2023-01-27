@@ -1,7 +1,8 @@
 import { timestampState as timestampAtom } from "atoms/timestamp";
 import { useRecoilState } from "recoil";
+import { isMessageSent } from "util/isMessageSent";
 
-export default function useDisplayTimestamp(message: Message, index: number) {
+export default function useDisplayTimestamp(message: SentMessage | ReceivedMessage, index: number) {
     const [timestampState, setTimestampState] = useRecoilState(timestampAtom)
 
     const handleDisplayTimeStamp = () => {
@@ -16,14 +17,13 @@ export default function useDisplayTimestamp(message: Message, index: number) {
     }
 
     const time = new Date(message.timestamp)
-    const sent = !!message.status
-    const status = message.status?.[Object.keys(message.status)[0]] || ''
+    const sent = isMessageSent(message)
+    const status = sent ? message.status?.[Object.keys(message.status)[0]] : ''
 
-    const displayedTimestamp = status.charAt(0).toUpperCase() + status.slice(1) + ' ' +
+    const displayedTimestamp = (sent ? status.charAt(0).toUpperCase() + status.slice(1) + ' ' : '') +
         (time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
             ? (sent ? 'today, ' : 'Today, ') + time.toLocaleTimeString()
             : time.toString().split('GMT')[0])
-
 
     const show = timestampState?.index === index
 

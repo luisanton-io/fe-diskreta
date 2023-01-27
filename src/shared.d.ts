@@ -12,13 +12,15 @@ interface User {
     publicKey: string
 }
 
-type MessageStatus = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+type SentMessageStatus = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+
+type ReceivedMessageStatus = 'new' | 'read'
 
 interface MessageStatusUpdate {
     chatId: string,
     hash: string,
     recipientId: string,
-    status: MessageStatus
+    status: OutgoingMessageStatus
 }
 interface Message {
     sender: User
@@ -30,16 +32,24 @@ interface Message {
     }
     timestamp: number
     hash: string
-    status: Record<User["_id"], MessageStatus>
 }
 
-interface OutgoingMessage extends Omit<Message, "sender" | "status"> {
+interface ReceivedMessage extends Message {
+    status: ReceivedMessageStatus
+}
+interface OutgoingMessage extends Omit<Message, "sender"> {
     for: string
     sender?: Message["sender"]
 }
-
+interface SentMessage extends Message {
+    status: Record<User["_id"], SentMessageStatus>
+}
 interface Chat {
     id: string
-    messages: Message[];
+    messages: (SentMessage | ReceivedMessage)[];
     members: User[]
+}
+interface Queue {
+    messages: ReceivedMessage[],
+    status: MessageStatusUpdate[]
 }

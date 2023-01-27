@@ -18,6 +18,10 @@ export default function Conversations() {
     const handleDeleteChat = useHandleDeleteChat()
     const latestTimestamp = (chat: Chat) => chat.messages[chat.messages.length - 1]?.timestamp || Date.now()
 
+    const newMessages = (chat: Chat) => chat.messages.filter(message =>
+        message.sender._id !== user!._id && (message as ReceivedMessage).status === 'new'
+    )?.length
+
     return <ListGroup id="conversations">
         {
             chats && Object.values(chats)
@@ -33,6 +37,7 @@ export default function Conversations() {
                             style={{ minHeight: 90 }}
                             onClick={() => navigate(`/${chat.id}`)}
                             data-active={chat.id === activeChat}
+                            data-unread={newMessages(chat) || undefined}
                         >
                             <h6 className="fw-bold">{recipients}</h6>
                             {latestMessage && (

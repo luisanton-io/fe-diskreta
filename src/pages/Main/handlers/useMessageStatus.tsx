@@ -11,13 +11,16 @@ export default function useMessageStatus() {
             [chatId]: {
                 ...chats![chatId],
                 messages: chats![chatId].messages.map(m =>
-                    m.hash !== hash ? m : ({
-                        ...m,
-                        status: {
-                            ...m.status,
-                            [recipientId]: status
-                        }
-                    }))
+                    m.hash === hash
+                        ? ({
+                            ...m,
+                            status: {
+                                ...(m as SentMessage).status,
+                                [recipientId]: status
+                            }
+                        })
+                        : m
+                )
             }
         }))
     }, [setChats])

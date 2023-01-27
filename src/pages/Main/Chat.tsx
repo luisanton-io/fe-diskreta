@@ -1,6 +1,8 @@
-import { userState } from "atoms/user";
 import { chatsState } from "atoms/chats";
+import { focusState } from "atoms/focus";
+import { userState } from "atoms/user";
 import Diskreta from "components/Diskreta";
+import { SHA256 } from "crypto-js";
 import useSocket from "hooks/useSocket";
 import { pki, util } from "node-forge";
 import { useEffect, useState } from "react";
@@ -11,9 +13,8 @@ import { Link, useParams } from "react-router-dom";
 import { useRecoilState, useRecoilValue } from "recoil";
 import maskUser from "util/maskUser";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
-import Message from "./Message";
-import { SHA256 } from "crypto-js";
 import useMessageStatus from "./handlers/useMessageStatus";
+import Message from "./Message";
 
 export interface SocketEcho {
     event: string
@@ -40,14 +41,35 @@ export default function Chat() {
         setServerEcho([])
     }, [activeChat])
 
-    const recipients = !!chats && !!activeChat && chats[activeChat]?.members?.filter(m => m._id !== user?._id)
+    useEffect(() => {
+        console.log(chats && Object.keys(chats).length)
+    }, [chats])
+
+    const hasFocus = useRecoilValue(focusState)
+
+    useEffect(() => {
+        const latestReceived = !!activeChat && [...(chats?.[activeChat].messages || [])].reverse().find(msg => msg.sender._id !== user?._id) as ReceivedMessage
+
+        if (hasFocus && socket && user?._id && activeChat && latestReceived && latestReceived.status === 'new') {
+            // emit "read" with last message
+            handleMessageStatus({
+                chatId: activeChat,
+                hash: (latestReceived as ReceivedMessage).hash,
+                status: 'read',
+                recipientId: user._id
+            })
+            socket.emit("read-msg", latestReceived)
+        }
+    }, [hasFocus, socket, user?._id, chats, activeChat, handleMessageStatus])
+
+    const recipients = !!activeChat && chats?.[activeChat]?.members?.filter(m => m._id !== user?._id)
 
 
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
 
         if (socket && activeChat && recipients && text) {
-            const payload = {
+            const payload: Omit<SentMessage, "hash" | "status"> = {
                 sender: maskUser(user)!,
                 to: recipients,
                 chatId: activeChat,
@@ -60,10 +82,13 @@ export default function Chat() {
                 hash: SHA256(JSON.stringify(payload)).toString(),
             }
 
-            const status = recipients.reduce((acc, recipient) => ({
-                ...acc,
-                [recipient._id]: 'outgoing'
-            }), {})
+            const sentMessage: SentMessage = {
+                ...message,
+                status: recipients.reduce((all, { _id }) => ({
+                    ...all,
+                    [_id]: 'outgoing'
+                }), {})
+            }
 
             setChats(chats => ({
                 ...chats,
@@ -71,7 +96,7 @@ export default function Chat() {
                     ...chats![activeChat],
                     messages: [
                         ...chats![activeChat].messages,
-                        { ...message, status }
+                        sentMessage
                     ]
                 }
             }))
@@ -85,7 +110,7 @@ export default function Chat() {
                     to: recipients,
                     for: recipient._id,
                     content: {
-                        text: util.encode64(publicKey.encrypt(text))
+                        text: util.encode64(publicKey.encrypt(util.encodeUtf8(text)))
                     }
                 }
 

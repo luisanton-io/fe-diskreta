@@ -65,6 +65,21 @@ textarea:focus {
                 @extend .bg-dark;
             }
 
+            &[data-unread]::after {
+                content: attr(data-unread);
+                position: absolute;
+                top: 50%;
+                right: 1em;
+                transform: translateY(-50%);
+                background: #4d95cc;
+                height: 42px;
+                width: 42px;
+                display: grid;
+                place-items: center;
+                border-radius: 21px;
+                transition: opacity 0.4s;
+            }
+
             .delete-btn {
                 transition: opacity 0.4s;
                 opacity: 0;
@@ -73,6 +88,10 @@ textarea:focus {
             &:hover {
                 .delete-btn {
                     opacity: 1;
+                    z-index: 1;
+                }
+                &[data-unread]::after {
+                    opacity: 0;
                 }
             }
         }

@@ -1,4 +1,5 @@
 import { refreshToken } from "API/refreshToken"
+import { focusState } from "atoms/focus"
 import { userState } from "atoms/user"
 import { pki } from "node-forge"
 import { SocketEcho } from "pages/Main/Chat"
@@ -21,11 +22,17 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
 
     const { token } = user || {}
 
+    const hasFocus = useRecoilValue(focusState)
+
     const socket = useMemo(() => {
-        const socket = !!token && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
-        // console.log({ socket })
-        return socket
-    }, [token])
+        return !!token && hasFocus && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
+    }, [token, hasFocus])
+
+    useEffect(() => {
+        return () => {
+            socket && socket.disconnect()
+        }
+    }, [socket, hasFocus])
 
     const archiveMessage = useArchiveMessage(privateKey)
 
@@ -34,23 +41,30 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
     useEffect(() => {
         if (!socket) return
 
-        const handleArchiveMessage = (message: Message, ack: Function) => {
-            archiveMessage(message, { showToast: true })
-            setServerEcho((echoes) => [...echoes, {
-                event: "in-msg",
-                payload: message
-            }])
-            ack()
+        const handleArchiveMessage = (message: ReceivedMessage, ack: Function) => {
+            try {
+                archiveMessage(message, { showToast: true })
+                setServerEcho(echoes => [...echoes, {
+                    event: "in-msg",
+                    payload: message
+                }])
+                ack()
+            } catch (error) {
+                ack((error as Error).message)
+            }
         }
 
-        const handleDequeue = (messages: Message[], ack: Function) => {
-            messages.forEach(msg => archiveMessage(msg, { showToast: false }))
-            ack()
-        }
+        const handleDequeue = (queue: Queue, ack: Function) => {
+            try {
+                console.log(queue)
+                const { messages = [], status = [] } = queue || {}
+                messages.forEach(msg => archiveMessage(msg, { showToast: false }))
+                status.forEach(handleMessageStatus)
+                ack()
+            } catch (error) {
+                ack((error as Error).message)
 
-        const handleDequeueStatus = (status: MessageStatusUpdate[], ack: Function) => {
-            status.forEach(handleMessageStatus)
-            ack()
+            }
         }
 
         const handleRefreshToken = () => {
@@ -63,7 +77,6 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
-        socket.on('dequeue-status', handleDequeueStatus)
         socket.on('jwt-expired', handleRefreshToken)
         socket.on('echo', handleEcho)
 

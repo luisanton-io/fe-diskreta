@@ -14,14 +14,14 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
 
     const chatIds = chats && Object.keys(chats)
 
-    const archiveMessage = useDeepCompareCallback((encryptedMessage: Message, { showToast = true }) => {
+    const archiveMessage = useDeepCompareCallback((encryptedMessage: ReceivedMessage, { showToast = true }) => {
 
         if (!privateKey) return
 
         const message = {
             ...encryptedMessage,
             content: {
-                text: privateKey.decrypt(util.decode64(encryptedMessage.content.text))
+                text: util.decodeUtf8(privateKey.decrypt(util.decode64(encryptedMessage.content.text)))
             }
         }
 
