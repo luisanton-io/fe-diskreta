@@ -1,5 +1,4 @@
 import { refreshToken } from "API/refreshToken"
-import { focusState } from "atoms/focus"
 import { userState } from "atoms/user"
 import { pki } from "node-forge"
 import { SocketEcho } from "pages/Main/Chat"
@@ -12,27 +11,21 @@ import { io } from "socket.io-client"
 export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAction<SocketEcho[]>>) {
 
     const user = useRecoilValue(userState)
-    const privateKey = (() => {
+    const privateKey = useMemo(() => {
         try {
             return pki.privateKeyFromPem(user?.privateKey ?? '')
         } catch {
             return null
         }
-    })()
+    }, [user])
 
     const { token } = user || {}
 
-    const hasFocus = useRecoilValue(focusState)
 
     const socket = useMemo(() => {
-        return !!token && hasFocus && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
-    }, [token, hasFocus])
+        return !!token && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
+    }, [token])
 
-    useEffect(() => {
-        return () => {
-            socket && socket.disconnect()
-        }
-    }, [socket, hasFocus])
 
     const archiveMessage = useArchiveMessage(privateKey)
 
@@ -62,8 +55,8 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
                 status.forEach(handleMessageStatus)
                 ack()
             } catch (error) {
+                console.log("Handle dequeue error:", error)
                 ack((error as Error).message)
-
             }
         }
 
@@ -82,6 +75,7 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
 
         return () => {
             socket.off('in-msg', handleArchiveMessage)
+            socket.off('msg-status', handleMessageStatus)
             socket.off('dequeue', handleDequeue)
             socket.off('jwt-expired', handleRefreshToken)
             socket.off('echo', handleEcho)

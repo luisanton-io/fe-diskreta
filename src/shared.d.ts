@@ -20,7 +20,7 @@ interface MessageStatusUpdate {
     chatId: string,
     hash: string,
     recipientId: string,
-    status: OutgoingMessageStatus
+    status: SentMessageStatus | ReceivedMessageStatus
 }
 interface Message {
     sender: User

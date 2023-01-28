@@ -41,24 +41,23 @@ export default function Chat() {
         setServerEcho([])
     }, [activeChat])
 
-    useEffect(() => {
-        console.log(chats && Object.keys(chats).length)
-    }, [chats])
-
     const hasFocus = useRecoilValue(focusState)
 
     useEffect(() => {
-        const latestReceived = !!activeChat && [...(chats?.[activeChat].messages || [])].reverse().find(msg => msg.sender._id !== user?._id) as ReceivedMessage
+        const newMessages = !!activeChat && [...(chats?.[activeChat].messages || [])].reverse().filter(msg => msg.sender._id !== user?._id && msg.status === 'new') as ReceivedMessage[]
 
-        if (hasFocus && socket && user?._id && activeChat && latestReceived && latestReceived.status === 'new') {
-            // emit "read" with last message
-            handleMessageStatus({
-                chatId: activeChat,
-                hash: (latestReceived as ReceivedMessage).hash,
-                status: 'read',
-                recipientId: user._id
+        if (hasFocus && socket && user?._id && activeChat && newMessages && newMessages.length) {
+            // emit "read" for new messages
+            newMessages.forEach(msg => {
+                handleMessageStatus({
+                    chatId: activeChat,
+                    hash: msg.hash,
+                    status: 'read',
+                    recipientId: user._id
+                })
+
+                socket.emit("read-msg", msg)
             })
-            socket.emit("read-msg", latestReceived)
         }
     }, [hasFocus, socket, user?._id, chats, activeChat, handleMessageStatus])
 
