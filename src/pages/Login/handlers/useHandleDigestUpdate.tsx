@@ -14,7 +14,7 @@ export default function useHandleDigestUpdate() {
         try {
             const { data: {
                 token: encryptedToken,
-                refreshToken: encryptedRefreshToken
+                refreshToken
             } } = await API.put<LoginResponse>('/users', {
                 nick: user.nick,
                 digest,
@@ -24,7 +24,7 @@ export default function useHandleDigestUpdate() {
             return {
                 digest,
                 token: pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken)),
-                refreshToken: pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedRefreshToken))
+                refreshToken
             }
         } catch (error) {
             throw new Error("Error updating user. Please try again later.")

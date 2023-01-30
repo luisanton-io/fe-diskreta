@@ -23,7 +23,7 @@ export default function useHandleRegenerate(nick: string, password: string) {
     const oldDigestEncrypted = localStorage.getItem(USER_DIGEST)
 
 
-    const handleRegenerate = (encryptedToken: string, encryptedRefreshToken: string, responseUser: User) => {
+    const handleRegenerate = (encryptedToken: string, refreshToken: string, responseUser: User) => {
         if (oldDigestEncrypted && !window.confirm("Signing in with a new user will destroy all data associated with any previous user. Continue?")) {
             return
         }
@@ -40,7 +40,7 @@ export default function useHandleRegenerate(nick: string, password: string) {
                     setUser({
                         ...responseUser,
                         token: privateKey.decrypt(util.decode64(encryptedToken)),
-                        refreshToken: privateKey.decrypt(util.decode64(encryptedRefreshToken)),
+                        refreshToken,
                         privateKey: pki.privateKeyToPem(privateKey),
                         digest: createDigest(nick, password)
                     })

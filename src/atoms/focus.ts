@@ -5,9 +5,9 @@ export const focusState = atom({
     default: true,
     effects: [
         ({ onSet }) => {
-            onSet(newValue => {
-                console.debug("Window focus changed:", newValue);
-            });
+            // onSet(newValue => {
+            // console.debug("Window focus changed:", newValue);
+            // });
         },
     ],
 

@@ -1,4 +1,5 @@
 import { refreshToken } from "API/refreshToken"
+import { focusState } from "atoms/focus"
 import { userState } from "atoms/user"
 import { pki } from "node-forge"
 import { SocketEcho } from "pages/Main/Chat"
@@ -7,6 +8,10 @@ import useMessageStatus from "pages/Main/handlers/useMessageStatus"
 import React, { useEffect, useMemo } from "react"
 import { useRecoilValue } from "recoil"
 import { io } from "socket.io-client"
+
+const isTokenExpired = (token?: string) => {
+    return token && Date.now() >= (JSON.parse(atob(token.split('.')[1]))).exp * 1000
+}
 
 export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAction<SocketEcho[]>>) {
 
@@ -21,6 +26,11 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
 
     const { token } = user || {}
 
+    const hasFocus = useRecoilValue(focusState)
+
+    useEffect(() => {
+        hasFocus && !!token && isTokenExpired(token) && refreshToken()
+    }, [hasFocus, token, privateKey])
 
     const socket = useMemo(() => {
         return !!token && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })

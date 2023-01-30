@@ -31,23 +31,21 @@ export default function useHandleSubmit(nick: string, password: string) {
             const digest = createDigest(nick, password)
 
             const {
-                data: { token: encryptedToken, refreshToken: encryptedRefreshToken, user: responseUser }
+                data: { token: encryptedToken, refreshToken, user: responseUser }
             } = await API.post<LoginResponse>("/users/session", { nick, digest })
 
             // We try to decrypt the store with the current user digest
             try {
                 const { chats, user } = decryptLocalStorage(digest)
 
-                const [token, refreshToken] = [encryptedToken, encryptedRefreshToken].map(
-                    (jwt: string) => pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(jwt))
-                )
+                const token = pki.privateKeyFromPem(user.privateKey).decrypt(util.decode64(encryptedToken))
 
                 setUser({ ...user, token, refreshToken })
                 setChats(chats)
                 navigate("/")
                 toast.dismiss()
             } catch {
-                handleRegenerate(encryptedToken, encryptedRefreshToken, responseUser)
+                handleRegenerate(encryptedToken, refreshToken, responseUser)
             }
 
         } catch (error) {

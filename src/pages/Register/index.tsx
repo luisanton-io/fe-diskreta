@@ -91,12 +91,11 @@ export default function Register() {
         try {
             const { data: {
                 token: encryptedToken,
-                refreshToken: encryptedRefreshToken,
+                refreshToken,
                 user
             } } = await API.post<LoginResponse>("/users", { digest, nick, publicKey: pki.publicKeyToPem(publicKey) })
 
-            const [token, refreshToken] =
-                [encryptedToken, encryptedRefreshToken].map(cipher => privateKey.decrypt(util.decode64(cipher)))
+            const token = privateKey.decrypt(util.decode64(encryptedToken))
 
             const newUserState = {
                 ...user,

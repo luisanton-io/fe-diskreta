@@ -4,7 +4,7 @@ import { useSetRecoilState } from "recoil";
 import { isMessageSent } from "util/isMessageSent";
 
 export const SentMessageStatusValues: SentMessageStatus[] = [
-    'error', 'outgoing', 'sent', 'delivered', 'read'
+    'outgoing', 'error', 'sent', 'delivered', 'read'
 ]
 
 export const ReceivedMessageStatusValues: ReceivedMessageStatus[] = [
