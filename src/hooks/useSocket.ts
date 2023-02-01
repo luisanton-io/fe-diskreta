@@ -30,7 +30,7 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
 
     useEffect(() => {
         hasFocus && !!token && isTokenExpired(token) && refreshToken()
-    }, [hasFocus, token, privateKey])
+    }, [hasFocus, token])
 
     const socket = useMemo(() => {
         return !!token && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
@@ -67,6 +67,10 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
             } catch (error) {
                 console.log("Handle dequeue error:", error)
                 console.log({ user, privateKey, messages, status })
+                    ; (window as any).user = user
+                    ; (window as any).privateKey = privateKey
+                    ; (window as any).messages = messages
+                    ; (window as any).status = status
                 ack((error as Error).message)
             }
         }
