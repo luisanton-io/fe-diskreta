@@ -18,8 +18,7 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
     const user = useRecoilValue(userState)
     const privateKey = useMemo(() => {
         try {
-            if (!user?.privateKey) throw new Error()
-            return pki.privateKeyFromPem(user.privateKey)
+            return (!user?.privateKey) ? null : pki.privateKeyFromPem(user.privateKey)
         } catch {
             return null
         }
