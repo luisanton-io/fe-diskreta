@@ -58,14 +58,15 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
         }
 
         const handleDequeue = (queue: Queue, ack: Function) => {
+            const { messages = [], status = [] } = queue || {}
             try {
                 console.log(queue)
-                const { messages = [], status = [] } = queue || {}
                 messages.forEach(msg => archiveMessage(msg, { showToast: false }))
                 status.forEach(handleMessageStatus)
                 ack()
             } catch (error) {
                 console.log("Handle dequeue error:", error)
+                console.log({ user, privateKey, messages, status })
                 ack((error as Error).message)
             }
         }
