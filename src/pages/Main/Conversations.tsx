@@ -1,11 +1,12 @@
-import { userState } from "atoms/user";
 import { chatsState } from "atoms/chats";
+import { userState } from "atoms/user";
+import useActiveChat from "hooks/useActiveChat";
+import React from "react";
 import { Button, ListGroup } from "react-bootstrap";
 import { Arrow90degUp, Trash3 } from "react-bootstrap-icons";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
-import React from "react";
 
 export default function Conversations() {
 
@@ -13,7 +14,7 @@ export default function Conversations() {
 
     const chats = useRecoilValue(chatsState)
     const user = useRecoilValue(userState)
-    const { activeChat } = useParams()
+    const { activeChatId } = useActiveChat()
 
     const handleDeleteChat = useHandleDeleteChat()
     const latestTimestamp = (chat: Chat) => chat.messages[chat.messages.length - 1]?.timestamp || Date.now()
@@ -36,7 +37,7 @@ export default function Conversations() {
                             className="conversation"
                             style={{ minHeight: 90 }}
                             onClick={() => navigate(`/${chat.id}`)}
-                            data-active={chat.id === activeChat}
+                            data-active={chat.id === activeChatId}
                             data-unread={newMessages(chat) || undefined}
                         >
                             <h6 className="fw-bold">{recipients}</h6>

@@ -1,6 +1,7 @@
 import { chatsState } from "atoms/chats";
+import useActiveChat from "hooks/useActiveChat";
 import { pki, util } from "node-forge";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { useDeepCompareCallback } from "use-deep-compare";
@@ -10,7 +11,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
     const [chats, setChats] = useRecoilState(chatsState)
     const navigate = useNavigate()
 
-    const { activeChat } = useParams()
+    const { activeChatId } = useActiveChat()
 
     const chatIds = chats && Object.keys(chats)
 
@@ -45,7 +46,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
                     }
         }))
 
-        if (showToast && chatId !== activeChat) {
+        if (showToast && chatId !== activeChatId) {
             toast.info(`${message.sender.nick}: ${message.content.text}`, {
                 position: toast.POSITION.TOP_CENTER,
                 onClick: () => {
@@ -55,7 +56,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
             })
         }
 
-    }, [privateKey, chatIds, activeChat, setChats])
+    }, [privateKey, chatIds, activeChatId, setChats])
 
     return archiveMessage
 }

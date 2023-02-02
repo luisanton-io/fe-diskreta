@@ -1,8 +1,9 @@
 import { userState } from "atoms/user";
 import { USER_DIGEST } from "constants/localStorage";
+import useActiveChat from "hooks/useActiveChat";
 import { useEffect } from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import Chat from "./Chat";
 import Conversations from "./Conversations";
@@ -13,7 +14,7 @@ export default function Main() {
     const navigate = useNavigate()
     const user = useRecoilValue(userState)
 
-    const { activeChat } = useParams()
+    const { activeChatId } = useActiveChat()
 
     const userExists = !!user
 
@@ -27,14 +28,14 @@ export default function Main() {
 
     return <Container className="py-5 h-100">
         <Row className="h-100 flex-column flex-md-row" style={{ margin: 'auto' }}>
-            <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChat}>
+            <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChatId}>
                 <SideHeader />
                 <hr />
                 <Conversations />
             </Col>
             <Col xs={12} md={8} id="main-right"
                 className="flex-grow-1"
-                data-active-chat={!!activeChat}>
+                data-active-chat={!!activeChatId}>
                 <Chat />
             </Col>
         </Row>

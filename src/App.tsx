@@ -54,7 +54,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Main />} />
-        <Route path="/:activeChat" element={<Main />} />
+        <Route path="/:activeChatId" element={<Main />} />
       </Routes>
       <Dialog />
       <Debug />
