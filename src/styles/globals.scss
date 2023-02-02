@@ -152,6 +152,7 @@ textarea:focus {
             max-width: 75%;
             padding-left: 2ch;
             padding-right: 2ch;
+            word-break: break-word;
 
             display: flex;
             flex-direction: column;
