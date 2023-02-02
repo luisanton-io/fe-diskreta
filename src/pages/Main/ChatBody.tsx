@@ -1,21 +1,18 @@
 import { focusState } from "atoms/focus"
 import { userState } from "atoms/user"
-import { useEffect } from "react"
+import { useContext, useEffect } from "react"
 import { useRecoilValue } from "recoil"
-import { Socket } from "socket.io-client"
+import { ChatContext } from "./context/ChatCtx"
 import useMessageStatus from "./handlers/useMessageStatus"
 import Message from "./Message"
 
-interface ChatBodyProps {
-    socket: false | Socket
-    activeChat: Chat
-}
-
-export default function ChatBody({ socket, activeChat }: ChatBodyProps) {
+export default function ChatBody() {
+    const hasFocus = useRecoilValue(focusState)
     const user = useRecoilValue(userState)
+
     const handleMessageStatus = useMessageStatus()
 
-    const hasFocus = useRecoilValue(focusState)
+    const { activeChat, socket } = useContext(ChatContext)
 
     useEffect(() => {
         const newMessages = !!activeChat && [...(activeChat.messages || [])]

@@ -3,28 +3,25 @@ import { userState } from "atoms/user";
 import { SHA256 } from "crypto-js";
 import useActiveChat from "hooks/useActiveChat";
 import { pki, util } from "node-forge";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Send } from "react-bootstrap-icons";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { Socket } from "socket.io-client";
 import maskUser from "util/maskUser";
+import { ChatContext } from "./context/ChatCtx";
 import useMessageStatus from "./handlers/useMessageStatus";
 
-interface MessageInputProps {
-    socket: false | Socket,
-    recipients?: false | User[]
-}
-
-export default function MessageInput({ socket, recipients }: MessageInputProps) {
+export default function MessageInput() {
     const setChats = useSetRecoilState(chatsState)
     const user = useRecoilValue(userState)
 
     const handleMessageStatus = useMessageStatus()
 
+    const { socket, recipients } = useContext(ChatContext)
+
     const [text, setText] = useState('')
     const { activeChatId } = useActiveChat()
-
 
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()

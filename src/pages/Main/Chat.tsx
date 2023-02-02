@@ -4,13 +4,9 @@ import useSocket from "hooks/useSocket";
 import { Col } from "react-bootstrap";
 import ChatBody from "./ChatBody";
 import ChatHeader from "./ChatHeader";
+import { ChatContext } from "./context/ChatCtx";
 import MessageInput from "./MessageInput";
 import ServerEcho from "./ServerEcho";
-
-export interface SocketEcho {
-    event: string
-    payload: Record<string, any>
-}
 
 export default function Chat() {
 
@@ -18,21 +14,24 @@ export default function Chat() {
     const { activeChat, recipients } = useActiveChat()
 
     return <>{
-        activeChat
-            ? <div className="d-flex flex-column h-100">
-                <ServerEcho socket={socket} />
+        activeChat && recipients && socket
+            ?
+            <ChatContext.Provider value={{ socket, activeChat, recipients }}>
+                <div className="d-flex flex-column h-100">
+                    <ServerEcho />
 
-                <div className="d-flex flex-column flex-grow-1" style={{ minHeight: '45vh' }}>
-                    <ChatHeader {...{ activeChat }} />
+                    <div className="d-flex flex-column flex-grow-1" style={{ minHeight: '45vh' }}>
+                        <ChatHeader />
 
-                    <hr />
+                        <hr />
 
-                    <ChatBody {...{ socket, activeChat }} />
+                        <ChatBody />
 
-                    <MessageInput {...{ socket, recipients }} />
+                        <MessageInput />
+                    </div>
+
                 </div>
-
-            </div>
+            </ChatContext.Provider>
             :
             <Col className="d-flex align-items-center flex-grow-1">
                 <Diskreta />

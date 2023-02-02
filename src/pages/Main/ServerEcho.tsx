@@ -1,19 +1,22 @@
 import useActiveChat from "hooks/useActiveChat";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import { JSONTree } from "react-json-tree";
-import { Socket } from "socket.io-client";
-import { SocketEcho } from "./Chat";
+import { ChatContext } from "./context/ChatCtx";
+export interface SocketEcho {
+    event: string
+    payload: Record<string, any>
+}
 
-export default function ServerEcho({ socket }: { socket: false | Socket }) {
+export default function ServerEcho() {
 
+    const { socket } = useContext(ChatContext)
     const [serverView, setServerView] = useState(true)
     const [serverEcho, setServerEcho] = useState<SocketEcho[]>([])
 
     const { activeChatId } = useActiveChat()
 
     useEffect(() => {
-        if (!socket) return
 
         const handleEcho = (payload: SocketEcho) => { setServerEcho(echoes => [...echoes, payload]) }
 

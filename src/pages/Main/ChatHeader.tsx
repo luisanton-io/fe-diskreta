@@ -1,16 +1,14 @@
 import useActiveChat from "hooks/useActiveChat";
+import { useContext } from "react";
 import { Dropdown } from "react-bootstrap";
 import { ArrowLeftShort, ThreeDots } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import { ChatContext } from "./context/ChatCtx";
 import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 
-interface ChatHeaderProps {
-    activeChat: Chat
-}
-
-export default function ChatHeader({ activeChat }: ChatHeaderProps) {
+export default function ChatHeader() {
     const handleDeleteChat = useHandleDeleteChat();
-    const { recipients } = useActiveChat()
+    const { activeChat, recipients } = useContext(ChatContext)
 
     return <div className="d-flex align-items-center mt-3">
         <Link to="/" className="d-md-none d-inline-block text-white me-2"><ArrowLeftShort style={{ fontSize: '2em' }} /></Link>
