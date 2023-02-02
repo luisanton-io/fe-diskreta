@@ -24,7 +24,7 @@ export default function decryptLocalStorage(digest: string): DecryptionResult { 
                 // }
             })
             .map((json, i) => {
-                console.log(json && JSON.parse(json))
+                // console.log(json && JSON.parse(json))
                 return json && JSON.parse(json)[[CHATS, USER][i]]
             })
 

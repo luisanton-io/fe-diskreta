@@ -25,6 +25,8 @@ export default function useDisplayTimestamp(message: SentMessage | ReceivedMessa
             ? (sent ? 'today, ' : 'Today, ') + time.toLocaleTimeString()
             : time.toString().split('GMT')[0])
 
+    // const displayedTimestamp = message.hash.slice(0, 8)
+
     const show = timestampState?.index === index
 
 

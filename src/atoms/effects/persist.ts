@@ -7,7 +7,7 @@ import { userState } from "atoms/user"
 const encrypt = (message: string) => {
     try {
         const value = AES.encrypt(message, getRecoil(userState)?.digest ?? '').toString()
-        console.table({ value, id: getRecoil(userState)?.digest, message })
+        // console.table({ value, id: getRecoil(userState)?.digest, message })
         return value
     } catch {
         return null
@@ -17,7 +17,7 @@ const encrypt = (message: string) => {
 const decrypt = (cipher: string) => {
     try {
         const value = AES.decrypt(cipher, getRecoil(userState)?.digest ?? '').toString(enc.Utf8)
-        console.table({ value })
+        // console.table({ value })
         return value
     } catch {
         return null
@@ -27,7 +27,7 @@ const decrypt = (cipher: string) => {
 export const encryptedStorage = () => {
     return {
         setItem: (key: string, value: string) => {
-            console.table({ key, value })
+            // console.table({ key, value })
             localStorage.setItem(key, encrypt(value) as string)
         },
         getItem: (key: string) => {

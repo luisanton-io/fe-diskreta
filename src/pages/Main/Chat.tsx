@@ -123,10 +123,9 @@ export default function Chat() {
                         status: 'sent'
                     })
                 })
-
-                setText('')
-
             }
+
+            setText('')
         }
     }
 

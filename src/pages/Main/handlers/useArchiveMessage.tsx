@@ -18,23 +18,11 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
 
         if (!privateKey) return
 
-        console.log('new private key...')
-
-        let message!: ReceivedMessage
-
-        try {
-            message = {
-                ...encryptedMessage,
-                content: {
-                    text: util.decodeUtf8(privateKey.decrypt(util.decode64(encryptedMessage.content.text)))
-                }
+        const message = {
+            ...encryptedMessage,
+            content: {
+                text: util.decodeUtf8(privateKey.decrypt(util.decode64(encryptedMessage.content.text)))
             }
-        } catch (error) {
-            console.log({ privateKey, encryptedMessage })
-                ; (window as any).util = util
-                ; (window as any).privateKey = privateKey
-                ; (window as any).encMsg = encryptedMessage
-
         }
 
         const { chatId } = message
@@ -67,7 +55,7 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
             })
         }
 
-    }, [privateKey, chatIds, setChats])
+    }, [privateKey, chatIds, activeChat, setChats])
 
     return archiveMessage
 }

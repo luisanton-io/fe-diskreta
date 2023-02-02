@@ -51,9 +51,9 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
                     event: "in-msg",
                     payload: message
                 }])
-                ack()
+                ack(JSON.stringify({ "hash": message.hash }))
             } catch (error) {
-                ack((error as Error).message)
+                ack(JSON.stringify({ error: (error as Error).message }))
             }
         }
 
@@ -62,7 +62,7 @@ export default function useSocket(setServerEcho: React.Dispatch<React.SetStateAc
             try {
                 console.log(queue)
                 messages.forEach(msg => archiveMessage(msg, { showToast: false }))
-                status.forEach(handleMessageStatus)
+                status.forEach(msg => handleMessageStatus(msg))
                 ack()
             } catch (error) {
                 console.log("Handle dequeue error:", error)

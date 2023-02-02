@@ -14,7 +14,7 @@ export const ReceivedMessageStatusValues: ReceivedMessageStatus[] = [
 export default function useMessageStatus() {
     const setChats = useSetRecoilState(chatsState)
 
-    return useCallback(({ chatId, hash, recipientId, status }: MessageStatusUpdate) => {
+    return useCallback(({ chatId, hash, recipientId, status }: MessageStatusUpdate, ack?: Function) => {
 
         const withUpdatedStatus = (message: SentMessage | ReceivedMessage) => {
 
@@ -54,5 +54,7 @@ export default function useMessageStatus() {
                 )
             }
         }))
+
+        ack?.()
     }, [setChats])
 }
