@@ -1,32 +1,31 @@
 import { chatsState } from "atoms/chats";
 import { userState } from "atoms/user";
+import imageCompression from 'browser-image-compression';
 import { AES, SHA256 } from "crypto-js";
 import { pki, random, util } from "node-forge";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Camera, Send } from "react-bootstrap-icons";
-import { useRecoilValue, useSetRecoilState } from "recoil";
-import maskUser from "util/maskUser";
-import { ChatContext } from "./context/ChatCtx";
-import useMessageStatus from "../handlers/useMessageStatus";
-import Spotlight from "./Spotlight";
-import convertFileToBase64 from "util/convertFileToBase64";
-import imageCompression from 'browser-image-compression';
 import { toast } from "react-toastify";
+import { useRecoilValue, useSetRecoilState } from "recoil";
+import convertFileToBase64 from "util/convertFileToBase64";
+import maskUser from "util/maskUser";
+// import useMessageStatus from "../handlers/useMessageStatus";
+import { ChatContext } from "./context/ChatCtx";
 
 export default function MessageInput() {
     const setChats = useSetRecoilState(chatsState)
     const user = useRecoilValue(userState)
 
-    const handleMessageStatus = useMessageStatus()
+    // const handleMessageStatus = useMessageStatus()
 
-    const { socket, recipients, activeChat } = useContext(ChatContext)
+    const {
+        //  socket, 
+        recipients, activeChat, setSpotlight } = useContext(ChatContext)
 
     const [text, setText] = useState('')
 
     const [media, setMedia] = useState<Media>()
-
-    const resetMedia = () => setMedia(undefined)
 
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
@@ -48,24 +47,24 @@ export default function MessageInput() {
             hash: SHA256(JSON.stringify(payload)).toString(),
         }
 
-        // const sentMessage: SentMessage = {
-        //     ...message,
-        //     status: recipients.reduce((all, { _id }) => ({
-        //         ...all,
-        //         [_id]: 'outgoing'
-        //     }), {})
-        // }
+        const sentMessage: SentMessage = {
+            ...message,
+            status: recipients.reduce((all, { _id }) => ({
+                ...all,
+                [_id]: 'outgoing'
+            }), {})
+        }
 
-        // setChats(chats => ({
-        //     ...chats,
-        //     [activeChat.id]: {
-        //         ...activeChat,
-        //         messages: [
-        //             ...activeChat.messages,
-        //             sentMessage
-        //         ]
-        //     }
-        // }))
+        setChats(chats => ({
+            ...chats,
+            [activeChat.id]: {
+                ...activeChat,
+                messages: [
+                    ...activeChat.messages,
+                    sentMessage
+                ]
+            }
+        }))
 
         for (const recipient of recipients) {
 
@@ -91,14 +90,14 @@ export default function MessageInput() {
 
             return setMedia(undefined)
 
-            socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-                handleMessageStatus({
-                    chatId: activeChat.id,
-                    hash: message.hash,
-                    recipientId,
-                    status: 'sent'
-                })
-            })
+            // socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+            //     handleMessageStatus({
+            //         chatId: activeChat.id,
+            //         hash: message.hash,
+            //         recipientId,
+            //         status: 'sent'
+            //     })
+            // })
         }
 
         setText('')
@@ -127,18 +126,25 @@ export default function MessageInput() {
 
     }
 
-    return <Form onSubmit={handleSendMessage} className="d-flex pt-3" style={{ zIndex: 1 }}>
+    useEffect(() => {
+        media && setSpotlight(s => ({
+            ...s,
+            media,
+            isInput: true,
+            onReset: () => {
+                setMedia(undefined)
+            },
+        }))
+    }, [media, setSpotlight])
+
+    return <Form onSubmit={handleSendMessage} className="d-flex pt-3" style={{ zIndex: Number(!!media) }}>
         {
-            media
-                ?
-                <Spotlight {...{ media, resetMedia }} />
-                :
-                <Button variant="outline-light" className="rounded-0" style={{ borderRight: 'transparent' }}>
-                    <label htmlFor="media-input">
-                        <Camera />
-                    </label>
-                    <input type="file" id="media-input" className="d-none" onChange={handleFile} />
-                </Button>
+            !media && <Button variant="outline-light" className="rounded-0" style={{ borderRight: 'transparent' }}>
+                <label htmlFor="media-input">
+                    <Camera />
+                </label>
+                <input type="file" id="media-input" className="d-none" onChange={handleFile} />
+            </Button>
         }
         <textarea id="msg-input" autoComplete="off"
             className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
@@ -147,7 +153,7 @@ export default function MessageInput() {
             onChange={e => setText(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
         />
-        <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text}>
+        <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text && !media}>
             <Send />
         </Button>
     </Form>

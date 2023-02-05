@@ -163,6 +163,13 @@ textarea:focus {
 
             border-radius: 16px;
 
+            img {
+                border-radius: 16px;
+                margin: -8px -8px 0 -8px;
+                max-width: calc(100% + 14px);
+                height: auto;
+            }
+
             &.received {
                 background-color: var(--bs-gray-800);
                 border: 1px solid var(--bs-dark);
@@ -219,7 +226,11 @@ textarea:focus {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding-bottom: 9em;
+
+        padding-top: 2.5em;
+        &[data-input-media="true"] {
+            padding-bottom: 9em;
+        }
 
         .close-btn {
             position: absolute;
@@ -229,14 +240,24 @@ textarea:focus {
             z-index: 1;
         }
 
-        img {
-            max-width: 90%;
-            max-height: 100%;
-            object-fit: cover;
-            margin: auto;
-            border-radius: 1em;
+        .react-transform-wrapper {
+            height: 100%;
+            width: 100%;
+            .react-transform-component {
+                height: 100%;
+                width: 100%;
+
+                img {
+                    max-width: 90%;
+                    max-height: 100%;
+                    object-fit: cover;
+                    margin: auto;
+                    border-radius: 1em;
+                }
+            }
         }
-        z-index: -1;
+
+        // z-index: -1;
     }
 }
 
