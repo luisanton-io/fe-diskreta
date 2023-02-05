@@ -6,7 +6,7 @@ import { Button, ListGroup } from "react-bootstrap";
 import { Arrow90degUp, Trash3 } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
-import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
+import useHandleDeleteChat from "../handlers/useHandleDeleteChat";
 
 export default function Conversations() {
 

@@ -26,7 +26,7 @@ export default function Main() {
         }
     }, [userExists, navigate])
 
-    return <Container className="py-5 h-100">
+    return <Container className="pt-5 pb-4 h-100">
         <Row className="h-100 flex-column flex-md-row" style={{ margin: 'auto' }}>
             <Col xs={12} md={4} id="main-left" style={{ overflow: 'auto' }} data-active-chat={!!activeChatId}>
                 <SideHeader />

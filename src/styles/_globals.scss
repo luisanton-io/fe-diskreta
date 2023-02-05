@@ -6,6 +6,7 @@ body {
     @extend .gradient-bg;
     @extend .font-monospace;
     color: #fff;
+    font-size: 14px;
 }
 
 input:active,
@@ -102,6 +103,9 @@ textarea:focus {
     display: flex;
     flex-direction: column;
     position: relative;
+    @media (max-width: 768px) {
+        position: static;
+    }
 
     height: 100%;
 
@@ -205,12 +209,42 @@ textarea:focus {
     textarea {
         resize: none;
     }
+
+    #spotlight {
+        position: absolute;
+        inset: 0;
+        background-color: #35353511;
+        backdrop-filter: blur(8px);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-bottom: 9em;
+
+        .close-btn {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            mix-blend-mode: difference;
+            z-index: 1;
+        }
+
+        img {
+            max-width: 90%;
+            max-height: 100%;
+            object-fit: cover;
+            margin: auto;
+            border-radius: 1em;
+        }
+        z-index: -1;
+    }
 }
 
 input.form-control,
 textarea {
     background-color: transparent !important;
     color: white !important;
+    transition: all 0.4s;
 
     &::placeholder {
         color: white;

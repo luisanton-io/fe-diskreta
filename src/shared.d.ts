@@ -22,13 +22,19 @@ interface MessageStatusUpdate {
     recipientId: string,
     status: SentMessageStatus | ReceivedMessageStatus
 }
+
+interface Media {
+    type: 'image' | 'video' | 'audio' | 'file'
+    data: string
+    encryptionKey: string  // AES-256
+}
 interface Message {
     sender: User
     to: User[]
     chatId: string
     content: {
         text: string;
-        media?: string
+        media?: Media
     }
     timestamp: number
     hash: string
