@@ -10,18 +10,17 @@ import { toast } from "react-toastify";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import convertFileToBase64 from "util/convertFileToBase64";
 import maskUser from "util/maskUser";
-// import useMessageStatus from "../handlers/useMessageStatus";
+import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
+import { SpotlightProps } from "./Spotlight";
 
 export default function MessageInput() {
     const setChats = useSetRecoilState(chatsState)
     const user = useRecoilValue(userState)
 
-    // const handleMessageStatus = useMessageStatus()
+    const handleMessageStatus = useMessageStatus()
 
-    const {
-        //  socket, 
-        recipients, activeChat, setSpotlight } = useContext(ChatContext)
+    const { socket, recipients, activeChat, setSpotlight } = useContext(ChatContext)
 
     const [text, setText] = useState('')
 
@@ -70,37 +69,40 @@ export default function MessageInput() {
 
             const publicKey = pki.publicKeyFromPem(recipient.publicKey)
 
+            const encryptionKey = media && util.encode64(publicKey.encrypt(util.encodeUtf8(media.encryptionKey)))
+
+            console.table({ encryptionKey, enc: media?.encryptionKey })
+
             const outgoingMessage: OutgoingMessage = {
                 ...message,
                 to: recipients,
                 for: recipient._id,
                 content: {
-                    text: util.encode64(publicKey.encrypt(util.encodeUtf8(text))),
+                    text: text && util.encode64(publicKey.encrypt(util.encodeUtf8(text))),
                     media: media && {
                         type: media.type,
-                        encryptionKey: util.encode64(publicKey.encrypt(util.encodeUtf8(media.encryptionKey))),
-                        data: util.encode64(AES.encrypt(util.encodeUtf8(media.data), media.encryptionKey).toString())
+                        encryptionKey: encryptionKey!,
+                        data: AES.encrypt(media.data, media.encryptionKey).toString()
                     }
                 }
             }
 
-
             delete outgoingMessage.sender
             console.log(outgoingMessage)
 
-            return setMedia(undefined)
-
-            // socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-            //     handleMessageStatus({
-            //         chatId: activeChat.id,
-            //         hash: message.hash,
-            //         recipientId,
-            //         status: 'sent'
-            //     })
-            // })
+            socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                handleMessageStatus({
+                    chatId: activeChat.id,
+                    hash: message.hash,
+                    recipientId,
+                    status: 'sent'
+                })
+            })
         }
 
+        setMedia(undefined)
         setText('')
+        setSpotlight({} as SpotlightProps)
     }
 
     const handleFile: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
@@ -114,7 +116,7 @@ export default function MessageInput() {
             const media: Media = {
                 type: 'image',
                 data: await convertFileToBase64(file),
-                encryptionKey: util.bytesToHex((random.getBytesSync(32)))
+                encryptionKey: util.bytesToHex(random.getBytesSync(32))
             }
 
             console.log(media)

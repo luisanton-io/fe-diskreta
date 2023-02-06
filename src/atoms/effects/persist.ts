@@ -6,7 +6,11 @@ import { userState } from "atoms/user"
 
 const encrypt = (message: string) => {
     try {
-        const value = AES.encrypt(message, getRecoil(userState)?.digest ?? '').toString()
+        const digest = getRecoil(userState)?.digest
+
+        if (!digest) return window.location.assign('/login')
+
+        const value = AES.encrypt(message, digest).toString()
         // console.table({ value, id: getRecoil(userState)?.digest, message })
         return value
     } catch {
