@@ -13,6 +13,7 @@ import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
+import heic2any from "heic2any";
 
 export default function MessageInput() {
     const setChats = useSetRecoilState(chatsState)
@@ -88,16 +89,20 @@ export default function MessageInput() {
             }
 
             delete outgoingMessage.sender
-            console.log(outgoingMessage)
+            console.log('outgoing!', outgoingMessage)
 
-            socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-                handleMessageStatus({
-                    chatId: activeChat.id,
-                    hash: message.hash,
-                    recipientId,
-                    status: 'sent'
+            try {
+                socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                    handleMessageStatus({
+                        chatId: activeChat.id,
+                        hash: message.hash,
+                        recipientId,
+                        status: 'sent'
+                    })
                 })
-            })
+            } catch (error) {
+                console.log(error)
+            }
         }
 
         setMedia(undefined)
@@ -107,22 +112,42 @@ export default function MessageInput() {
 
     const handleFile: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
         try {
-            const file = await imageCompression(e.target.files![0], {
-                maxWidthOrHeight: 1000,
-                maxSizeMB: 1,
-                useWebWorker: true
-            })
+
+            const file = await (async () => {
+                console.log(e.target.files![0])
+                if (!e.target.files![0].name.toLowerCase().endsWith('heic')) {
+                    return e.target.files![0]
+                }
+
+                const f = e.target.files![0] as File
+
+                const pngBlob = await heic2any({
+                    blob: new Blob([f], { type: f.type }),
+                    toType: "image/png",
+                }) as Blob
+
+                return new File([pngBlob], "name", { type: pngBlob.type })
+
+            })()
+
+            const compressedFile = await imageCompression(
+                file,
+                {
+                    maxWidthOrHeight: 1000,
+                    maxSizeMB: 0.8,
+                    useWebWorker: true
+                }
+            )
 
             const media: Media = {
                 type: 'image',
-                data: await convertFileToBase64(file),
+                data: await convertFileToBase64(compressedFile),
                 encryptionKey: util.bytesToHex(random.getBytesSync(32))
             }
 
-            console.log(media)
-
             setMedia(media)
         } catch (error) {
+            console.error(error)
             toast.error((error as Error).message)
         }
 
@@ -145,7 +170,9 @@ export default function MessageInput() {
                 <label htmlFor="media-input">
                     <Camera />
                 </label>
-                <input type="file" id="media-input" className="d-none" onChange={handleFile} />
+                <input type="file"
+                    // accept=".jpeg,.jpg,.png;video/*;capture=camcorder"
+                    id="media-input" className="d-none" onChange={handleFile} />
             </Button>
         }
         <textarea id="msg-input" autoComplete="off"
