@@ -6,6 +6,7 @@ body {
     @extend .gradient-bg;
     @extend .font-monospace;
     color: #fff;
+    // font-size: 14px;
 }
 
 input:active,
@@ -102,6 +103,9 @@ textarea:focus {
     display: flex;
     flex-direction: column;
     position: relative;
+    @media (max-width: 768px) {
+        position: static;
+    }
 
     height: 100%;
 
@@ -159,6 +163,13 @@ textarea:focus {
 
             border-radius: 16px;
 
+            img {
+                border-radius: 16px;
+                margin: -8px -8px 0 -8px;
+                max-width: calc(100% + 14px);
+                height: auto;
+            }
+
             &.received {
                 background-color: var(--bs-gray-800);
                 border: 1px solid var(--bs-dark);
@@ -205,12 +216,56 @@ textarea:focus {
     textarea {
         resize: none;
     }
+
+    #spotlight {
+        position: absolute;
+        inset: 0;
+        background-color: #35353511;
+        backdrop-filter: blur(8px);
+
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        padding-top: 2.5em;
+        &[data-input-media="true"] {
+            padding-bottom: 9em;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            mix-blend-mode: difference;
+            z-index: 1;
+        }
+
+        .react-transform-wrapper {
+            height: 100%;
+            width: 100%;
+            .react-transform-component {
+                height: 100%;
+                width: 100%;
+
+                img {
+                    max-width: 90%;
+                    max-height: 100%;
+                    object-fit: cover;
+                    margin: auto;
+                    border-radius: 1em;
+                }
+            }
+        }
+
+        // z-index: -1;
+    }
 }
 
 input.form-control,
 textarea {
     background-color: transparent !important;
     color: white !important;
+    transition: all 0.4s;
 
     &::placeholder {
         color: white;

@@ -1,10 +1,9 @@
-import useActiveChat from "hooks/useActiveChat";
 import { useContext } from "react";
 import { Dropdown } from "react-bootstrap";
 import { ArrowLeftShort, ThreeDots } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
+import useHandleDeleteChat from "../handlers/useHandleDeleteChat";
 import { ChatContext } from "./context/ChatCtx";
-import useHandleDeleteChat from "./handlers/useHandleDeleteChat";
 
 export default function ChatHeader() {
     const handleDeleteChat = useHandleDeleteChat();

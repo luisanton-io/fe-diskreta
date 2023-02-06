@@ -11,7 +11,7 @@ export interface SocketEcho {
 export default function ServerEcho() {
 
     const { socket } = useContext(ChatContext)
-    const [serverView, setServerView] = useState(true)
+    const [serverView, setServerView] = useState(false)
     const [serverEcho, setServerEcho] = useState<SocketEcho[]>([])
 
     const { activeChatId } = useActiveChat()

@@ -3,7 +3,7 @@ import { userState } from "atoms/user"
 import { useContext, useEffect } from "react"
 import { useRecoilValue } from "recoil"
 import { ChatContext } from "./context/ChatCtx"
-import useMessageStatus from "./handlers/useMessageStatus"
+import useMessageStatus from "../handlers/useMessageStatus"
 import Message from "./Message"
 
 export default function ChatBody() {

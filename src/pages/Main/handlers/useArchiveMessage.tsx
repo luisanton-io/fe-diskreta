@@ -1,12 +1,16 @@
 import { chatsState } from "atoms/chats";
+import { AES, enc } from "crypto-js";
 import useActiveChat from "hooks/useActiveChat";
-import { pki, util } from "node-forge";
+import usePrivateKey from "hooks/usePrivateKey";
+import { util } from "node-forge";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilState } from "recoil";
 import { useDeepCompareCallback } from "use-deep-compare";
 
-export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null) {
+export default function useArchiveMessage() {
+
+    const privateKey = usePrivateKey();
 
     const [chats, setChats] = useRecoilState(chatsState)
     const navigate = useNavigate()
@@ -19,10 +23,29 @@ export default function useArchiveMessage(privateKey: pki.rsa.PrivateKey | null)
 
         if (!privateKey) return
 
+        const decryptMedia = (media?: Media) => {
+            try {
+                if (!media) return
+                const encryptionKey = util.decodeUtf8(privateKey.decrypt(util.decode64(media.encryptionKey)))
+                return {
+                    ...media,
+                    encryptionKey,
+                    data: AES.decrypt(media.data, encryptionKey).toString(enc.Utf8)
+                }
+            } catch (error) {
+                console.log('error', error)
+            }
+        }
+
+        const decryptText = (text?: string) => {
+            return text ? util.decodeUtf8(privateKey.decrypt(util.decode64(text))) : ""
+        }
+
         const message = {
             ...encryptedMessage,
             content: {
-                text: util.decodeUtf8(privateKey.decrypt(util.decode64(encryptedMessage.content.text)))
+                text: decryptText(encryptedMessage.content.text),
+                media: decryptMedia(encryptedMessage.content.media)
             }
         }
 
