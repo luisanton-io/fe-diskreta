@@ -29,11 +29,11 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight } = useContext(ChatContext)
 
-    const onSwipedRight = () => {
+    const onSwipedLeft = () => {
         console.log("swiped right...")
     }
 
-    const swipeProps = useSwipe({ onSwipedRight, onSwipedLeft: () => null })
+    const swipeProps = useSwipe({ onSwipedRight: () => null, onSwipedLeft })
 
     return <div className="d-flex" {...swipeProps}>
         <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"} py-3 my-2`}
