@@ -43,15 +43,17 @@ export default function Message({ message, sent, i }: Props) {
                     message.content.text && message.content.text.split("\n").map((line, i) =>
                         <span key={i}>{
                             line.split(' ').map(word =>
-                                urlRegexp.test(word)
-                                    ? <a style={{ color: 'white' }}
-                                        onClick={e => { e.stopPropagation() }}
-                                        href={word.startsWith('http') ? word : `https://${word}`}
-                                        target="_blank" rel="noopener noreferrer"
-                                    >
-                                        {word}
-                                    </a>
-                                    : word
+                                <>
+                                    {urlRegexp.test(word)
+                                        ? <a style={{ color: 'white' }}
+                                            onClick={e => { e.stopPropagation() }}
+                                            href={word.startsWith('http') ? word : `https://${word}`}
+                                            target="_blank" rel="noopener noreferrer"
+                                        >
+                                            {word}
+                                        </a>
+                                        : word}{' '}
+                                </>
                             )
                         }</span>
                     )
