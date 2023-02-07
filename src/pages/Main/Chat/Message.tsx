@@ -3,6 +3,7 @@ import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import { useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -15,6 +16,8 @@ interface Props {
     sent: boolean
     i: number
 }
+
+const urlRegexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
 
 export default function Message({ message, sent, i }: Props) {
 
@@ -37,7 +40,21 @@ export default function Message({ message, sent, i }: Props) {
             }
             <span>
                 {
-                    message.content.text && message.content.text.split("\n").map((line, i) => <span key={i}>{line}</span>)
+                    message.content.text && message.content.text.split("\n").map((line, i) =>
+                        <span key={i}>{
+                            line.split(' ').map(word =>
+                                urlRegexp.test(word)
+                                    ? <a style={{ color: 'white' }}
+                                        onClick={e => { e.stopPropagation() }}
+                                        href={word.startsWith('http') ? word : `https://${word}`}
+                                        target="_blank" rel="noopener noreferrer"
+                                    >
+                                        {word}
+                                    </a>
+                                    : word
+                            )
+                        }</span>
+                    )
                 }
                 {
                     sent &&
@@ -46,7 +63,7 @@ export default function Message({ message, sent, i }: Props) {
                     } style={{ fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
                 }
             </span>
-        </div>
+        </div >
         <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
-    </div>
+    </div >
 }
