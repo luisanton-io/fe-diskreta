@@ -3,6 +3,7 @@ import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
+import useSwipe from 'hooks/useSwipe';
 import { useContext } from 'react';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
@@ -28,7 +29,13 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight } = useContext(ChatContext)
 
-    return <div className="d-flex">
+    const onSwipedRight = () => {
+        console.log("swiped right...")
+    }
+
+    const swipeProps = useSwipe({ onSwipedRight, onSwipedLeft: () => null })
+
+    return <div className="d-flex" {...swipeProps}>
         <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"} py-3 my-2`}
             onClick={handleDisplayTimeStamp}>
             {
