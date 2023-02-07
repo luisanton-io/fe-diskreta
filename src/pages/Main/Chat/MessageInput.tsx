@@ -113,25 +113,23 @@ export default function MessageInput() {
     const handleFile: React.ChangeEventHandler<HTMLInputElement> = async (e) => {
         try {
 
-            const file = await (async () => {
-                console.log(e.target.files![0])
-                if (!e.target.files![0].name.toLowerCase().endsWith('heic')) {
-                    return e.target.files![0]
+            const selectedFile = await (async () => {
+                const file = e.target.files![0] as File
+
+                if (!file.name.toLowerCase().endsWith('heic')) {
+                    return file
                 }
 
-                const f = e.target.files![0] as File
-
                 const pngBlob = await heic2any({
-                    blob: new Blob([f], { type: f.type }),
+                    blob: new Blob([file], { type: file.type }),
                     toType: "image/png",
                 }) as Blob
 
                 return new File([pngBlob], "name", { type: pngBlob.type })
-
             })()
 
             const compressedFile = await imageCompression(
-                file,
+                selectedFile,
                 {
                     maxWidthOrHeight: 1000,
                     maxSizeMB: 0.8,
