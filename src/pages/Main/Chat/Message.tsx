@@ -1,9 +1,9 @@
+import React from 'react'
 import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import { useContext } from 'react';
-import { Link } from 'react-router-dom';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -42,8 +42,8 @@ export default function Message({ message, sent, i }: Props) {
                 {
                     message.content.text && message.content.text.split("\n").map((line, i) =>
                         <span key={i}>{
-                            line.split(' ').map(word =>
-                                <>
+                            line.split(' ').map((word, i) =>
+                                <React.Fragment key={`word-${i}`}>
                                     {urlRegexp.test(word)
                                         ? <a style={{ color: 'white' }}
                                             onClick={e => { e.stopPropagation() }}
@@ -53,7 +53,7 @@ export default function Message({ message, sent, i }: Props) {
                                             {word}
                                         </a>
                                         : word}{' '}
-                                </>
+                                </React.Fragment>
                             )
                         }</span>
                     )
