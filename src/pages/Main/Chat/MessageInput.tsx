@@ -88,21 +88,33 @@ export default function MessageInput() {
                 }
             }
 
-            delete outgoingMessage.sender
-            console.log('outgoing!', outgoingMessage)
+            delete outgoingMessage.sender;
 
-            try {
-                socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-                    handleMessageStatus({
-                        chatId: activeChat.id,
-                        hash: message.hash,
-                        recipientId,
-                        status: 'sent'
-                    })
-                })
-            } catch (error) {
-                console.log(error)
-            }
+            (async () => {
+                try {
+                    let sent = false
+                    do {
+                        sent = (!await new Promise(resolve => {
+                            socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                                handleMessageStatus({
+                                    chatId: activeChat.id,
+                                    hash: message.hash,
+                                    recipientId,
+                                    status: 'sent'
+                                })
+                                resolve(true)
+                            })
+
+                            setTimeout(() => {
+                                resolve(false)
+                            }, 5000) // retry - maybe jwt expired
+
+                        }))
+                    } while (!sent)
+                } catch (error) {
+                    console.log(error)
+                }
+            })()
         }
 
         setMedia(undefined)
