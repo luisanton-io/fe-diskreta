@@ -3,7 +3,7 @@ import { userState } from "atoms/user";
 import imageCompression from 'browser-image-compression';
 import { AES, SHA256 } from "crypto-js";
 import { pki, random, util } from "node-forge";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Camera, Send } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
@@ -94,7 +94,7 @@ export default function MessageInput() {
                 try {
                     let sent = false
                     do {
-                        sent = (!await new Promise(resolve => {
+                        sent = await new Promise(resolve => {
                             socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
                                 handleMessageStatus({
                                     chatId: activeChat.id,
@@ -107,9 +107,10 @@ export default function MessageInput() {
 
                             setTimeout(() => {
                                 resolve(false)
-                            }, 5000) // retry - maybe jwt expired
+                            }, 3000) // retry - maybe jwt expired
 
-                        }))
+                        })
+                        console.log("Message sent: ", sent)
                     } while (!sent)
                 } catch (error) {
                     console.log(error)
