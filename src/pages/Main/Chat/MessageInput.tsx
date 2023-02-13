@@ -95,15 +95,17 @@ export default function MessageInput() {
                     let sent = false
                     do {
                         sent = await new Promise(resolve => {
-                            socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-                                handleMessageStatus({
-                                    chatId: activeChat.id,
-                                    hash: message.hash,
-                                    recipientId,
-                                    status: 'sent'
+                            socket.active
+                                ? socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                                    handleMessageStatus({
+                                        chatId: activeChat.id,
+                                        hash: message.hash,
+                                        recipientId,
+                                        status: 'sent'
+                                    })
+                                    resolve(true)
                                 })
-                                resolve(true)
-                            })
+                                : socket.connect()
 
                             setTimeout(() => {
                                 resolve(false)
