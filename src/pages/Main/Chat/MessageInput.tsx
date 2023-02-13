@@ -2,8 +2,9 @@ import { chatsState } from "atoms/chats";
 import { userState } from "atoms/user";
 import imageCompression from 'browser-image-compression';
 import { AES, SHA256 } from "crypto-js";
+import heic2any from "heic2any";
 import { pki, random, util } from "node-forge";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Camera, Send } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
@@ -13,7 +14,6 @@ import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
-import heic2any from "heic2any";
 
 export default function MessageInput() {
     const setChats = useSetRecoilState(chatsState)
