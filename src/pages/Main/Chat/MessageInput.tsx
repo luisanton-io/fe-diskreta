@@ -200,7 +200,13 @@ export default function MessageInput({ wrapperRef }: MessageInputProps) {
                     <p>{replyingTo.sender.nick}</p>
                     <p>{replyingTo.content.text}</p>
                 </div>
-                <Close onClick={() => setReplyingTo(undefined)} style={{ transform: 'scale(0.7)' }} />
+                <Close
+                    onClick={e => {
+                        e.stopPropagation()
+                        setReplyingTo(undefined)
+                    }}
+                    style={{ transform: 'scale(0.7)' }}
+                />
             </div>
         }
         <div className="d-flex">

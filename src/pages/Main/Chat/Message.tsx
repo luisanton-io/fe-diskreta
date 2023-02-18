@@ -6,7 +6,7 @@ import { replyingToState } from 'atoms/replyingTo';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useSwipe from 'hooks/useSwipe';
 import React, { CSSProperties, useContext, useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -31,13 +31,13 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const { deltaX, ...swipeProps } = useSwipe()
+    const { deltaX, setDeltaX, ...swipeProps } = useSwipe()
 
     const triggerReply = deltaX > 50
 
     const translateX = triggerReply ? 50 : deltaX
 
-    const setReplyingTo = useSetRecoilState(replyingToState)
+    const [replyingTo, setReplyingTo] = useRecoilState(replyingToState)
 
     useEffect(() => {
         if (triggerReply) {
@@ -46,7 +46,11 @@ export default function Message({ message, sent, i }: Props) {
         }
     }, [triggerReply, setReplyingTo, message])
 
-    const replyIconTransition = deltaX > 0 ? Math.abs(deltaX) / 50 : 0
+    useEffect(() => {
+        setDeltaX(0)
+    }, [replyingTo?.hash])
+
+    const replyIconTransition = deltaX > 10 ? Math.abs(deltaX) / 50 : 0
 
     return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-2" {...swipeProps}
         style={{ transform: `translateX(-${translateX}px)` }}

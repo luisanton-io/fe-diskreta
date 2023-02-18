@@ -7,6 +7,7 @@ interface SwipeInput {
 
 interface SwipeOutput {
     deltaX: number,
+    setDeltaX: (delta: number) => void
     onTouchStart: (e: TouchEvent) => void
     onTouchMove: (e: TouchEvent) => void
     onTouchEnd: () => void
@@ -45,6 +46,7 @@ export default function useSwipe(input?: SwipeInput): SwipeOutput {
 
     return {
         deltaX,
+        setDeltaX,
         onTouchStart,
         onTouchMove,
         onTouchEnd
