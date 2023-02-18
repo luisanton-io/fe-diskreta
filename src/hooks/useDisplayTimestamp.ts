@@ -17,15 +17,10 @@ export default function useDisplayTimestamp(message: SentMessage | ReceivedMessa
     }
 
     const time = new Date(message.timestamp)
-    const sent = isMessageSent(message)
-    const status = sent ? message.status?.[Object.keys(message.status)[0]] : ''
 
-    const displayedTimestamp = (sent ? status.charAt(0).toUpperCase() + status.slice(1) + ' ' : '') +
-        (time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
-            ? (sent ? 'today, ' : 'Today, ') + time.toLocaleTimeString()
-            : time.toString().split('GMT')[0])
-
-    // const displayedTimestamp = message.hash.slice(0, 8)
+    const displayedTimestamp = (time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
+        ? 'Today, ' + time.toLocaleTimeString()
+        : time.toString().split('GMT')[0])
 
     const show = timestampState?.index === index
 

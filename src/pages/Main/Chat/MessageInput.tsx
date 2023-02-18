@@ -1,27 +1,34 @@
+import { Close } from "@mui/icons-material";
 import { chatsState } from "atoms/chats";
+import { replyingToState } from "atoms/replyingTo";
 import { userState } from "atoms/user";
 import imageCompression from 'browser-image-compression';
 import { AES, SHA256 } from "crypto-js";
+import heic2any from "heic2any";
 import { pki, random, util } from "node-forge";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Camera, Send } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
-import { useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import convertFileToBase64 from "util/convertFileToBase64";
 import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
-import heic2any from "heic2any";
 
-export default function MessageInput() {
+interface MessageInputProps {
+    wrapperRef: HTMLElement | null
+}
+
+export default function MessageInput({ wrapperRef }: MessageInputProps) {
+
     const setChats = useSetRecoilState(chatsState)
     const user = useRecoilValue(userState)
 
     const handleMessageStatus = useMessageStatus()
 
-    const { socket, recipients, activeChat, setSpotlight } = useContext(ChatContext)
+    const { socket, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
 
     const [text, setText] = useState('')
 
@@ -39,7 +46,8 @@ export default function MessageInput() {
             to: recipients,
             chatId: activeChat.id,
             content: { text, media },
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            replyingTo
         }
 
         const message = {
@@ -112,8 +120,9 @@ export default function MessageInput() {
                             }, 3000) // retry - maybe jwt expired
 
                         })
-                        console.log("Message sent: ", sent)
                     } while (!sent)
+
+                    console.log("Message sent: ", sent)
                 } catch (error) {
                     console.log(error)
                 }
@@ -177,26 +186,45 @@ export default function MessageInput() {
         }))
     }, [media, setSpotlight])
 
-    return <Form onSubmit={handleSendMessage} className="d-flex pt-3" style={{ zIndex: Number(!!media) }}>
+    const [replyingTo, setReplyingTo] = useRecoilState(replyingToState)
+
+    useEffect(() => {
+        setReplyingTo(undefined)
+    }, [activeChat, setReplyingTo])
+
+    return <Form onSubmit={handleSendMessage} className="cursor-pointer position-relative d-flex flex-column pt-3" style={{ zIndex: Number(!!media) }}>
         {
-            !media && <Button variant="outline-light" className="rounded-0" style={{ borderRight: 'transparent' }}>
-                <label htmlFor="media-input">
-                    <Camera />
-                </label>
-                <input type="file"
-                    // accept=".jpeg,.jpg,.png;video/*;capture=camcorder"
-                    id="media-input" className="d-none" onChange={handleFile} />
-            </Button>
+            replyingTo &&
+            <div id="reply" className="d-flex align-items-center" onClick={handleScrollTo(replyingTo.hash)}>
+                <div className="col">
+                    <p>{replyingTo.sender.nick}</p>
+                    <p>{replyingTo.content.text}</p>
+                </div>
+                <Close onClick={() => setReplyingTo(undefined)} style={{ transform: 'scale(0.7)' }} />
+            </div>
         }
-        <textarea id="msg-input" autoComplete="off"
-            className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
-            placeholder="Type a message..."
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
-        />
-        <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text && !media}>
-            <Send />
-        </Button>
+        <div className="d-flex">
+            {
+                !media && (
+                    <Button variant="outline-light" className="rounded-0" style={{ borderRight: 'transparent' }}>
+                        <label htmlFor="media-input">
+                            <Camera />
+                        </label>
+                        <input type="file" id="media-input" className="d-none" onChange={handleFile} />
+                    </Button>
+                )
+            }
+            <textarea id="msg-input" autoComplete="off"
+                className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
+                placeholder="Type a message..."
+                value={text}
+                onChange={e => setText(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
+            />
+            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text && !media}>
+                <Send />
+            </Button>
+
+        </div>
     </Form>
 }

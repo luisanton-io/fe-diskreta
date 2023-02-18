@@ -36,7 +36,7 @@ export default function ChatBody() {
     }, [hasFocus, socket, user?._id, activeChat, handleMessageStatus])
 
 
-    return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2" style={{ overflow: 'auto' }}>
+    return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2">
         {
             activeChat.messages.map((message, i) => (
                 <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
