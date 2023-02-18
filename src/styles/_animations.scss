@@ -8,6 +8,10 @@
     transform-origin: top;
 }
 
+.flashing {
+    animation: flashing 0.3s ease-in-out 2;
+}
+
 @keyframes slide-in-blurred-bottom {
     0% {
         transform: translateY(30%) scaleY(1.5);
@@ -31,5 +35,14 @@
         transform: translateY(30%) scaleY(1.5);
         filter: blur(40px);
         opacity: 0;
+    }
+}
+
+@keyframes flashing {
+    0% {
+        filter: opacity(0.5);
+    }
+    100% {
+        filter: opacity(1);
     }
 }

@@ -1,7 +1,7 @@
 import Diskreta from "components/Diskreta";
 import useActiveChat from "hooks/useActiveChat";
 import useSocket from "hooks/useSocket";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Col } from "react-bootstrap";
 import ChatBody from "./ChatBody";
 import ChatHeader from "./ChatHeader";
@@ -14,27 +14,50 @@ export default function Chat() {
 
     const socket = useSocket()
     const { activeChat, recipients } = useActiveChat()
+
+    const [chatWrapperRef, setChatWrapperRef] = useState<HTMLElement | null>(null)
     const [{ media, onReset, isInput }, setSpotlight] = useState<SpotlightProps>({} as SpotlightProps)
 
     const resetMedia = () => {
         setSpotlight({} as SpotlightProps)
     }
 
+    const handleScrollTo = (hash: string) => (e: React.SyntheticEvent) => {
+        e.stopPropagation()
+
+        const message = chatWrapperRef?.querySelector(`#_${hash}`)
+        if (!message) return
+
+        const flashOn = () => {
+            message.classList.add('flashing')
+        }
+
+        const flashOff = () => {
+            message.classList.remove('flashing')
+            message.removeEventListener('animationend', flashOff)
+        }
+
+        message.addEventListener('animationend', flashOff)
+
+        message.scrollIntoView({ behavior: 'smooth' })
+        setTimeout(flashOn, 500)
+    }
+
     return <>{
         activeChat && recipients && socket
             ?
-            <ChatContext.Provider value={{ socket, activeChat, recipients, setSpotlight }}>
+            <ChatContext.Provider value={{ socket, activeChat, recipients, setSpotlight, handleScrollTo }}>
                 <div className="d-flex flex-column h-100">
                     <ServerEcho />
 
-                    <div className="d-flex flex-column flex-grow-1" style={{ minHeight: '45vh' }}>
+                    <div className="d-flex flex-column flex-grow-1" ref={setChatWrapperRef} style={{ minHeight: '45vh' }}>
                         <ChatHeader />
 
                         <hr />
 
                         <ChatBody />
 
-                        <MessageInput />
+                        <MessageInput wrapperRef={chatWrapperRef} />
                     </div>
 
                     {

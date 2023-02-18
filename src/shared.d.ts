@@ -37,7 +37,8 @@ interface Message {
         media?: Media
     }
     timestamp: number
-    hash: string
+    hash: string,
+    replyingTo?: Message
 }
 
 interface ReceivedMessage extends Message {

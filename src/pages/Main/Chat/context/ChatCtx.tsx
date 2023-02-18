@@ -7,6 +7,7 @@ interface IChatContext {
     activeChat: Chat,
     recipients: User[],
     setSpotlight: React.Dispatch<React.SetStateAction<SpotlightProps>>
+    handleScrollTo: (hash: string) => (e: React.SyntheticEvent) => void,
 }
 
 export const ChatContext = createContext<IChatContext>({} as IChatContext)

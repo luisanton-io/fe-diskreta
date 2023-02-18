@@ -1,10 +1,12 @@
-import React from 'react'
+import { Reply } from '@mui/icons-material';
 import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
+import { replyingToState } from 'atoms/replyingTo';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useSwipe from 'hooks/useSwipe';
-import { useContext } from 'react';
+import React, { CSSProperties, useContext, useEffect } from 'react';
+import { useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -27,52 +29,79 @@ export default function Message({ message, sent, i }: Props) {
     const status = isMessageSent(message) ? message.status?.[message.to[0]._id] : message.status
     const Icon = Icons[status]
 
-    const { setSpotlight } = useContext(ChatContext)
+    const { setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const onSwipedLeft = () => {
-        console.log("swiped right...")
-    }
+    const { deltaX, ...swipeProps } = useSwipe()
 
-    const swipeProps = useSwipe({ onSwipedRight: () => null, onSwipedLeft })
+    const triggerReply = deltaX > 50
 
-    return <div className="d-flex" {...swipeProps}>
-        <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"} py-3 my-2`}
-            onClick={handleDisplayTimeStamp}>
+    const translateX = triggerReply ? 50 : deltaX
+
+    const setReplyingTo = useSetRecoilState(replyingToState)
+
+    useEffect(() => {
+        if (triggerReply) {
+            navigator.vibrate?.(80)
+            setReplyingTo(message)
+        }
+    }, [triggerReply, setReplyingTo, message])
+
+    const replyIconTransition = deltaX > 0 ? Math.abs(deltaX) / 50 : 0
+
+    return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-2" {...swipeProps}
+        style={{ transform: `translateX(-${translateX}px)` }}
+    >
+        <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"}`} onClick={handleDisplayTimeStamp}>
             {
-                message.content.media &&
-                <img
-                    src={message.content.media.data} alt="..."
-                    onClick={() => setSpotlight(s => s && ({ ...s, media: message.content.media! }))}
-                />
+                message.replyingTo && <div className={`reply mb-0 mt-2`} onClick={handleScrollTo(message.replyingTo!.hash)}>
+                    <div className="bg-dark px-3 py-3 mx-2" style={{ borderRadius: '1em' }}>
+                        <p className="m-0"><strong>{message.replyingTo.sender.nick}</strong></p>
+                        <p className="m-0">{message.replyingTo.content.text}</p>
+                    </div>
+                </div>
             }
-            <span>
+            <div className='py-3'>
+
                 {
-                    message.content.text && message.content.text.split("\n").map((line, i) =>
-                        <span key={i}>{
-                            line.split(' ').map((word, i) =>
-                                <React.Fragment key={`word-${i}`}>
-                                    {urlRegexp.test(word)
-                                        ? <a style={{ color: 'white' }}
-                                            onClick={e => { e.stopPropagation() }}
-                                            href={word.startsWith('http') ? word : `https://${word}`}
-                                            target="_blank" rel="noopener noreferrer"
-                                        >
-                                            {word}
-                                        </a>
-                                        : word}{' '}
-                                </React.Fragment>
-                            )
-                        }</span>
-                    )
+                    message.content.media &&
+                    <img
+                        src={message.content.media.data} alt="..."
+                        onClick={() => setSpotlight(s => s && ({ ...s, media: message.content.media! }))}
+                    />
                 }
-                {
-                    sent &&
-                    <Icon className={
-                        message.content.text && "ms-1"
-                    } style={{ fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
-                }
-            </span>
-        </div >
+                <span>
+                    {
+                        message.content.text && message.content.text.split("\n").map((line, i) =>
+                            <span key={i}>{
+                                line.split(' ').map((word, i) =>
+                                    <React.Fragment key={`word-${i}`}>
+                                        {urlRegexp.test(word)
+                                            ? <a style={{ color: 'white' }}
+                                                onClick={e => { e.stopPropagation() }}
+                                                href={word.startsWith('http') ? word : `https://${word}`}
+                                                target="_blank" rel="noopener noreferrer"
+                                            >
+                                                {word}
+                                            </a>
+                                            : word}{' '}
+                                    </React.Fragment>
+                                )
+                            }</span>
+                        )
+                    }
+                    {
+                        sent &&
+                        <Icon className={
+                            message.content.text && "ms-1"
+                        } style={{ fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
+                    }
+                </span>
+            </div>
+
+        </div>
         <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
-    </div >
+        <div className="reply-icon-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties} onClick={() => setReplyingTo(message)}>
+            <Reply />
+        </div>
+    </div>
 }
