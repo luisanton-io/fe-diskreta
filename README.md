@@ -12,7 +12,7 @@
 ## Why `diskreta`?
 
 "Diskreta" is the [Esperanto](https://en.wikipedia.org/wiki/Esperanto) word for "discreet".
-The goal of `diskreta.` is an being an anonymous, discreet, encrypted and secure chat system.
+The goal of `diskreta.` is to be an anonymous, discreet, encrypted and secure chat system.
 
 ## Overview
 
