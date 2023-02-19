@@ -6,7 +6,7 @@ import { replyingToState } from 'atoms/replyingTo';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useSwipe from 'hooks/useSwipe';
 import React, { CSSProperties, useContext, useEffect } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -31,13 +31,13 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const { deltaX, setDeltaX, ...swipeProps } = useSwipe()
+    const { deltaX, ...swipeProps } = useSwipe()
 
     const triggerReply = deltaX > 50
 
     const translateX = triggerReply ? 50 : deltaX
 
-    const [replyingTo, setReplyingTo] = useRecoilState(replyingToState)
+    const setReplyingTo = useSetRecoilState(replyingToState)
 
     useEffect(() => {
         if (triggerReply) {
@@ -45,10 +45,6 @@ export default function Message({ message, sent, i }: Props) {
             setReplyingTo(message)
         }
     }, [triggerReply, setReplyingTo, message])
-
-    useEffect(() => {
-        setDeltaX(0)
-    }, [replyingTo?.hash])
 
     const replyIconTransition = deltaX > 10 ? Math.abs(deltaX) / 50 : 0
 

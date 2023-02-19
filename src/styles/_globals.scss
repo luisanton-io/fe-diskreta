@@ -211,16 +211,18 @@ textarea:focus {
                 }
 
                 .reply {
-                    margin-inline: -2ch;
+                    position: relative;
                     width: calc(100% + 4ch);
+                    left: -2ch;
                 }
             }
-            &:hover .reply-icon-wrapper {
-                opacity: 1;
+            @media (min-width: 768px) {
+                &:hover .reply-icon-wrapper {
+                    opacity: 1;
+                }
             }
 
             .reply-icon-wrapper {
-                --transformX: calc(24 * var(--transition));
                 position: absolute;
                 top: 50%;
                 right: -1ch;
