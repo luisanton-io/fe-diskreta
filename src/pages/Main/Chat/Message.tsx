@@ -52,7 +52,7 @@ export default function Message({ message, sent, i }: Props) {
 
     const replyIconTransition = Math.abs(deltaX) / 50
 
-    return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-2" {...swipeProps}
+    return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-1" {...swipeProps}
         style={{ transform: `translateX(-${translateX}px)` }}
     >
         <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"}`} onClick={handleDisplayTimeStamp}>
@@ -96,8 +96,8 @@ export default function Message({ message, sent, i }: Props) {
                     {
                         sent &&
                         <Icon className={
-                            message.content.text && "ms-1"
-                        } style={{ fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
+                            message.content.text && "mt-1 ms-2"
+                        } style={{ float: 'right', fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
                     }
                 </span>
             </div>

@@ -6,7 +6,7 @@ body {
     @extend .gradient-bg;
     @extend .font-monospace;
     color: #fff;
-    // font-size: 14px;
+    font-size: 13px;
 }
 
 input:active,
@@ -155,7 +155,7 @@ textarea:focus {
         .message-wrapper {
             .message {
                 position: relative;
-                max-width: 75%;
+                max-width: 85%;
                 padding-inline: 2ch;
                 word-break: break-word;
 
