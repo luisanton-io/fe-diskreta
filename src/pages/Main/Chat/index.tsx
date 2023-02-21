@@ -57,7 +57,7 @@ export default function Chat() {
 
                         <ChatBody />
 
-                        <MessageInput wrapperRef={chatWrapperRef} />
+                        <MessageInput />
                     </div>
 
                     {

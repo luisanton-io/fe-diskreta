@@ -42,7 +42,11 @@ export default function Message({ message, sent, i }: Props) {
     useEffect(() => {
         if (triggerReply) {
             navigator.vibrate?.(80)
-            setReplyingTo(message)
+            setReplyingTo({
+                sender: message.sender,
+                hash: message.hash,
+                content: message.content
+            })
         }
     }, [triggerReply, setReplyingTo, message])
 

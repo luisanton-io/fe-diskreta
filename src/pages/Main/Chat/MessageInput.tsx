@@ -17,11 +17,7 @@ import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
 
-interface MessageInputProps {
-    wrapperRef: HTMLElement | null
-}
-
-export default function MessageInput({ wrapperRef }: MessageInputProps) {
+export default function MessageInput() {
 
     const setChats = useSetRecoilState(chatsState)
     const user = useRecoilValue(userState)
@@ -79,8 +75,6 @@ export default function MessageInput({ wrapperRef }: MessageInputProps) {
             const publicKey = pki.publicKeyFromPem(recipient.publicKey)
 
             const encryptionKey = media && util.encode64(publicKey.encrypt(util.encodeUtf8(media.encryptionKey)))
-
-            console.table({ encryptionKey, enc: media?.encryptionKey })
 
             const outgoingMessage: OutgoingMessage = {
                 ...message,

@@ -38,9 +38,10 @@ interface Message {
     }
     timestamp: number
     hash: string,
-    replyingTo?: Message
+    replyingTo?: Reply
 }
 
+type Reply = Pick<Message, 'sender' | 'content' | 'hash'>
 interface ReceivedMessage extends Message {
     status: ReceivedMessageStatus
 }
