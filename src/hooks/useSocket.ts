@@ -55,13 +55,13 @@ export default function useSocket() {
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
-        socket.on('jwt-expired', handleRefreshToken)
+        socket.on('connect_error', handleRefreshToken);
 
         return () => {
             socket.off('in-msg', handleArchiveMessage)
             socket.off('msg-status', handleMessageStatus)
             socket.off('dequeue', handleDequeue)
-            socket.off('jwt-expired', handleRefreshToken)
+            socket.off('connect_error', handleRefreshToken);
         }
 
     }, [socket, archiveMessage, handleMessageStatus])
