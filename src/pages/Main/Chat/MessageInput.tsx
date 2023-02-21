@@ -16,6 +16,7 @@ import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
 import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
+import Typing from "./Typing";
 
 export default function MessageInput() {
 
@@ -186,7 +187,12 @@ export default function MessageInput() {
         setReplyingTo(undefined)
     }, [activeChat, setReplyingTo])
 
-    return <Form onSubmit={handleSendMessage} className="cursor-pointer position-relative d-flex flex-column pt-3" style={{ zIndex: Number(!!media) }}>
+    const [isTyping, setIsTyping] = useState(true)
+
+    return <Form onSubmit={handleSendMessage} className="cursor-pointer position-relative d-flex flex-column pt-4" style={{ zIndex: Number(!!media) }}>
+        {
+            isTyping && <Typing />
+        }
         {
             replyingTo &&
             <div id="reply" className="d-flex align-items-center" onClick={handleScrollTo(replyingTo.hash)}>
