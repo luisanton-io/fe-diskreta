@@ -56,6 +56,7 @@ interface Chat {
     id: string
     messages: (SentMessage | ReceivedMessage)[];
     members: User[]
+    typing: User
 }
 interface Queue {
     messages: ReceivedMessage[],
