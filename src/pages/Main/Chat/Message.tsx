@@ -31,11 +31,11 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const { deltaX, ...swipeProps } = useSwipe()
+    const { deltaX, vSwipe, ...swipeProps } = useSwipe()
 
-    const triggerReply = deltaX > 50
+    const triggerReply = !vSwipe && deltaX > 50
 
-    const translateX = triggerReply ? 50 : deltaX
+    const translateX = triggerReply ? 50 : vSwipe ? 0 : deltaX
 
     const setReplyingTo = useSetRecoilState(replyingToState)
 
@@ -50,7 +50,7 @@ export default function Message({ message, sent, i }: Props) {
         }
     }, [triggerReply, setReplyingTo, message])
 
-    const replyIconTransition = deltaX > 10 ? Math.abs(deltaX) / 50 : 0
+    const replyIconTransition = Math.abs(deltaX) / 50
 
     return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-2" {...swipeProps}
         style={{ transform: `translateX(-${translateX}px)` }}
