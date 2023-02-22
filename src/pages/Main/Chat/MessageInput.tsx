@@ -187,11 +187,41 @@ export default function MessageInput() {
         setReplyingTo(undefined)
     }, [activeChat, setReplyingTo])
 
-    const [isTyping, setIsTyping] = useState(true)
+    const [isTyping, setIsTyping] = useState(false)
+
+    useEffect(() => {
+        setIsTyping(!!text)
+
+        const timeout = !!text && setTimeout(() => {
+            console.log('stopped typing')
+            setIsTyping(false)
+        }, 2000)
+
+        return () => {
+            timeout && clearTimeout(timeout)
+        }
+    }, [text])
+
+    useEffect(() => {
+        const interval = isTyping && setInterval(() => {
+            for (const recipient of recipients) {
+                console.log('typing')
+                socket.emit('typing', {
+                    chatId: activeChat.id,
+                    recipient,
+                    sender: maskUser(user)!
+                })
+            }
+        }, 400)
+
+        return () => {
+            interval && clearInterval(interval)
+        }
+    }, [isTyping, recipients, socket, activeChat.id, user])
 
     return <Form onSubmit={handleSendMessage} className="cursor-pointer position-relative d-flex flex-column pt-4" style={{ zIndex: Number(!!media) }}>
         {
-            isTyping && <Typing />
+            !!activeChat.typing?.length && <Typing />
         }
         {
             replyingTo &&

@@ -28,8 +28,8 @@ export default function Conversations() {
             chats && Object.values(chats)
                 .sort((a, b) => latestTimestamp(b) - latestTimestamp(a))
                 .map(chat => {
-
-                    const recipients = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
+                    const recipients = chat.members.filter(m => m._id !== user?._id)
+                    const recipientsNicks = chat.members.filter(m => m._id !== user?._id).map(r => r.nick).join(', ')
                     const latestMessage = chat.messages[chat.messages.length - 1]
 
                     return <React.Fragment key={chat.id}>
@@ -40,18 +40,30 @@ export default function Conversations() {
                             data-active={chat.id === activeChatId}
                             data-unread={newMessages(chat) || undefined}
                         >
-                            <h6 className="fw-bold">{recipients}</h6>
-                            {latestMessage && (
-                                <div
-                                    className="d-flex align-items-center"
-                                    style={{ width: "95%" }}
-                                >
-                                    {latestMessage.sender._id === user!._id && <Arrow90degUp className="me-2" style={{ transform: "scale(1.2)" }} />}
-                                    <p className="m-0 text-light" style={{ whiteSpace: "nowrap", textOverflow: 'ellipsis', overflow: "hidden" }}>
-                                        {latestMessage.content.text}
-                                    </p>
-                                </div>
-                            )}
+                            <h6 className="fw-bold">{recipientsNicks}</h6>
+                            {
+                                !!chat.typing?.length
+                                    ?
+                                    <div
+                                        className="d-flex align-items-center"
+                                        style={{ width: "95%" }}
+                                    >
+                                        <p className="m-0 text-light" style={{ whiteSpace: "nowrap", textOverflow: 'ellipsis', overflow: "hidden" }}>
+                                            {recipients.filter(r => chat.typing?.includes(r._id)).map(r => r.nick).join(', ')} is typing...
+                                        </p>
+                                    </div>
+                                    : latestMessage && (
+                                        <div
+                                            className="d-flex align-items-center"
+                                            style={{ width: "95%" }}
+                                        >
+                                            {latestMessage.sender._id === user!._id && <Arrow90degUp className="me-2" style={{ transform: "scale(1.2)" }} />}
+                                            <p className="m-0 text-light" style={{ whiteSpace: "nowrap", textOverflow: 'ellipsis', overflow: "hidden" }}>
+                                                {latestMessage.content.text}
+                                            </p>
+                                        </div>
+                                    )
+                            }
                             <Button variant="outline-danger"
                                 onClick={e => {
                                     e.stopPropagation()
