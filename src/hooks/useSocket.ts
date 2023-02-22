@@ -1,10 +1,17 @@
 import { refreshToken } from "API/refreshToken"
+import { chatsState } from "atoms/chats"
 import { userState } from "atoms/user"
 import useArchiveMessage from "pages/Main/handlers/useArchiveMessage"
 import useMessageStatus from "pages/Main/handlers/useMessageStatus"
-import { useEffect, useMemo } from "react"
-import { useRecoilValue } from "recoil"
+import { useEffect, useMemo, useRef } from "react"
+import { useRecoilValue, useSetRecoilState } from "recoil"
 import { io } from "socket.io-client"
+
+interface TimeoutMap {
+    [key: string]: { // chatid
+        [key: string]: NodeJS.Timeout // userid: timeoutRef
+    }
+}
 
 export default function useSocket() {
 
@@ -20,6 +27,9 @@ export default function useSocket() {
     const archiveMessage = useArchiveMessage()
 
     const handleMessageStatus = useMessageStatus()
+
+    const setChats = useSetRecoilState(chatsState)
+    const typingTimeouts = useRef<TimeoutMap>({})
 
     useEffect(() => {
         if (!socket) return
@@ -46,6 +56,40 @@ export default function useSocket() {
             }
         }
 
+        const handleTyping = (typing: TypingMsg) => {
+
+
+            const currentTimeout = typingTimeouts.current[typing.chatId]?.[typing.sender._id]
+
+            console.table({ currentTimeout: !!currentTimeout })
+            console.log(typingTimeouts.current)
+
+            if (currentTimeout) {
+                clearTimeout(currentTimeout)
+                delete typingTimeouts.current[typing.chatId]![typing.sender._id]
+            } else {
+                setChats(chats => !chats?.[typing.chatId] ? chats : {
+                    ...chats,
+                    [typing.chatId]: {
+                        ...chats[typing.chatId],
+                        typing: [...(chats[typing.chatId]?.typing || []), typing.sender._id]
+                    }
+                })
+            }
+
+            (typingTimeouts.current[typing.chatId] ||= {})[typing.sender._id] = setTimeout(() => {
+                delete typingTimeouts.current[typing.chatId]![typing.sender._id]
+                setChats(chats => chats && {
+                    ...chats,
+                    [typing.chatId]: {
+                        ...chats[typing.chatId],
+                        typing: chats[typing.chatId].typing?.filter(id => id !== typing.sender._id)
+                    }
+                })
+            }, 500)
+
+        }
+
         const handleRefreshToken = () => {
             socket.disconnect()
             refreshToken()
@@ -55,16 +99,18 @@ export default function useSocket() {
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
+        socket.on('typing', handleTyping)
         socket.on('connect_error', handleRefreshToken);
 
         return () => {
             socket.off('in-msg', handleArchiveMessage)
             socket.off('msg-status', handleMessageStatus)
             socket.off('dequeue', handleDequeue)
+            socket.off('typing', handleTyping)
             socket.off('connect_error', handleRefreshToken);
         }
 
-    }, [socket, archiveMessage, handleMessageStatus])
+    }, [socket, archiveMessage, handleMessageStatus, setChats])
 
     return socket
 }
