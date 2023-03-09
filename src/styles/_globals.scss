@@ -41,6 +41,8 @@ textarea:focus {
 }
 
 #main-left {
+    @extend .custom-scrollbar;
+
     position: relative;
     display: flex;
     flex-direction: column;
@@ -186,6 +188,10 @@ textarea:focus {
                     + .timestamp {
                         transform: translateX(-20%);
                         margin-right: auto;
+                        order: 1;
+                    }
+                    ~ .reply-icon-wrapper {
+                        transform: translateX(50%);
                     }
                 }
 
