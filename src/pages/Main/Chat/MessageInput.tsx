@@ -185,7 +185,7 @@ export default function MessageInput() {
 
     useEffect(() => {
         setReplyingTo(undefined)
-    }, [activeChat, setReplyingTo])
+    }, [activeChat.id, setReplyingTo])
 
     const [isTyping, setIsTyping] = useState(false)
 
