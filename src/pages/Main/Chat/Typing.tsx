@@ -14,7 +14,7 @@ export default function Typing() {
     useEffect(() => {
         const interval = setInterval(() => {
             setDots(dots => dots === '...' ? '' : dots + '.')
-        }, 600)
+        }, 300)
 
         return () => {
             clearInterval(interval)
