@@ -1,10 +1,16 @@
 :root {
     --toastify-font-family: var(--bs-font-monospace) !important;
 }
+html {
+    min-height: calc(100% + env(safe-area-inset-top));
+}
 
 body {
     @extend .gradient-bg;
     @extend .font-monospace;
+    position: fixed;
+    inset: 0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     color: #fff;
     font-size: 13px;
 }
