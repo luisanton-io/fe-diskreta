@@ -126,6 +126,7 @@ export default function MessageInput() {
 
         setMedia(undefined)
         setText('')
+        setReplyingTo(undefined)
         setSpotlight({} as SpotlightProps)
     }
 

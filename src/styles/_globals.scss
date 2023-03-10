@@ -30,14 +30,17 @@ textarea:focus {
     }
 }
 
-.modal-dialog .modal-content {
-    background-color: change-color($color: $black, $alpha: 0.85);
-    backdrop-filter: blur(8px);
+.modal-dialog {
+    margin-top: env(safe-area-inset-top);
+    .modal-content {
+        background-color: change-color($color: $black, $alpha: 0.85);
+        backdrop-filter: blur(8px);
 
-    color: #fff;
-    border: none;
-    background-size: 800% 800%;
-    border-radius: 0px;
+        color: #fff;
+        border: none;
+        background-size: 800% 800%;
+        border-radius: 0px;
+    }
 }
 
 #main-left {
@@ -160,6 +163,7 @@ textarea:focus {
         @extend .custom-scrollbar;
         margin-left: -0.5rem;
         overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
         .message-wrapper {
             .message {
                 position: relative;
