@@ -6,11 +6,12 @@ import imageCompression from 'browser-image-compression';
 import { AES, SHA256 } from "crypto-js";
 import heic2any from "heic2any";
 import { pki, random, util } from "node-forge";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { Camera, Send } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { Socket } from "socket.io-client";
 import convertFileToBase64 from "util/convertFileToBase64";
 import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
@@ -26,6 +27,7 @@ export default function MessageInput() {
     const handleMessageStatus = useMessageStatus()
 
     const { socket, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
+    const socketRef = useRef<Socket | null>(null)
 
     const [text, setText] = useState('')
 
@@ -98,17 +100,15 @@ export default function MessageInput() {
                     let sent = false
                     do {
                         sent = await new Promise(resolve => {
-                            socket.active
-                                ? socket.emit("out-msg", outgoingMessage, (recipientId: string) => {
-                                    handleMessageStatus({
-                                        chatId: activeChat.id,
-                                        hash: message.hash,
-                                        recipientId,
-                                        status: 'sent'
-                                    })
-                                    resolve(true)
+                            socketRef.current?.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                                handleMessageStatus({
+                                    chatId: activeChat.id,
+                                    hash: message.hash,
+                                    recipientId,
+                                    status: 'sent'
                                 })
-                                : socket.connect()
+                                resolve(true)
+                            })
 
                             setTimeout(() => {
                                 resolve(false)
