@@ -29,6 +29,10 @@ export default function MessageInput() {
     const { socket, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
     const socketRef = useRef<Socket | null>(null)
 
+    useEffect(() => {
+        socketRef.current = socket
+    }, [socket])
+
     const [text, setText] = useState('')
 
     const [media, setMedia] = useState<Media>()
