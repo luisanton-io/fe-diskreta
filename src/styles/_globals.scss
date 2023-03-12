@@ -23,6 +23,10 @@ textarea:focus {
     box-shadow: none !important;
 }
 
+.dropdown button::after {
+    content: none;
+}
+
 @media (max-width: 768px) {
     body {
         background-position-x: -100%;
@@ -153,10 +157,6 @@ textarea:focus {
             background-color: transparent !important;
             margin: 0 !important;
         }
-    }
-
-    .dropdown button::after {
-        content: none;
     }
 
     #message-container {
