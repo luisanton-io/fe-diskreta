@@ -2,7 +2,13 @@
     --toastify-font-family: var(--bs-font-monospace) !important;
 }
 html {
-    min-height: calc(100% + env(safe-area-inset-top));
+    min-height: 100%;
+}
+
+@supports (-webkit-hyphens: none) {
+    html {
+        min-height: calc(100% + env(safe-area-inset-top));
+    }
 }
 
 body {
