@@ -1,8 +1,9 @@
 import Diskreta from "components/Diskreta";
 import useActiveChat from "hooks/useActiveChat";
 import useSocket from "hooks/useSocket";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Col } from "react-bootstrap";
+import { Socket } from "socket.io-client";
 import ChatBody from "./ChatBody";
 import ChatHeader from "./ChatHeader";
 import { ChatContext } from "./context/ChatCtx";
@@ -12,7 +13,8 @@ import Spotlight, { SpotlightProps } from "./Spotlight";
 
 export default function Chat() {
 
-    const socket = useSocket()
+    const { socket, connected } = useSocket()
+
     const { activeChat, recipients } = useActiveChat()
 
     const [chatWrapperRef, setChatWrapperRef] = useState<HTMLElement | null>(null)
@@ -46,7 +48,7 @@ export default function Chat() {
     return <>{
         activeChat && recipients && socket
             ?
-            <ChatContext.Provider value={{ socket, activeChat, recipients, setSpotlight, handleScrollTo }}>
+            <ChatContext.Provider value={{ socket, connected, activeChat, recipients, setSpotlight, handleScrollTo }}>
                 <div className="d-flex flex-column h-100">
                     <ServerEcho />
 

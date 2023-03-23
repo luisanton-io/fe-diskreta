@@ -27,8 +27,8 @@ export default function MessageInput() {
 
     const handleMessageStatus = useMessageStatus()
 
-    const { socket, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
-    const socketRef = useRef<Socket | null>(null)
+    const { socket, connected, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
+    const socketRef = useRef<Socket>(socket)
 
     useEffect(() => {
         socketRef.current = socket
@@ -43,7 +43,7 @@ export default function MessageInput() {
 
         console.log('sending msg')
 
-        if (socketRef.current?.disconnected) try {
+        if (!socketRef.current?.connected) try {
             await refreshToken()
         } catch {
             return toast.error('Cannot connect. Try again later.')
@@ -112,6 +112,10 @@ export default function MessageInput() {
                     do {
                         sent = await new Promise(resolve => {
                             socketRef.current?.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                                if (!recipientId) return setTimeout(() => {
+                                    resolve(false)
+                                }, 1000)
+
                                 handleMessageStatus({
                                     chatId: activeChat.id,
                                     hash: message.hash,
@@ -269,7 +273,7 @@ export default function MessageInput() {
                 onChange={e => setText(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
             />
-            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text && !media}>
+            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={(!text && !media) || !connected}>
                 <Send />
             </Button>
 

@@ -12,7 +12,7 @@ export default function ChatBody() {
 
     const handleMessageStatus = useMessageStatus()
 
-    const { activeChat, socket } = useContext(ChatContext)
+    const { activeChat, socket, connected } = useContext(ChatContext)
 
     useEffect(() => {
         const newMessages = !!activeChat && [...(activeChat.messages || [])]
@@ -20,7 +20,7 @@ export default function ChatBody() {
                 msg.sender._id !== user?._id && msg.status === 'new'
             ) as ReceivedMessage[]
 
-        if (hasFocus && socket && user?._id && newMessages && newMessages.length) {
+        if (hasFocus && connected && user?._id && newMessages && newMessages.length) {
             // emit "read" for new messages
             newMessages.forEach(msg => {
                 handleMessageStatus({
@@ -33,7 +33,7 @@ export default function ChatBody() {
                 socket.emit("read-msg", msg)
             })
         }
-    }, [hasFocus, socket, user?._id, activeChat, handleMessageStatus])
+    }, [hasFocus, socket, connected, user?._id, activeChat, handleMessageStatus])
 
 
     return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2">

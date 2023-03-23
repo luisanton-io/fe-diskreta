@@ -3,7 +3,7 @@ import { chatsState } from "atoms/chats"
 import { userState } from "atoms/user"
 import useArchiveMessage from "pages/Main/handlers/useArchiveMessage"
 import useMessageStatus from "pages/Main/handlers/useMessageStatus"
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { io } from "socket.io-client"
@@ -24,6 +24,7 @@ export default function useSocket() {
         return !!token && io(process.env.REACT_APP_BE_DOMAIN!, { transports: ['websocket'], auth: { token } })
     }, [token])
 
+    const [connected, setConnected] = useState(false)
 
     const archiveMessage = useArchiveMessage()
 
@@ -96,22 +97,23 @@ export default function useSocket() {
             refreshToken()
         }
 
-        const showConnecting = () => {
+        const onDisconnect = () => {
             toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER, autoClose: false })
+            setConnected(false)
         }
 
-        const showConnected = () => {
+        const onConnect = () => {
             toast.dismiss()
             toast.success("Connected!", { position: toast.POSITION.TOP_CENTER })
+            setConnected(true)
         }
-
 
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
         socket.on('typing', handleTyping)
-        socket.on('connect', showConnected)
-        socket.on('disconnect', showConnecting)
+        socket.on('connect', onConnect)
+        socket.on('disconnect', onDisconnect)
         socket.on('connect_error', handleRefreshToken);
 
         return () => {
@@ -119,12 +121,12 @@ export default function useSocket() {
             socket.off('msg-status', handleMessageStatus)
             socket.off('dequeue', handleDequeue)
             socket.off('typing', handleTyping)
-            socket.off('connect', showConnected)
-            socket.off('disconnect', showConnecting)
+            socket.off('connect', onConnect)
+            socket.off('disconnect', onDisconnect)
             socket.off('connect_error', handleRefreshToken);
         }
 
     }, [socket, archiveMessage, handleMessageStatus, setChats])
 
-    return socket
+    return { socket, connected }
 }
