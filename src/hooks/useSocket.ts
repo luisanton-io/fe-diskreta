@@ -4,6 +4,7 @@ import { userState } from "atoms/user"
 import useArchiveMessage from "pages/Main/handlers/useArchiveMessage"
 import useMessageStatus from "pages/Main/handlers/useMessageStatus"
 import { useEffect, useMemo, useRef } from "react"
+import { toast } from "react-toastify"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { io } from "socket.io-client"
 
@@ -95,11 +96,21 @@ export default function useSocket() {
             refreshToken()
         }
 
+        const showConnecting = () => {
+            toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER })
+        }
+
+        const showConnected = () => {
+            toast.success("Connected!", { position: toast.POSITION.TOP_CENTER })
+        }
+
 
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('dequeue', handleDequeue)
         socket.on('typing', handleTyping)
+        socket.on('connect', showConnected)
+        socket.on('disconnect', showConnecting)
         socket.on('connect_error', handleRefreshToken);
 
         return () => {
@@ -107,6 +118,8 @@ export default function useSocket() {
             socket.off('msg-status', handleMessageStatus)
             socket.off('dequeue', handleDequeue)
             socket.off('typing', handleTyping)
+            socket.off('connect', showConnected)
+            socket.off('disconnect', showConnecting)
             socket.off('connect_error', handleRefreshToken);
         }
 
