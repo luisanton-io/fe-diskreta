@@ -1,4 +1,5 @@
 import { Close } from "@mui/icons-material";
+import { refreshToken } from "API/refreshToken";
 import { chatsState } from "atoms/chats";
 import { replyingToState } from "atoms/replyingTo";
 import { userState } from "atoms/user";
@@ -37,10 +38,16 @@ export default function MessageInput() {
 
     const [media, setMedia] = useState<Media>()
 
-    const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
 
         console.log('sending msg')
+
+        if (socketRef.current?.disconnected) try {
+            await refreshToken()
+        } catch {
+            return toast.error('Cannot connect. Try again later.')
+        }
 
         if (!text && !media) return
 
