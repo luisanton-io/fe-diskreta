@@ -97,10 +97,11 @@ export default function useSocket() {
         }
 
         const showConnecting = () => {
-            toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER })
+            toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER, autoClose: false })
         }
 
         const showConnected = () => {
+            toast.dismiss()
             toast.success("Connected!", { position: toast.POSITION.TOP_CENTER })
         }
 

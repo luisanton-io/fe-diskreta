@@ -33,7 +33,7 @@ export default function useHandleSubmit(nick: string, password: string) {
 
             const digest = createDigest(nick, password)
 
-            const toastId = toast.info("Connecting...")
+            const toastId = toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER })
 
             const {
                 data: { token: encryptedToken, refreshToken, user: responseUser }
