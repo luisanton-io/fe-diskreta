@@ -33,7 +33,7 @@ export default function useHandleSubmit(nick: string, password: string) {
 
             const digest = createDigest(nick, password)
 
-            const toastId = toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER })
+            const toastId = toast.info("Connecting...")
 
             const {
                 data: { token: encryptedToken, refreshToken, user: responseUser }
@@ -57,7 +57,7 @@ export default function useHandleSubmit(nick: string, password: string) {
                     }, 1000)
                 })
             } catch {
-                toast.error("User data decryption failed. Regenerate keys?")
+                toast.update(toastId, { render: "User data decryption failed. Regenerate keys?", type: "error" })
                 handleRegenerate(encryptedToken, refreshToken, responseUser)
             }
 
