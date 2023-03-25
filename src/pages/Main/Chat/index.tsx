@@ -1,9 +1,8 @@
 import Diskreta from "components/Diskreta";
 import useActiveChat from "hooks/useActiveChat";
 import useSocket from "hooks/useSocket";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { Col } from "react-bootstrap";
-import { Socket } from "socket.io-client";
 import ChatBody from "./ChatBody";
 import ChatHeader from "./ChatHeader";
 import { ChatContext } from "./context/ChatCtx";

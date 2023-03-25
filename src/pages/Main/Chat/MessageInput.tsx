@@ -101,6 +101,14 @@ export default function MessageInput() {
                         encryptionKey: encryptionKey!,
                         data: AES.encrypt(media.data, media.encryptionKey).toString()
                     }
+                },
+                replyingTo: replyingTo && {
+                    ...replyingTo,
+                    content: {
+                        text: replyingTo.content.text
+                            ? util.encode64(publicKey.encrypt(util.encodeUtf8(replyingTo.content.text)))
+                            : '📷' // must be media
+                    }
                 }
             }
 

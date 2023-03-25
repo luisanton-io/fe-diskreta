@@ -49,6 +49,16 @@ export default function useArchiveMessage() {
             }
         }
 
+        if (encryptedMessage.replyingTo) {
+            message.replyingTo = {
+                ...encryptedMessage.replyingTo,
+                content: {
+                    text: decryptText(encryptedMessage.replyingTo.content.text),
+                    media: decryptMedia(encryptedMessage.replyingTo.content.media)
+                }
+            }
+        }
+
         const { chatId } = message
 
         setChats(chats => ({
