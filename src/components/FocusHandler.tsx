@@ -23,12 +23,7 @@ export default function FocusHandler() {
     useEffect(() => {
         const logoutTimeout = setTimeout(() => {
             if (!focus && !['/register', '/login'].includes(window.location.pathname)) {
-                setUser(u => u && ({
-                    ...u,
-                    token: '', // will disconnect socket
-                    refreshToken: ''
-                }))
-                navigate('/login')
+                window.location.reload()
             }
         }, 10000)
 
