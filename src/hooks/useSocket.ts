@@ -48,7 +48,7 @@ export default function useSocket() {
         const handleDequeue = (queue: Queue, ack: Function) => {
             const { messages = [], status = [] } = queue || {}
             try {
-                console.log(queue)
+                // console.log(queue)
                 messages.forEach(msg => archiveMessage(msg, { showToast: false }))
                 status.forEach(msg => handleMessageStatus(msg))
                 ack()
@@ -99,6 +99,7 @@ export default function useSocket() {
 
         const onDisconnect = () => {
             toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER, autoClose: false })
+            refreshToken()
             setConnected(false)
         }
 
