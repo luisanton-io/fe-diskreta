@@ -105,7 +105,7 @@ export default function useSocket() {
 
         const onConnect = () => {
             toast.dismiss()
-            toast.success("Connected!", { position: toast.POSITION.TOP_CENTER })
+            toast.success("Connected!", { position: toast.POSITION.TOP_CENTER, autoClose: 2000 })
             setConnected(true)
         }
 
