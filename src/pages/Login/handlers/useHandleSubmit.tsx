@@ -31,10 +31,6 @@ export default function useHandleSubmit(nick: string, password: string) {
                 return toast.error("Credentials missing")
             }
 
-            if (nick === 'Dandelion') {
-                toast.info('@Dandelion check your email')
-            }
-
             const digest = createDigest(nick, password)
 
             const toastId = toast.info("Connecting...")
