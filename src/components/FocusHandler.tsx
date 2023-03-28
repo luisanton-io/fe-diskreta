@@ -21,15 +21,21 @@ export default function FocusHandler() {
     }, [setFocus])
 
     useEffect(() => {
-        if (!focus) {
-            setUser(u => u && ({
-                ...u,
-                token: '', // will disconnect socket
-                refreshToken: ''
-            }))
-            navigate('/login')
+        const logoutTimeout = setTimeout(() => {
+            if (!focus && !['/register', '/login'].includes(window.location.pathname)) {
+                setUser(u => u && ({
+                    ...u,
+                    token: '', // will disconnect socket
+                    refreshToken: ''
+                }))
+                navigate('/login')
+            }
+        }, 10000)
+
+        return () => {
+            clearTimeout(logoutTimeout)
         }
-    }, [focus])
+    }, [focus, navigate, setUser])
 
     return null
 }
