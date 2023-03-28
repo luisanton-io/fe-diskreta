@@ -1,1 +1,1 @@
-export const MEDIA_PLACEHOLDER = 'MEDIA_PLACEHOLDER'
+export const MEDIA_PLACEHOLDER = '📷'
