@@ -3,6 +3,7 @@ import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
 import { replyingToState } from 'atoms/replyingTo';
+import { MEDIA_PLACEHOLDER } from 'constants/mediaPlaceholder';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useSwipe from 'hooks/useSwipe';
 import React, { CSSProperties, useContext, useEffect } from 'react';
@@ -52,6 +53,10 @@ export default function Message({ message, sent, i }: Props) {
 
     const replyIconTransition = Math.abs(deltaX) / 50
 
+    const handleSpotlight = () => {
+        setSpotlight(s => s && ({ ...s, media: message.content.media!, hash: message.hash }))
+    }
+
     return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-1" {...swipeProps}
         style={{ transform: `translateX(-${translateX}px)` }}
     >
@@ -65,13 +70,22 @@ export default function Message({ message, sent, i }: Props) {
                 </div>
             }
             <div className='py-3'>
-
                 {
-                    message.content.media &&
-                    <img
-                        src={message.content.media.data} alt="..."
-                        onClick={() => setSpotlight(s => s && ({ ...s, media: message.content.media! }))}
-                    />
+                    message.content.media && <>{
+                        message.content.media.data !== MEDIA_PLACEHOLDER
+                            ?
+                            <button className="w-100 rounded-4 mb-3 bg-dark border-0 p-4" onClick={handleSpotlight}>
+                                📷 <span className="text-white">Tap to see media</span>
+                            </button>
+                            :
+                            <button className="w-100 rounded-4 mb-3 bg-dark border-0 p-4">
+                                📷 <i className="text-white-50">{
+                                    isMessageSent(message)
+                                        ? 'Sent'
+                                        : 'Opened'
+                                }</i>
+                            </button>
+                    }</>
                 }
                 <span>
                     {

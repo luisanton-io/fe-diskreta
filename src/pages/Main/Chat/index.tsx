@@ -17,7 +17,7 @@ export default function Chat() {
     const { activeChat, recipients } = useActiveChat()
 
     const [chatWrapperRef, setChatWrapperRef] = useState<HTMLElement | null>(null)
-    const [{ media, onReset, isInput }, setSpotlight] = useState<SpotlightProps>({} as SpotlightProps)
+    const [{ media, onReset, isInput, hash }, setSpotlight] = useState<SpotlightProps>({} as SpotlightProps)
 
     const resetMedia = () => {
         setSpotlight({} as SpotlightProps)
@@ -62,7 +62,7 @@ export default function Chat() {
                     </div>
 
                     {
-                        media && <Spotlight {...{ media, resetMedia, onReset, isInput }} />
+                        media && <Spotlight {...{ media, resetMedia, onReset, isInput, hash }} />
                     }
 
                 </div>

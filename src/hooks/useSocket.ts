@@ -63,8 +63,8 @@ export default function useSocket() {
 
             const currentTimeout = typingTimeouts.current[typing.chatId]?.[typing.sender._id]
 
-            console.table({ currentTimeout: !!currentTimeout })
-            console.log(typingTimeouts.current)
+            // console.table({ currentTimeout: !!currentTimeout })
+            // console.log(typingTimeouts.current)
 
             if (currentTimeout) {
                 clearTimeout(currentTimeout)
@@ -99,6 +99,13 @@ export default function useSocket() {
 
         const onDisconnect = () => {
             toast.info("Connecting...", { position: toast.POSITION.TOP_CENTER, autoClose: false })
+            setChats(chats => chats && Object.values(chats).reduce((chats, { id }) => ({
+                ...chats,
+                [id]: {
+                    ...chats[id],
+                    typing: undefined
+                }
+            }), chats))
             refreshToken()
             setConnected(false)
         }

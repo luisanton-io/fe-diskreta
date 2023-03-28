@@ -4,6 +4,7 @@ import { chatsState } from "atoms/chats";
 import { replyingToState } from "atoms/replyingTo";
 import { userState } from "atoms/user";
 import imageCompression from 'browser-image-compression';
+import { MEDIA_PLACEHOLDER } from "constants/mediaPlaceholder";
 import { AES, SHA256 } from "crypto-js";
 import heic2any from "heic2any";
 import { pki, random, util } from "node-forge";
@@ -67,6 +68,13 @@ export default function MessageInput() {
 
         const sentMessage: SentMessage = {
             ...message,
+            content: {
+                text: message.content.text,
+                media: message.content.media && {
+                    ...message.content.media,
+                    data: MEDIA_PLACEHOLDER
+                }
+            },
             status: recipients.reduce((all, { _id }) => ({
                 ...all,
                 [_id]: 'outgoing'
@@ -105,9 +113,9 @@ export default function MessageInput() {
                 replyingTo: replyingTo && {
                     ...replyingTo,
                     content: {
-                        text: replyingTo.content.text
-                            ? util.encode64(publicKey.encrypt(util.encodeUtf8(replyingTo.content.text)))
-                            : '📷' // must be media
+                        text: util.encode64(publicKey.encrypt(util.encodeUtf8(
+                            replyingTo.content.text || '📷' // either text or media
+                        )))
                     }
                 }
             }
