@@ -1,3 +1,4 @@
+import API from "API"
 import { refreshToken } from "API/refreshToken"
 import { chatsState } from "atoms/chats"
 import { userState } from "atoms/user"
@@ -36,25 +37,22 @@ export default function useSocket() {
     useEffect(() => {
         if (!socket) return
 
+        API.get<Queue>("/queues").then(({ data: queue }) => {
+            const { messages = [], status = [] } = queue || {}
+            try {
+                messages.forEach(msg => archiveMessage(msg, { showToast: false }))
+                status.forEach(msg => handleMessageStatus(msg))
+            } catch (error) {
+                console.log("Handle dequeue error:", error)
+            }
+        })
+
         const handleArchiveMessage = (message: ReceivedMessage, ack: Function) => {
             try {
                 archiveMessage(message, { showToast: true })
                 ack(JSON.stringify({ "hash": message.hash }))
             } catch (error) {
                 ack(JSON.stringify({ error: (error as Error) }))
-            }
-        }
-
-        const handleDequeue = (queue: Queue, ack: Function) => {
-            const { messages = [], status = [] } = queue || {}
-            try {
-                // console.log(queue)
-                messages.forEach(msg => archiveMessage(msg, { showToast: false }))
-                status.forEach(msg => handleMessageStatus(msg))
-                ack()
-            } catch (error) {
-                console.log("Handle dequeue error:", error)
-                ack((error as Error).message)
             }
         }
 
@@ -81,7 +79,7 @@ export default function useSocket() {
 
             (typingTimeouts.current[typing.chatId] ||= {})[typing.sender._id] = setTimeout(() => {
                 delete typingTimeouts.current[typing.chatId]![typing.sender._id]
-                setChats(chats => chats && {
+                setChats(chats => !chats?.[typing.chatId] ? chats : {
                     ...chats,
                     [typing.chatId]: {
                         ...chats[typing.chatId],
@@ -118,7 +116,6 @@ export default function useSocket() {
 
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
-        socket.on('dequeue', handleDequeue)
         socket.on('typing', handleTyping)
         socket.on('connect', onConnect)
         socket.on('disconnect', onDisconnect)
@@ -127,7 +124,6 @@ export default function useSocket() {
         return () => {
             socket.off('in-msg', handleArchiveMessage)
             socket.off('msg-status', handleMessageStatus)
-            socket.off('dequeue', handleDequeue)
             socket.off('typing', handleTyping)
             socket.off('connect', onConnect)
             socket.off('disconnect', onDisconnect)
