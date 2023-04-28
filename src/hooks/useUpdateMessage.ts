@@ -11,14 +11,18 @@ export default function useUpdateMessage() {
     const setChats = useSetRecoilState(chatsState)
 
     return useCallback(({ chatId, hash, updater }: UpdateMessage) => {
-        setChats(chats => !chats?.[chatId] ? chats : ({
-            ...chats,
-            [chatId]: {
-                ...chats[chatId],
-                messages: chats[chatId].messages.map(msg =>
-                    msg.hash !== hash ? msg : updater(msg)
-                )
-            }
-        }))
+        setChats(chats => {
+            if (!chats?.[chatId]) return chats
+
+            const indexToUpdate = chats[chatId].indexing[hash]
+            const messages = [...chats[chatId].messages]
+
+            messages[indexToUpdate] = updater({ ...messages[indexToUpdate] })
+
+            return ({
+                ...chats,
+                [chatId]: { ...chats[chatId], messages }
+            })
+        })
     }, [setChats])
 }

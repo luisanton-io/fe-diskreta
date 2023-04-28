@@ -88,7 +88,11 @@ export default function MessageInput() {
                 messages: [
                     ...activeChat.messages,
                     sentMessage
-                ]
+                ],
+                indexing: {
+                    ...(activeChat.indexing || {}),
+                    [sentMessage.hash]: activeChat.messages.length
+                }
             }
         }))
 
