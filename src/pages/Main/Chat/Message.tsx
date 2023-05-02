@@ -22,6 +22,7 @@ interface Props {
 }
 
 const urlRegexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
+const emojiRegex = new RegExp(/^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){1,2}|(?:\ud83d[\udc00-\ude4f]){1,2}|(?:\ud83d[\ude80-\udeff]){1,2}|(?:\ud83e[\udd00-\udfff]){1,2}|[\u0023-\u0039]\u20e3|[\u200d\u2934-\u2935\u2b05-\u2b07\u2b1b\u2b1c\u2b50\u2b55\u3030\u303d\u3297\u3299]\ufe0f?)+$/);
 
 export default function Message({ message, sent, i }: Props) {
 
@@ -90,21 +91,23 @@ export default function Message({ message, sent, i }: Props) {
                 <span>
                     {
                         message.content.text && message.content.text.split("\n").map((line, i) =>
-                            <span key={i}>{
-                                line.split(' ').map((word, i) =>
-                                    <React.Fragment key={`word-${i}`}>
-                                        {urlRegexp.test(word)
-                                            ? <a style={{ color: 'white' }}
-                                                onClick={e => { e.stopPropagation() }}
-                                                href={word.startsWith('http') ? word : `https://${word}`}
-                                                target="_blank" rel="noopener noreferrer"
-                                            >
-                                                {word}
-                                            </a>
-                                            : word}{' '}
-                                    </React.Fragment>
-                                )
-                            }</span>
+                            <span key={i} style={{
+                                fontSize: emojiRegex.test(message.content.text) ? '3em' : '1em'
+                            }}>{
+                                    line.split(' ').map((word, i) =>
+                                        <React.Fragment key={`word-${i}`}>
+                                            {urlRegexp.test(word)
+                                                ? <a style={{ color: 'white' }}
+                                                    onClick={e => { e.stopPropagation() }}
+                                                    href={word.startsWith('http') ? word : `https://${word}`}
+                                                    target="_blank" rel="noopener noreferrer"
+                                                >
+                                                    {word}
+                                                </a>
+                                                : word}{' '}
+                                        </React.Fragment>
+                                    )
+                                }</span>
                         )
                     }
                     {
