@@ -74,7 +74,8 @@ export default function SearchDialog() {
                 [chatId]: {
                     id: chatId,
                     messages: [],
-                    members: [publicUser!, selectedUser]
+                    members: [publicUser!, selectedUser],
+                    indexing: {}
                 }
             }))
         }

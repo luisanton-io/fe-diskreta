@@ -1,8 +1,10 @@
 import { Close } from "@mui/icons-material";
+import { refreshToken } from "API/refreshToken";
 import { chatsState } from "atoms/chats";
 import { replyingToState } from "atoms/replyingTo";
 import { userState } from "atoms/user";
 import imageCompression from 'browser-image-compression';
+import { MEDIA_PLACEHOLDER } from "constants/mediaPlaceholder";
 import { AES, SHA256 } from "crypto-js";
 import heic2any from "heic2any";
 import { pki, random, util } from "node-forge";
@@ -26,8 +28,8 @@ export default function MessageInput() {
 
     const handleMessageStatus = useMessageStatus()
 
-    const { socket, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
-    const socketRef = useRef<Socket | null>(null)
+    const { socket, connected, recipients, activeChat, setSpotlight, handleScrollTo } = useContext(ChatContext)
+    const socketRef = useRef<Socket>(socket)
 
     useEffect(() => {
         socketRef.current = socket
@@ -37,10 +39,16 @@ export default function MessageInput() {
 
     const [media, setMedia] = useState<Media>()
 
-    const handleSendMessage = (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleSendMessage = async (e: React.FormEvent<HTMLFormElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
         e.preventDefault()
 
         console.log('sending msg')
+
+        if (!socketRef.current?.connected) try {
+            await refreshToken()
+        } catch {
+            return toast.error('Cannot connect. Try again later.')
+        }
 
         if (!text && !media) return
 
@@ -60,6 +68,13 @@ export default function MessageInput() {
 
         const sentMessage: SentMessage = {
             ...message,
+            content: {
+                text: message.content.text,
+                media: message.content.media && {
+                    ...message.content.media,
+                    data: MEDIA_PLACEHOLDER
+                }
+            },
             status: recipients.reduce((all, { _id }) => ({
                 ...all,
                 [_id]: 'outgoing'
@@ -73,7 +88,11 @@ export default function MessageInput() {
                 messages: [
                     ...activeChat.messages,
                     sentMessage
-                ]
+                ],
+                indexing: {
+                    ...(activeChat.indexing || {}),
+                    [sentMessage.hash]: activeChat.messages.length
+                }
             }
         }))
 
@@ -94,6 +113,14 @@ export default function MessageInput() {
                         encryptionKey: encryptionKey!,
                         data: AES.encrypt(media.data, media.encryptionKey).toString()
                     }
+                },
+                replyingTo: replyingTo && {
+                    ...replyingTo,
+                    content: {
+                        text: util.encode64(publicKey.encrypt(util.encodeUtf8(
+                            replyingTo.content.text || '📷' // either text or media
+                        )))
+                    }
                 }
             }
 
@@ -105,6 +132,10 @@ export default function MessageInput() {
                     do {
                         sent = await new Promise(resolve => {
                             socketRef.current?.emit("out-msg", outgoingMessage, (recipientId: string) => {
+                                if (!recipientId) return setTimeout(() => {
+                                    resolve(false)
+                                }, 1000)
+
                                 handleMessageStatus({
                                     chatId: activeChat.id,
                                     hash: message.hash,
@@ -262,7 +293,7 @@ export default function MessageInput() {
                 onChange={e => setText(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
             />
-            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={!text && !media}>
+            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={(!text && !media) || !connected}>
                 <Send />
             </Button>
 

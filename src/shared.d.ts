@@ -57,6 +57,7 @@ interface Chat {
     messages: (SentMessage | ReceivedMessage)[];
     members: User[]
     typing?: User["_id"][]
+    indexing: Record<string, number> // msg hash -> msg index
 }
 interface Queue {
     messages: ReceivedMessage[],
@@ -67,3 +68,5 @@ interface TypingMsg {
     chatId: string
     sender: User
 }
+
+type Override<T, R> = Omit<T, keyof R> & R;

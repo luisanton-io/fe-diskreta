@@ -49,25 +49,52 @@ export default function useArchiveMessage() {
             }
         }
 
+        if (encryptedMessage.replyingTo) {
+            message.replyingTo = {
+                ...encryptedMessage.replyingTo,
+                content: {
+                    text: decryptText(encryptedMessage.replyingTo.content.text),
+                    media: decryptMedia(encryptedMessage.replyingTo.content.media)
+                }
+            }
+        }
+
         const { chatId } = message
 
-        setChats(chats => ({
-            ...chats,
-            [chatId]:
-                !chatIds?.includes(chatId)
+        setChats(chats => {
+
+            if (
+                !chats
+                || Number.isSafeInteger(chats[chatId]?.indexing?.[message.hash]) // optional chaining 'indexing' for retrocompatibility
+            ) return chats
+
+            const chatToUpdate = chats[chatId]
+
+            return ({
+                ...chats,
+                [chatId]: !!chatToUpdate
                     ? {
-                        id: chatId,
-                        members: [...message.to, message.sender],
-                        messages: [...(chats?.[chatId]?.messages || []), message]
+                        ...chatToUpdate,
+                        messages: [
+                            ...chatToUpdate.messages,
+                            message,
+                        ],
+                        indexing: {
+                            ...chatToUpdate.indexing,
+                            [message.hash]: chatToUpdate.messages.length, // new index corresponds to new length
+                        },
                     }
                     : {
-                        ...chats![chatId],
-                        messages: [
-                            ...(chats![chatId].messages || []),
-                            message
-                        ]
+                        id: chatId,
+                        members: [...message.to, message.sender],
+                        messages: [message],
+                        indexing: {
+                            [message.hash]: 0,
+                        },
                     }
-        }))
+            })
+
+        })
 
         if (showToast && chatId !== activeChatId) {
             toast.info(`${message.sender.nick}: ${message.content.text}`, {

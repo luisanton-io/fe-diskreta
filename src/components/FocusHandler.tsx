@@ -1,9 +1,14 @@
 import { focusState } from "atoms/focus";
+import { userState } from "atoms/user";
 import { useEffect } from "react";
-import { useSetRecoilState } from "recoil";
+import { useNavigate } from "react-router-dom";
+import { useRecoilState, useSetRecoilState } from "recoil";
 
 export default function FocusHandler() {
-    const setFocus = useSetRecoilState(focusState)
+    const navigate = useNavigate()
+    const setUser = useSetRecoilState(userState)
+
+    const [focus, setFocus] = useRecoilState(focusState)
 
     useEffect(() => {
         const focusDaemon = setInterval(() => {
@@ -14,6 +19,18 @@ export default function FocusHandler() {
             clearInterval(focusDaemon)
         }
     }, [setFocus])
+
+    useEffect(() => {
+        const logoutTimeout = setTimeout(() => {
+            if (!focus && !['/register', '/login'].includes(window.location.pathname)) {
+                window.location.reload()
+            }
+        }, 10000)
+
+        return () => {
+            clearTimeout(logoutTimeout)
+        }
+    }, [focus, navigate, setUser])
 
     return null
 }

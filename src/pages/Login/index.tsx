@@ -1,6 +1,6 @@
 import Diskreta from "components/Diskreta";
 import { useState } from "react";
-import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
+import { Button, Col, Container, Form, InputGroup, Row, Spinner } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import useHandleRecovery from "./handlers/useHandleRecovery";
 import useHandleSubmit from "./handlers/useHandleSubmit";
@@ -10,7 +10,7 @@ export default function Login() {
     const [nick, setNick] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleSubmit = useHandleSubmit(nick, password)
+    const { handleSubmit, loading } = useHandleSubmit(nick, password)
     const handleRecovery = useHandleRecovery(nick, password)
 
     return <Container className="my-auto">
@@ -35,8 +35,15 @@ export default function Login() {
 
                     <Button type="submit"
                         variant="outline-info"
-                        className=" ms-auto w-50 my-3 rounded-0 font-monospace login border-3"
+                        className="d-flex justify-content-center align-items-center ms-auto w-50 my-3 rounded-0 font-monospace login border-3"
+                        disabled={loading}
                     >
+                        {
+                            loading &&
+                            <div style={{ transform: 'scale(0.5) translateY(5%)' }}>
+                                <Spinner />
+                            </div>
+                        }
                         Login
                     </Button>
 

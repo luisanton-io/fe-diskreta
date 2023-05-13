@@ -26,9 +26,7 @@ export default function Main() {
 
     useEffect(() => {
         if (!userExists) {
-            !localStorage.getItem(USER_DIGEST)
-                ? navigate("/register")
-                : navigate("/login")
+            navigate("/login")
         }
     }, [userExists, navigate])
 

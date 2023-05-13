@@ -4,6 +4,7 @@ import { SpotlightProps } from "../Spotlight";
 
 interface IChatContext {
     socket: Socket,
+    connected: boolean,
     activeChat: Chat,
     recipients: User[],
     setSpotlight: React.Dispatch<React.SetStateAction<SpotlightProps>>

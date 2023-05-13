@@ -2,7 +2,7 @@
     --toastify-font-family: var(--bs-font-monospace) !important;
 }
 html {
-    min-height: calc(100% + env(safe-area-inset-top));
+    min-height: 100%;
 }
 
 body {
@@ -10,9 +10,20 @@ body {
     @extend .font-monospace;
     position: fixed;
     inset: 0;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: 0;
     color: #fff;
     font-size: 13px;
+}
+
+@supports (-webkit-hyphens: none) {
+    html {
+        min-height: calc(100% + env(safe-area-inset-top));
+    }
+
+    body {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+            env(safe-area-inset-left);
+    }
 }
 
 input:active,
@@ -387,4 +398,9 @@ textarea {
             background-color: rgba(255, 255, 255, 0.1);
         }
     }
+}
+
+.Toastify > div {
+    margin-top: env(safe-area-inset-top);
+    margin-bottom: env(safe-area-inset-top);
 }

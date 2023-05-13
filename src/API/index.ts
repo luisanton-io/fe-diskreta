@@ -26,7 +26,13 @@ API.interceptors.response.use(
     async function (error) {
         const failedRequest = error.config;
 
-        if (
+        if (error.code === "ERR_NETWORK") {
+            return await new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(API(failedRequest))
+                }, 3000)
+            })
+        } else if (
             error.response.status === 401 &&
             !["/users/session", "/users/refreshToken"].includes(failedRequest.url)
         ) {

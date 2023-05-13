@@ -12,11 +12,12 @@ import Spotlight, { SpotlightProps } from "./Spotlight";
 
 export default function Chat() {
 
-    const socket = useSocket()
+    const { socket, connected } = useSocket()
+
     const { activeChat, recipients } = useActiveChat()
 
     const [chatWrapperRef, setChatWrapperRef] = useState<HTMLElement | null>(null)
-    const [{ media, onReset, isInput }, setSpotlight] = useState<SpotlightProps>({} as SpotlightProps)
+    const [{ media, onReset, isInput, hash }, setSpotlight] = useState<SpotlightProps>({} as SpotlightProps)
 
     const resetMedia = () => {
         setSpotlight({} as SpotlightProps)
@@ -46,7 +47,7 @@ export default function Chat() {
     return <>{
         activeChat && recipients && socket
             ?
-            <ChatContext.Provider value={{ socket, activeChat, recipients, setSpotlight, handleScrollTo }}>
+            <ChatContext.Provider value={{ socket, connected, activeChat, recipients, setSpotlight, handleScrollTo }}>
                 <div className="d-flex flex-column h-100">
                     <ServerEcho />
 
@@ -61,7 +62,7 @@ export default function Chat() {
                     </div>
 
                     {
-                        media && <Spotlight {...{ media, resetMedia, onReset, isInput }} />
+                        media && <Spotlight {...{ media, resetMedia, onReset, isInput, hash }} />
                     }
 
                 </div>
