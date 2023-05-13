@@ -8,7 +8,7 @@ import { Form } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useSetRecoilState } from "recoil"
-import { createDigest } from "util/createDigest"
+import { createSignedDigest } from "util/createDigest"
 import generateKeyPair from "util/generateKeypair"
 
 export default function useHandleRegenerate(nick: string, password: string) {
@@ -37,12 +37,18 @@ export default function useHandleRegenerate(nick: string, password: string) {
                 setTimeout(async () => {
                     const { privateKey } = await generateKeyPair(mnemonic.current)
 
-                    setUser({
-                        ...responseUser,
-                        token: privateKey.decrypt(util.decode64(encryptedToken)),
-                        refreshToken,
-                        privateKey: pki.privateKeyToPem(privateKey),
-                        digest: createDigest(nick, password)
+                    setUser(() => {
+                        const userWithoutDigest: Omit<LoggedUser, 'digest'> = {
+                            ...responseUser,
+                            token: privateKey.decrypt(util.decode64(encryptedToken)),
+                            refreshToken,
+                            privateKey: pki.privateKeyToPem(privateKey),
+                        }
+
+                        return {
+                            ...userWithoutDigest,
+                            digest: createSignedDigest(userWithoutDigest, password).digest // as side effect, saves encrypted digest to localStorage
+                        }
                     })
                     setChats(defaultChats)
                     setDialog(null)
