@@ -93,7 +93,7 @@ export default function SideHeader() {
 
     return <div className="d-flex">
         <Button variant="outline-info"
-            className="btn-submit flex-grow-1 d-flex align-items-center justify-content-center mt-3 py-2"
+            className="btn-submit flex-grow-1 d-flex align-items-center justify-content-center py-2"
             onClick={handleShowSearchDialog}>
             <Plus className="me-1" style={{ fontSize: '1.5em' }} />
             <span>New</span>
@@ -103,7 +103,7 @@ export default function SideHeader() {
             onClick={handleRemoveData}>
             <ExclamationOctagonFill style={{ fontSize: '1.25em' }} />
         </Button> */}
-        <Dropdown className="ms-auto">
+        <Dropdown className="ms-auto d-flex align-items-center">
             <Dropdown.Toggle variant="link" className="rounded-0 text-white border-0 shadow-none">
                 <ThreeDots style={{ fontSize: '1.5em' }} />
             </Dropdown.Toggle>
