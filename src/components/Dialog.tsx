@@ -10,7 +10,7 @@ export default function Dialog() {
         setDialog(null)
     }
 
-    return <Modal show={!!Dialog}>
+    return <Modal show={!!Dialog} className="mt-3">
         {
             Dialog && (<>
                 <Dialog.Content />

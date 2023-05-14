@@ -1,6 +1,15 @@
 $black: rgb(9, 9, 19);
 $blue: rgb(17, 55, 126);
 $green: rgb(71, 153, 77);
-$background: linear-gradient(45deg, $blue 0%, $green 100%);
+$default-background: linear-gradient(45deg, $blue 0%, $green 100%);
+$deepBlue-background: linear-gradient(144deg, #0b090a 0%, 60%, #0a043c 80%, #03506f 100%);
 
 $dark: rgb(33, 37, 41);
+
+[data-theme="Default"] {
+    --background: #{$default-background};
+}
+
+[data-theme="Deep Blue"] {
+    --background: #{$deepBlue-background};
+}
