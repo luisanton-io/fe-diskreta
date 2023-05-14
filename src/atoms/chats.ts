@@ -1,5 +1,5 @@
 import { atom } from "recoil";
-import { getRecoil } from "recoil-nexus";
+// import { getRecoil } from "recoil-nexus";
 import { CHATS } from "constants/localStorage";
 import persist from "./effects/persist";
 
@@ -13,4 +13,4 @@ export const chatsState = atom<Record<string, Chat> | null>({
     effects: [persistAtom],
 });
 
-(window as any).chats = () => getRecoil(chatsState)
+// (window as any).chats = () => getRecoil(chatsState)
