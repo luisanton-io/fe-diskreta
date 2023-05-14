@@ -1,5 +1,3 @@
-import { toast } from "react-toastify"
-
 function clipboardFallback(text: string) {
     const isIos = navigator.userAgent.match(/ipad|iphone/i);
     const textarea = document.createElement('textarea');
