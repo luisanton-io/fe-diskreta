@@ -63,9 +63,8 @@ export default function SideHeader() {
                         }).forEach(key => {
                             localStorage.setItem(key, data[key])
                         })
-
                 } catch (error) {
-                    toast.error("Corrupted data. Please try exporting again from the other device.")
+                    toast.error("Corrupted data. Please try exporting again.")
                 } finally {
                     window.location.reload()
                 }
