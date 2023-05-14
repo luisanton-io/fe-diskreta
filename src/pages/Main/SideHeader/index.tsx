@@ -65,7 +65,9 @@ export default function SideHeader() {
                         })
 
                 } catch (error) {
-                    toast.error("Invalid JSON")
+                    toast.error("Corrupted data. Please try exporting again from the other device.")
+                } finally {
+                    window.location.reload()
                 }
             },
             submitLabel: "Import"
@@ -75,9 +77,9 @@ export default function SideHeader() {
     const clipboard = useClipboard()
 
     const handleExportData = () => {
-        STORAGE_KEYS.forEach(key => {
+        STORAGE_KEYS.forEach((key, i) => {
             if (!localStorage.getItem(key)) {
-                throw new Error(`Missing key "${key}"`)
+                throw new Error(`Missing key "${Object.keys(STORAGE_KEYS)[i]}"`)
             }
         })
         const data: Record<string, string> = {}
@@ -87,6 +89,7 @@ export default function SideHeader() {
 
         clipboard.copy(JSON.stringify(data))
 
+        alert("Data copied to clipboard. This data is military grade encrypted and can only be decrypted using Diskreta in another device, using your recovery phrase to regenerate your keys.")
     }
 
     return <div className="d-flex">
