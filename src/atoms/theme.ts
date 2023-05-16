@@ -1,11 +1,21 @@
-import { atom } from "recoil";
-import { THEME } from "constants/localStorage";
-import persist from "./effects/persist";
+import { selector } from "recoil";
+import { userState } from "./user";
 
-const { persistAtom } = persist(THEME)
+export const themeState = selector({
+    key: "theme",
+    get: ({ get }) => {
+        return get(userState)?.settings.theme ?? "Default";
+    },
+    set: ({ set, get }, theme) => {
+        const user = get(userState);
+        if (!user) return;
 
-export const themeState = atom<string>({
-    key: THEME,
-    default: "Default",
-    effects: [persistAtom],
+        set(userState, {
+            ...user,
+            settings: {
+                ...user.settings,
+                theme: theme as string
+            }
+        });
+    }
 });

@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { useSetRecoilState } from "recoil";
 import SearchDialog from "./SearchDialog";
-import Settings from "./Settings";
+import Settings from "../Settings";
 
 
 export default function SideHeader() {

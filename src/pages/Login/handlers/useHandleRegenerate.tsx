@@ -1,6 +1,7 @@
 import { chatsState, defaultChats } from "atoms/chats"
 import { dialogState } from "atoms/dialog"
 import { userState } from "atoms/user"
+import { defaultSettings } from "constants/defaultSettings"
 import { USER_DIGEST } from "constants/localStorage"
 import { pki, util } from "node-forge"
 import { useRef } from "react"
@@ -43,6 +44,7 @@ export default function useHandleRegenerate(nick: string, password: string) {
                             token: privateKey.decrypt(util.decode64(encryptedToken)),
                             refreshToken,
                             privateKey: pki.privateKeyToPem(privateKey),
+                            settings: defaultSettings
                         }
 
                         return {
