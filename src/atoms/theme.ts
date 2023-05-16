@@ -14,7 +14,7 @@ export const themeState = selector({
             ...user,
             settings: {
                 ...user.settings,
-                theme: theme as string
+                theme: theme as Theme
             }
         });
     }

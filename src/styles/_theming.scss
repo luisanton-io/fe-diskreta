@@ -1,0 +1,90 @@
+body:not([data-theme*="Sans"]) {
+    @extend .font-monospace;
+}
+
+[data-theme="Default"] {
+    --background: #{$default-background};
+    background-size: 400% 400%;
+}
+
+[data-theme="Deep Blue"] {
+    --background: #{$deepBlue-background};
+    background-size: 400% 400%;
+    @media (min-width: 768px) {
+        background-size: 110% 120%;
+    }
+}
+
+[data-theme*="Sans"] {
+    font-family: "Red Hat Display", sans-serif;
+    font-size: 16px;
+}
+
+[data-theme="Sans Dark"] {
+    --background: #{$sansDark-background};
+}
+
+[data-theme="Sans Light"] {
+    --hue-rotation: 220deg;
+    --background: #{$sansLight-background};
+
+    & {
+        filter: hue-rotate(var(--hue-rotation)) invert(1);
+    }
+
+    @mixin cancel-hue-rotation {
+        filter: hue-rotate(calc(360deg - var(--hue-rotation))) invert(1);
+    }
+
+    .message.received {
+        background-color: #d0d0d0 !important;
+        color: black;
+    }
+
+    // span + svg, // ticks
+    img,
+    [class*="danger"] {
+        @include cancel-hue-rotation;
+    }
+}
+
+[data-theme="Hacker"] {
+    --background: #{$sansDark-background};
+
+    * {
+        color: $hacker-color !important;
+        border-color: $hacker-color;
+    }
+
+    *,
+    .font-monospace {
+        font-family: "Source Code Pro", monospace !important;
+    }
+
+    input:active,
+    input:active,
+    input:hover,
+    button:hover,
+    button:active,
+    button:focus {
+        background: transparent !important;
+    }
+
+    ::placeholder {
+        color: $hacker-color !important;
+        opacity: 0.8;
+    }
+
+    .message.received {
+        background-color: black !important;
+        border-color: change-color($color: $white, $alpha: 0.1) !important;
+    }
+
+    .message.sent {
+        border-color: change-color($color: $hacker-color, $alpha: 0.5) !important;
+    }
+
+    .message {
+        border-radius: 0px !important;
+    }
+}

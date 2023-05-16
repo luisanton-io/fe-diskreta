@@ -17,6 +17,6 @@ interface LoggedUser extends CurrentUser {
 }
 
 interface Settings {
-    theme: string
+    theme: Theme
     sessionTimeout: number
 }

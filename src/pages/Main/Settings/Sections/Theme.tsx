@@ -4,6 +4,7 @@ import cn from "classnames";
 import { ListGroup } from "react-bootstrap";
 import { useRecoilState } from "recoil";
 import Section from ".";
+import { Themes } from "constants/themes";
 
 export default function Theme() {
     const [currentTheme, setCurrentTheme] = useRecoilState(themeState)
@@ -11,7 +12,7 @@ export default function Theme() {
     return <Section title="Theme">
         <ListGroup>
             {
-                ["Default", "Deep Blue"].map(theme => (
+                Object.values(Themes).map(theme => (
                     <ListGroup.Item
                         className={cn("rounded-0 mb-2 border bg-transparent cursor-pointer", currentTheme === theme ? "border-warning text-warning" : "border-light text-white")}
                         key={theme}

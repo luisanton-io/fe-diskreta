@@ -7,7 +7,6 @@ html {
 
 body {
     @extend .gradient-bg;
-    @extend .font-monospace;
     position: fixed;
     inset: 0;
     padding: 0;
