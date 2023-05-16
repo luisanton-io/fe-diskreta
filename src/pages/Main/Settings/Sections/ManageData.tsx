@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { CHATS, USER, USER_DIGEST } from "constants/localStorage";
 import copy from "copy-to-clipboard";
 import { useRef } from "react";
-import { ListGroup, ListGroupItem } from "react-bootstrap";
+import { Button, ListGroup, ListGroupItem } from "react-bootstrap";
 import { Download, Trash, Upload } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -96,15 +96,15 @@ export default function ManageData() {
 
     return <Section title="Manage Data">
         <ListGroup className="bg-transparent text-white">
-            <ListGroupItem className="d-flex align-items-center bg-transparent text-white border rounded-0 mb-2" onClick={handleImportData}>
+            <ListGroupItem className="cursor-pointer bg-transparent text-white border d-flex align-items-center rounded-0 mb-2" onClick={handleImportData}>
                 <Download /><span className="ms-2">Import</span>
             </ListGroupItem>
-            <ListGroupItem className="d-flex align-items-center bg-transparent text-white border rounded-0 mb-2" onClick={handleExportData}>
+            <ListGroupItem className="cursor-pointer bg-transparent text-white border d-flex align-items-center rounded-0 mb-2" onClick={handleExportData}>
                 <Upload /><span className="ms-2">Export</span>
             </ListGroupItem>
-            <ListGroupItem className="d-flex align-items-center bg-transparent text-danger border rounded-0 mb-2 border-danger " onClick={handleRemoveData}>
+            <Button variant="outline-danger" className="d-flex align-items-center rounded-0 mb-2 px-3 py-2" onClick={handleRemoveData}>
                 <Trash /><span className="ms-2">Delete</span>
-            </ListGroupItem>
+            </Button>
         </ListGroup>
     </Section>
 }

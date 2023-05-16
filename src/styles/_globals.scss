@@ -400,6 +400,18 @@ textarea {
     }
 }
 
+#settings {
+    // max-height: 85vh;
+    overflow: auto;
+    button {
+        font-size: 1em;
+    }
+
+    & + div {
+        display: none !important;
+    }
+}
+
 .Toastify > div {
     margin-top: env(safe-area-inset-top);
     margin-bottom: env(safe-area-inset-top);

@@ -1,18 +1,16 @@
 import API from "API"
-import { userState } from "atoms/user"
 import { chatsState } from "atoms/chats"
+import { userState } from "atoms/user"
 import { AxiosError } from "axios"
+import { defaultSettings } from "constants/defaultSettings"
 import { pki, util } from "node-forge"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useSetRecoilState } from "recoil"
 import { createDigest } from "util/createDigest"
 import decryptLocalStorage from "util/decryptLocalStorage"
 import useHandleRegenerate from "./useHandleRegenerate"
-import { useState } from "react"
-import { themeState } from "atoms/theme"
-import { encryptedStorage } from "atoms/effects/persist"
-import { THEME } from "constants/localStorage"
 
 export default function useHandleSubmit(nick: string, password: string) {
 
@@ -20,7 +18,6 @@ export default function useHandleSubmit(nick: string, password: string) {
 
     const setUser = useSetRecoilState(userState)
     const setChats = useSetRecoilState(chatsState)
-    const setTheme = useSetRecoilState(themeState)
 
     const navigate = useNavigate()
 
@@ -53,17 +50,18 @@ export default function useHandleSubmit(nick: string, password: string) {
 
                 await new Promise<void>((resolve) => {
                     setTimeout(() => {
-                        setUser({ ...user, token, refreshToken })
+                        setUser({
+                            // @ts-ignore - defaultSettings for retrocompatibility for users who didn't have settings in previous versions
+                            settings: defaultSettings,
+                            ...user,
+                            token,
+                            refreshToken
+                        })
                         setChats(chats)
 
                         navigate("/")
                         toast.dismiss()
                         resolve()
-
-                        setTheme(
-                            // double key needed: one for localStorage, one for recoil - matching for convenience
-                            JSON.parse(encryptedStorage().getItem(THEME)!)[THEME]
-                        )
 
                     }, 1000)
                 })

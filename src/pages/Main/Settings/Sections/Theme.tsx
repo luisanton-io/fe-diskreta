@@ -13,7 +13,7 @@ export default function Theme() {
             {
                 ["Default", "Deep Blue"].map(theme => (
                     <ListGroup.Item
-                        className={cn("rounded-0 mb-2 border bg-transparent", currentTheme === theme ? "border-warning text-warning" : "border-light text-white")}
+                        className={cn("rounded-0 mb-2 border bg-transparent cursor-pointer", currentTheme === theme ? "border-warning text-warning" : "border-light text-white")}
                         key={theme}
                         onClick={() => setCurrentTheme(theme)}>
                         {currentTheme === theme && (

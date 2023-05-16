@@ -16,6 +16,7 @@ import { createDigest } from "util/createDigest";
 import generateKeyPair from "util/generateKeypair";
 import SeedDialog from "./SeedDialog";
 import withHysteresis from "util/withHysteresis";
+import { defaultSettings } from "constants/defaultSettings";
 
 export default function Register() {
 
@@ -102,7 +103,8 @@ export default function Register() {
                 digest,
                 token,
                 refreshToken,
-                privateKey: pki.privateKeyToPem(privateKey)
+                privateKey: pki.privateKeyToPem(privateKey),
+                settings: defaultSettings
             }
 
             setUser(newUserState)

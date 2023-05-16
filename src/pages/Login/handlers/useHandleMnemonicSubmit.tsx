@@ -12,6 +12,7 @@ import decryptLocalStorage from "util/decryptLocalStorage";
 import generateKeyPair from "util/generateKeypair";
 import withHysteresis from "util/withHysteresis";
 import useHandleDigestUpdate from "./useHandleDigestUpdate";
+import { defaultSettings } from "constants/defaultSettings";
 
 export default function useHandleMnemonicSubmit(mnemonic: React.MutableRefObject<string>) {
 
@@ -92,6 +93,7 @@ export default function useHandleMnemonicSubmit(mnemonic: React.MutableRefObject
                     user: {
                         ...responseUser,
                         privateKey: pki.privateKeyToPem(privateKey),
+                        settings: defaultSettings
                     },
                     chats: defaultChats
                 }

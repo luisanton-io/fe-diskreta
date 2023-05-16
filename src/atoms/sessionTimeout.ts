@@ -1,12 +1,12 @@
 import { selector } from "recoil";
 import { userState } from "./user";
 
-export const themeState = selector({
-    key: "theme",
+export const sessionTimeoutState = selector({
+    key: "sessionTimeout",
     get: ({ get }) => {
-        return get(userState)?.settings.theme ?? "Default";
+        return get(userState)?.settings.sessionTimeout ?? 15;
     },
-    set: ({ set, get }, theme) => {
+    set: ({ set, get }, sessionTimeout) => {
         const user = get(userState);
         if (!user) return;
 
@@ -14,7 +14,7 @@ export const themeState = selector({
             ...user,
             settings: {
                 ...user.settings,
-                theme: theme as string
+                sessionTimeout: sessionTimeout as number
             }
         });
     }
