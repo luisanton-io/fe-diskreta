@@ -37,8 +37,9 @@ body:not([data-theme*="Sans"]) {
     }
 
     .message.received {
-        background-color: #d0d0d0 !important;
-        color: black;
+        background-color: #222222 !important;
+        color: white;
+        @include cancel-hue-rotation;
     }
 
     // span + svg, // ticks
@@ -53,7 +54,7 @@ body:not([data-theme*="Sans"]) {
 
     * {
         color: $hacker-color !important;
-        border-color: $hacker-color;
+        border-color: $hacker-color !important;
     }
 
     *,
