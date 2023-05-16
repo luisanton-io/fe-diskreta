@@ -287,7 +287,7 @@ export default function MessageInput() {
                 )
             }
             <textarea id="msg-input" autoComplete="off"
-                className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
+                className="rounded-0 text-white p-3 bg-transparent flex-grow-1"
                 placeholder="Type a message..."
                 value={text}
                 onChange={e => setText(e.target.value)}

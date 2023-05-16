@@ -23,7 +23,6 @@ export default function FocusHandler() {
     }, [setFocus])
 
     useEffect(() => {
-        console.table({ focus, sessionTimeout })
         const logoutTimeout = setTimeout(() => {
             if (!!sessionTimeout && !focus && !['/register', '/login'].includes(window.location.pathname)) {
                 window.location.reload()
