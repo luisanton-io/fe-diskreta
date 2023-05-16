@@ -401,8 +401,14 @@ textarea {
 }
 
 #settings {
+    // max-height: 85vh;
+    overflow: auto;
     button {
         font-size: 1em;
+    }
+
+    & + div {
+        display: none !important;
     }
 }
 

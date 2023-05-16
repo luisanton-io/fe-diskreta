@@ -4,9 +4,12 @@ import { useSetRecoilState } from "recoil";
 import ManageData from "./Sections/ManageData";
 import Theme from "./Sections/Theme";
 import SessionTimeout from "./Sections/SessionTimeout";
+import { Close } from "@mui/icons-material";
 
 function SettingsDialogContent() {
-    return <div id="settings">
+    const setDialog = useSetRecoilState(dialogState)
+    return <div id="settings" className="py-4 position-relative">
+        <Close className="cursor-pointer position-absolute top-4 end-0 me-3" onClick={() => setDialog(null)} />
         <Theme />
         <SessionTimeout />
         <ManageData />
@@ -19,8 +22,7 @@ export default function Settings() {
     const openDialog = () => {
         setDialog({
             Content: SettingsDialogContent,
-            onConfirm: () => setDialog(null),
-            cancelLabel: "Close"
+            onConfirm: () => setDialog(null)
         })
     }
     return (
