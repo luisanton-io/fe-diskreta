@@ -353,8 +353,8 @@ textarea:focus {
 
 input.form-control,
 textarea {
-    background-color: transparent !important;
-    color: white !important;
+    background-color: transparent;
+    color: white;
     transition: all 0.4s;
 
     &::placeholder {

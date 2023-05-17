@@ -27,19 +27,31 @@ body:not([data-theme*="Sans"]) {
 [data-theme="Sans Light"] {
     --hue-rotation: 220deg;
     --background: #{$sansLight-background};
+    --extra-filters: grayscale(0);
 
     & {
         filter: hue-rotate(var(--hue-rotation)) invert(1);
     }
 
     @mixin cancel-hue-rotation {
-        filter: hue-rotate(calc(360deg - var(--hue-rotation))) invert(1);
+        filter: hue-rotate(calc(360deg - var(--hue-rotation))) invert(1) var(--extra-filters);
     }
 
-    .message.received {
-        background-color: #222222 !important;
-        color: white;
-        @include cancel-hue-rotation;
+    #main-right {
+        .message.received {
+            background-color: #989898 !important;
+            color: black;
+            box-shadow: inset 1px 1px 6px #aeaeae, inset -1px -1px 6px #aeaeae;
+            @include cancel-hue-rotation;
+        }
+
+        .message.sent {
+            background-color: #aeaeae11 !important;
+            color: black;
+            --extra-filters: drop-shadow(-4px -4px 5px rgb(13, 13, 13, 0.5))
+                drop-shadow(4px 4px 3px rgba(213, 213, 213, 0.2));
+            @include cancel-hue-rotation;
+        }
     }
 
     // span + svg, // ticks
