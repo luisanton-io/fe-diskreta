@@ -10,8 +10,8 @@ export default function ChatHeader() {
     const { activeChat, recipients } = useContext(ChatContext)
 
     return <div className="d-flex align-items-center mt-3">
-        <Link to="/" className="d-md-none d-inline-block text-white me-2"><ArrowLeftShort style={{ fontSize: '2em' }} /></Link>
-        {recipients && <h4 className="d-inline-block font-monospace m-0">
+        <Link to="/" className="d-md-none text-white me-2"><ArrowLeftShort style={{ fontSize: '2em' }} /></Link>
+        {recipients && <h4 className="m-0" style={{ letterSpacing: .5 }}>
             {recipients.map(r => r.nick).join(", ")}
         </h4>}
 
