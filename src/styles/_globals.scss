@@ -353,7 +353,7 @@ textarea:focus {
 input.form-control,
 textarea {
     background-color: transparent !important;
-    color: var(--theme-color);
+    color: var(--theme-color) !important;
     border: 1px solid var(--theme-color);
     transition: all 0.4s;
 
