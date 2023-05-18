@@ -111,7 +111,7 @@ export default function SearchDialog() {
 
                 <ListGroup >
                     {users.map((u, i) =>
-                        <ListGroup.Item key={`user-${i}`} style={{ borderColor: 'white' }} className="user-result rounded-0 mb-3 py-3 cursor-pointer text-white border-1" onClick={() => handleSelectedUser(u)}>
+                        <ListGroup.Item key={`user-${i}`} style={{ borderColor: 'var(--theme-color)' }} className="user-result rounded-0 mb-3 py-3 cursor-pointer text-white border-1" onClick={() => handleSelectedUser(u)}>
                             {u.nick}
                         </ListGroup.Item>
                     )}

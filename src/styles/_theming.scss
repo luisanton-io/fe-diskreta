@@ -1,13 +1,25 @@
-body:not([data-theme*="Sans"]) {
-    @extend .font-monospace;
+:root {
+    --theme-color: white;
+    --msg-tick-read: #0dcaf0;
+}
+
+[data-theme] {
+    --background: gray;
 }
 
 [data-theme="Default"] {
+    @extend .font-monospace;
     --background: #{$default-background};
     background-size: 400% 400%;
 }
 
+@mixin sans {
+    font-family: "Red Hat Display", sans-serif;
+    font-size: 16px;
+}
+
 [data-theme="Deep Blue"] {
+    @include sans;
     --background: #{$deepBlue-background};
     background-size: 400% 400%;
     @media (min-width: 768px) {
@@ -15,49 +27,57 @@ body:not([data-theme*="Sans"]) {
     }
 }
 
-[data-theme*="Sans"] {
-    font-family: "Red Hat Display", sans-serif;
-    font-size: 16px;
-}
-
-[data-theme="Sans Dark"] {
-    --background: #{$sansDark-background};
-}
-
-[data-theme="Sans Light"] {
+[data-theme="Sunny"] {
+    @include sans;
     --hue-rotation: 220deg;
     --background: #{$sansLight-background};
-    --extra-filters: grayscale(0);
+    --theme-color: rgb(149, 81, 4);
+    --theme-color-contrast: rgb(255, 238, 209);
 
-    & {
-        filter: hue-rotate(var(--hue-rotation)) invert(1);
+    color: var(--theme-color);
+
+    --bs-light-rgb: var(--theme-color);
+    --bs-border-color: var(--theme-color);
+    --bs-border-color: var(--theme-color);
+
+    ::placeholder {
+        color: var(--theme-color);
+    }
+    [class*="light"] {
+        --bs-btn-color: var(--theme-color);
+        --bs-btn-border-color: var(--theme-color);
     }
 
-    @mixin cancel-hue-rotation {
-        filter: hue-rotate(calc(360deg - var(--hue-rotation))) invert(1) var(--extra-filters);
+    .modal-dialog {
+        --bg-color: #{change-color($color: rgb(255, 238, 209), $alpha: 0.95)};
+        [class*="warning"] {
+            filter: invert(1) hue-rotate(310deg);
+        }
+    }
+
+    .dropdown-item[class*="white"] {
+        color: var(--theme-color-contrast) !important;
     }
 
     #main-right {
-        .message.received {
-            background-color: #989898 !important;
-            color: black;
-            box-shadow: inset 1px 1px 6px #aeaeae, inset -1px -1px 6px #aeaeae;
-            @include cancel-hue-rotation;
-        }
+        #message-container {
+            .message-wrapper {
+                .message.received {
+                    background-color: #33250d9a;
+                    color: var(--theme-color-contrast);
+                    box-shadow: inset 1px 1px 6px #0a0a0a09, inset -1px -1px 6px #0a0a0a09;
+                }
 
-        .message.sent {
-            background-color: #aeaeae11 !important;
-            color: black;
-            --extra-filters: drop-shadow(-4px -4px 5px rgb(13, 13, 13, 0.5))
-                drop-shadow(4px 4px 3px rgba(213, 213, 213, 0.2));
-            @include cancel-hue-rotation;
+                .message.sent {
+                    --tint: #e6b56d40;
+                    --msg-tick-read: #ff9900;
+                    background-color: #aeaeae11;
+                    color: var(--theme-color);
+                    box-shadow: -2px -2px 12px -2px var(--tint), 4px 4px 8px -3px #7c581518;
+                    border: 1px solid var(--tint);
+                }
+            }
         }
-    }
-
-    // span + svg, // ticks
-    img,
-    [class*="danger"] {
-        @include cancel-hue-rotation;
     }
 }
 

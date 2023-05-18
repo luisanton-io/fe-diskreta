@@ -10,7 +10,7 @@ body {
     position: fixed;
     inset: 0;
     padding: 0;
-    color: #fff;
+    color: var(--theme-color);
     font-size: 13px;
 }
 
@@ -45,12 +45,11 @@ textarea:focus {
 }
 
 .modal-dialog {
+    --bg-color: #{change-color($color: $black, $alpha: 0.85)};
     margin-top: env(safe-area-inset-top);
     .modal-content {
-        background-color: change-color($color: $black, $alpha: 0.85);
+        background-color: var(--bg-color);
         backdrop-filter: blur(8px);
-
-        color: #fff;
         border: none;
         background-size: 800% 800%;
         border-radius: 0px;
@@ -85,7 +84,7 @@ textarea:focus {
             border-radius: 0;
 
             background-color: transparent;
-            color: white;
+            color: var(--theme-color);
 
             &[data-active="true"] {
                 @extend .bg-dark;
@@ -353,12 +352,13 @@ textarea:focus {
 
 input.form-control,
 textarea {
-    background-color: transparent;
-    color: white;
+    background-color: transparent !important;
+    color: var(--theme-color);
+    border: 1px solid var(--theme-color);
     transition: all 0.4s;
 
     &::placeholder {
-        color: white;
+        color: var(--theme-color);
         // @extend .font-monospace;
     }
 

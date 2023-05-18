@@ -114,7 +114,7 @@ export default function Message({ message, sent, i }: Props) {
                         sent &&
                         <Icon className={
                             message.content.text && "mt-1 ms-2"
-                        } style={{ float: 'right', fontSize: '1em', color: status === 'read' ? '#0dcaf0' : undefined }} />
+                        } style={{ float: 'right', fontSize: '1em', color: status === 'read' ? 'var(--msg-tick-read)' : undefined }} />
                     }
                 </span>
             </div>
