@@ -4,6 +4,7 @@ import { userState } from "atoms/user";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { isMobile } from "react-device-detect";
 
 export default function FocusHandler() {
     const navigate = useNavigate()
@@ -14,7 +15,7 @@ export default function FocusHandler() {
 
     useEffect(() => {
         const focusDaemon = setInterval(() => {
-            setFocus(!document.hidden && document.hasFocus())
+            setFocus(!document.hidden && (isMobile || document.hasFocus()))
         }, 1000)
 
         return () => {
