@@ -30,7 +30,10 @@ export default function ChatBody() {
                     recipientId: user._id
                 })
 
-                socket.emit("read-msg", msg)
+                socket.emit("read-msg", {
+                    ...msg,
+                    content: {} // remove decrypted content
+                })
             })
         }
     }, [hasFocus, socket, connected, user?._id, activeChat, handleMessageStatus])
