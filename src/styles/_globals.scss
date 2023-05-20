@@ -192,6 +192,7 @@ textarea:focus {
                 }
             }
             .message {
+                cursor: pointer;
                 position: relative;
                 max-width: 85%;
                 padding-inline: 2ch;
@@ -199,6 +200,7 @@ textarea:focus {
 
                 display: flex;
                 flex-direction: column;
+                align-items: flex-start;
 
                 border-radius: 16px;
 

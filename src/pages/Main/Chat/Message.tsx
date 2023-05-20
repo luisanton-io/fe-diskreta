@@ -5,8 +5,9 @@ import delivered from '@mui/icons-material/DoneAll';
 import { replyingToState } from 'atoms/replyingTo';
 import { MEDIA_PLACEHOLDER } from 'constants/mediaPlaceholder';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
+import useLongPress from 'hooks/useLongPress';
 import useSwipe from 'hooks/useSwipe';
-import React, { CSSProperties, useContext, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useContext, useEffect } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
@@ -28,6 +29,9 @@ const emojiRegex = new RegExp(/^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){1,2
 
 export default function Message({ message, sent, i }: Props) {
 
+    const id = '_' + message.hash
+    const messageTime = `${new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+
     const { handleDisplayTimeStamp, displayedTimestamp, show } = useDisplayTimestamp(message, i)
 
     const status = isMessageSent(message) ? message.status?.[message.to[0]._id].split(' ')[0] : message.status
@@ -35,11 +39,15 @@ export default function Message({ message, sent, i }: Props) {
 
     const { setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const { deltaX, vSwipe, ...swipeProps } = useSwipe()
+    const { deltaX, vSwipe, ...swipeHandlers } = useSwipe()
+
 
     const triggerReply = !vSwipe && deltaX > 50
 
     const translateX = triggerReply ? 50 : vSwipe ? 0 : deltaX
+    const transform = !!translateX ? `translateX(-${translateX}px)` : undefined
+
+    // console.table({ deltaX, translateX, transform })
 
     const setReplyingTo = useSetRecoilState(replyingToState)
 
@@ -56,49 +64,34 @@ export default function Message({ message, sent, i }: Props) {
 
     const replyIconTransition = Math.abs(deltaX) / 50
 
+    const { longPressTimeout, longPressed, setLongPressed, ...longPressHandlers } = useLongPress()
+
+    useEffect(() => {
+        const currentTimeout = longPressTimeout.current
+        return () => {
+            currentTimeout && clearTimeout(currentTimeout)
+        }
+    }, [deltaX, longPressTimeout])
+
+    useEffect(() => {
+        longPressed && document.querySelector(`#${id}`)!.scrollIntoView({ behavior: 'smooth', "block": "center" })
+    }, [longPressed, id])
+
     const handleSpotlight = () => {
         setSpotlight(s => s && ({ ...s, media: message.content.media!, hash: message.hash }))
     }
 
-    const selectionTimeout = useRef<NodeJS.Timeout>()
-
-    useEffect(() => {
-        return () => {
-            selectionTimeout.current && clearTimeout(selectionTimeout.current)
-        }
-    }, [deltaX])
-
-    const [selected, setSelected] = useState(false);
-    const transform = !!translateX ? `translateX(-${translateX}px)` : undefined
-
-    const id = '_' + message.hash
-
-    useEffect(() => {
-        selected && document.querySelector(`#${id}`)!.scrollIntoView({ behavior: 'smooth', "block": "center" })
-    }, [selected, id])
-
-    const messageTime = `${new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-
     return <div className="d-flex align-items-center message-wrapper my-1"
         id={id}
+        data-selected={longPressed}
+        {...swipeHandlers}
         style={{ transform }}
-        data-selected={selected}
-        {...swipeProps}
     >
-        <div className="overlay" onClick={() => setSelected(false)}></div>
+        <div className="overlay" onClick={() => setLongPressed(false)}></div>
         <div
-            onTouchStart={e => {
-                e.stopPropagation()
-                selectionTimeout.current = setTimeout(() => {
-                    setSelected(true)
-                }, 500)
-            }}
-            onTouchEnd={e => {
-                e.stopPropagation()
-                selectionTimeout.current && clearTimeout(selectionTimeout.current)
-            }}
-            className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"}`}
-            onClick={() => !selected && isMessageSent(message) && handleDisplayTimeStamp()}
+            className={`message ${sent ? "sent" : "received"}`}
+            onClick={() => !longPressed && sent && handleDisplayTimeStamp()}
+            {...longPressHandlers}
         >
             {
                 message.replyingTo && <div className={`reply mb-0 mt-2`} onClick={handleScrollTo(message.replyingTo!.hash)}>
@@ -156,10 +149,10 @@ export default function Message({ message, sent, i }: Props) {
                         <span style={{ fontSize: '0.6em' }}>{messageTime}</span>
                         {
                             sent &&
-                            <Icon className={
-                                // message.content.text && "mt-1 ms-2"
-                                "ms-1"
-                            } style={{ fontSize: '1em', color: status === 'read' ? 'var(--msg-tick-read)' : undefined }} />
+                            <Icon className="ms-1" style={{
+                                fontSize: '1em',
+                                color: status === 'read' ? 'var(--msg-tick-read)' : undefined
+                            }} />
                         }
                     </div>
                 </span>
