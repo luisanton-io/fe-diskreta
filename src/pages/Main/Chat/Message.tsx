@@ -5,15 +5,16 @@ import delivered from '@mui/icons-material/DoneAll';
 import { dialogState } from 'atoms/dialog';
 import { replyingToState } from 'atoms/replyingTo';
 import { userState } from 'atoms/user';
-import { DialogClose } from 'components/Dialog';
 import { MEDIA_PLACEHOLDER } from 'constants/mediaPlaceholder';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useLongPress from 'hooks/useLongPress';
 import useSwipe from 'hooks/useSwipe';
 import useUpdateMessage from 'hooks/useUpdateMessage';
 import React, { CSSProperties, useContext, useEffect } from 'react';
+import { EmojiSmile } from 'react-bootstrap-icons';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
+import UsersReaction from './UsersReaction';
 import { ChatContext } from './context/ChatCtx';
 
 const Icons = {
@@ -110,31 +111,16 @@ export default function Message({ message, sent, i }: Props) {
 
     const setDialog = useSetRecoilState(dialogState)
 
-    const handleReactionsDialog = () => {
-        console.log("handleReactionDialog")
+    const handleReactionsDialog = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         // open dialog to display users reactions
+        e.stopPropagation()
         setDialog(dialog => {
             return {
                 ...(dialog || {}),
                 onConfirm() {
                     return null
                 },
-                Content: () => <div id="users-reaction">
-                    <h5 className="mt-4 text-start">Reactions</h5>
-                    <DialogClose />
-                    {
-                        Object.entries(message.reactions || {})
-                            .sort(([, aReaction], [, bReaction]) => {
-                                return reactions.indexOf(aReaction!) - reactions.indexOf(bReaction!)
-                            })
-                            .map(([memberId, reaction]) => {
-                                const nick = recipients.find(r => r._id === memberId)?.nick || user?.nick
-                                return <div className="d-flex w-100 align-items-center p-3">
-                                    <span className="w-25 text-center fs-2">{reaction}</span>
-                                    <span>{nick}</span>
-                                </div>
-                            })
-                    }</div>
+                Content: () => <UsersReaction message={message} recipients={recipients} />
             }
         })
     }
@@ -151,13 +137,13 @@ export default function Message({ message, sent, i }: Props) {
     >
         {longPressed && <>
             <div className="overlay" onClick={() => setLongPressed(false)}></div>
-            {
-                console.log(message.reactions)
-            }
-            <div className="select-reaction">
+            <div className="select-reaction" data-reacted={Object.keys(message.reactions || {}).includes(user!._id)}>
                 {
                     reactions.map(reaction => (
-                        <span key={reaction} className="option-reaction" onClick={handleReaction(reaction)}>
+                        <span key={reaction}
+                            data-selected={message.reactions?.[user!._id] === reaction}
+                            className="option-reaction"
+                            onClick={handleReaction(reaction)}>
                             {reaction}
                         </span>
                     ))
@@ -260,8 +246,13 @@ export default function Message({ message, sent, i }: Props) {
             sent &&
             <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
         }
-        <div className="reply-icon-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties} onClick={() => setReplyingTo(message)}>
-            <Reply />
+        <div className="actions-icons-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties}>
+            <span className="ms-2" onClick={() => setLongPressed(true)}>
+                <EmojiSmile />
+            </span>
+            <span className="ms-2" onClick={() => setReplyingTo(message)}>
+                <Reply />
+            </span>
         </div>
     </div>
 }
