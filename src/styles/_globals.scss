@@ -131,6 +131,10 @@ textarea:focus {
         position: static;
     }
 
+    *:not(textarea) {
+        user-select: none !important;
+    }
+
     height: 100%;
 
     &[data-active-chat="false"] {
@@ -172,8 +176,21 @@ textarea:focus {
         @extend .custom-scrollbar;
         margin-left: -0.5rem;
         overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
+        // -webkit-overflow-scrolling: touch;
         .message-wrapper {
+            position: relative;
+            &[data-selected="true"] {
+                .overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: #00000038;
+                    z-index: 2;
+                    backdrop-filter: blur(4px);
+                }
+                .message {
+                    z-index: 3;
+                }
+            }
             .message {
                 position: relative;
                 max-width: 85%;

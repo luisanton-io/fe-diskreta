@@ -12,7 +12,8 @@ interface User {
     publicKey: string
 }
 
-type SentMessageStatus = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+type SentMessageStatusWithoutTime = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+type SentMessageStatus = `${SentMessageStatusWithoutTime} ${number}`
 
 type ReceivedMessageStatus = 'new' | 'read'
 
@@ -20,7 +21,8 @@ interface MessageStatusUpdate {
     chatId: string,
     hash: string,
     recipientId: string,
-    status: SentMessageStatus | ReceivedMessageStatus
+    status: SentMessageStatusWithoutTime | ReceivedMessageStatus
+    timestamp?: number
 }
 
 interface Media {

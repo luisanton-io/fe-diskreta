@@ -2,7 +2,7 @@ import useUpdateMessage from "hooks/useUpdateMessage";
 import { useCallback } from "react";
 import { isMessageSent } from "util/isMessageSent";
 
-export const SentMessageStatusValues: SentMessageStatus[] = [
+export const SentMessageStatusValues: SentMessageStatusWithoutTime[] = [
     'outgoing', 'error', 'sent', 'delivered', 'read'
 ]
 
@@ -14,18 +14,19 @@ export default function useMessageStatus() {
 
     const updateMessage = useUpdateMessage()
 
-    return useCallback(({ chatId, hash, recipientId, status }: MessageStatusUpdate, ack?: Function) => {
+    return useCallback(({ chatId, hash, recipientId, status, timestamp = Date.now() }: MessageStatusUpdate, ack?: Function) => {
 
         updateMessage({
             chatId, hash, updater: message => {
 
                 if (isMessageSent(message)) {
-                    if (SentMessageStatusValues.indexOf(message.status[recipientId]) < SentMessageStatusValues.indexOf(status as SentMessageStatus)) {
+                    if (SentMessageStatusValues.indexOf(message.status[recipientId].split(' ')[0] as SentMessageStatusWithoutTime) < SentMessageStatusValues.indexOf(status as SentMessageStatusWithoutTime)) {
                         return {
                             ...message,
                             status: {
                                 ...message.status,
-                                [recipientId]: status as SentMessageStatus
+                                // Changing this to tuple (as it should) would break the app for old users :(
+                                [recipientId]: `${status} ${timestamp}` as SentMessageStatus
                             }
                         }
                     }
