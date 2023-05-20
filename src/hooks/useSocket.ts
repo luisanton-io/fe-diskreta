@@ -97,13 +97,17 @@ export default function useSocket() {
 
             console.table({ chatId, hash, senderId, reaction })
 
-            const updater = (message: SentMessage | ReceivedMessage) => ({
-                ...message,
-                reactions: {
-                    ...message.reactions,
-                    [senderId]: message.reactions?.senderId === reaction ? undefined : reaction
+            const updater = (message: SentMessage | ReceivedMessage) => {
+                const updatedReaction = message.reactions?.[senderId] === reaction ? undefined : reaction
+
+                return {
+                    ...message,
+                    reactions: {
+                        ...(message.reactions || {}),
+                        [senderId]: updatedReaction
+                    }
                 }
-            })
+            }
 
             updateMessage({ chatId, hash, updater })
             ack?.()
