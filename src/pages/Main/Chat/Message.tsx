@@ -2,13 +2,19 @@ import { Reply } from '@mui/icons-material';
 import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
+import { dialogState } from 'atoms/dialog';
 import { replyingToState } from 'atoms/replyingTo';
+import { userState } from 'atoms/user';
 import { MEDIA_PLACEHOLDER } from 'constants/mediaPlaceholder';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
+import useLongPress from 'hooks/useLongPress';
 import useSwipe from 'hooks/useSwipe';
+import useUpdateMessage from 'hooks/useUpdateMessage';
 import React, { CSSProperties, useContext, useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { EmojiSmile } from 'react-bootstrap-icons';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
+import UsersReaction from './UsersReaction';
 import { ChatContext } from './context/ChatCtx';
 
 const Icons = {
@@ -24,20 +30,28 @@ interface Props {
 const urlRegexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
 const emojiRegex = new RegExp(/^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){1,2}|(?:\ud83d[\udc00-\ude4f]){1,2}|(?:\ud83d[\ude80-\udeff]){1,2}|(?:\ud83e[\udd00-\udfff]){1,2}|[\u0023-\u0039]\u20e3|[\u200d\u2934-\u2935\u2b05-\u2b07\u2b1b\u2b1c\u2b50\u2b55\u3030\u303d\u3297\u3299]\ufe0f?)+$/);
 
+export const reactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const
+
 export default function Message({ message, sent, i }: Props) {
+
+    const id = '_' + message.hash
+    const messageTime = `${new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
 
     const { handleDisplayTimeStamp, displayedTimestamp, show } = useDisplayTimestamp(message, i)
 
-    const status = isMessageSent(message) ? message.status?.[message.to[0]._id] : message.status
-    const Icon = Icons[status]
+    const status = isMessageSent(message) ? message.status?.[message.to[0]._id].split(' ')[0] : message.status
+    const Icon = Icons[status as SentMessageStatusWithoutTime | ReceivedMessageStatus]
 
-    const { setSpotlight, handleScrollTo } = useContext(ChatContext)
+    const { socket, recipients, setSpotlight, handleScrollTo } = useContext(ChatContext)
 
-    const { deltaX, vSwipe, ...swipeProps } = useSwipe()
+    const { deltaX, vSwipe, ...swipeHandlers } = useSwipe()
 
     const triggerReply = !vSwipe && deltaX > 50
 
     const translateX = triggerReply ? 50 : vSwipe ? 0 : deltaX
+    const transform = !!translateX ? `translateX(-${translateX}px)` : undefined
+
+    // console.table({ deltaX, translateX, transform })
 
     const setReplyingTo = useSetRecoilState(replyingToState)
 
@@ -54,14 +68,114 @@ export default function Message({ message, sent, i }: Props) {
 
     const replyIconTransition = Math.abs(deltaX) / 50
 
+    const { longPressTimeout, longPressed, setLongPressed, ...longPressHandlers } = useLongPress()
+
+    useEffect(() => {
+        const currentTimeout = longPressTimeout.current
+        return () => {
+            currentTimeout && clearTimeout(currentTimeout)
+        }
+    }, [deltaX, longPressTimeout])
+
+    useEffect(() => {
+        longPressed && document.querySelector(`#${id}`)!.scrollIntoView({ behavior: 'smooth', "block": "center" })
+    }, [longPressed, id])
+
+    const user = useRecoilValue(userState)
+    const updateMessage = useUpdateMessage()
+
+    const handleReaction = (reaction: Reaction) => () => {
+        updateMessage({
+            chatId: message.chatId,
+            hash: message.hash,
+            updater: message => ({
+                ...message,
+                reactions: {
+                    ...(message.reactions || {}),
+                    [user!._id]: message.reactions?.[user!._id] === reaction ? undefined : reaction
+                }
+            })
+        })
+        for (const recipient of recipients) {
+            const reactionPayload: ReactionPayload = {
+                chatId: message.chatId,
+                hash: message.hash,
+                senderId: user!._id,
+                recipientId: recipient._id,
+                reaction
+            }
+
+            socket.emit('out-reaction', reactionPayload)
+        }
+    }
+
+    const setDialog = useSetRecoilState(dialogState)
+
+    const handleReactionsDialog = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        // open dialog to display users reactions
+        e.stopPropagation()
+        setDialog(dialog => {
+            return {
+                ...(dialog || {}),
+                onConfirm() {
+                    return null
+                },
+                Content: () => <UsersReaction message={message} recipients={recipients} />
+            }
+        })
+    }
+
     const handleSpotlight = () => {
         setSpotlight(s => s && ({ ...s, media: message.content.media!, hash: message.hash }))
     }
 
-    return <div id={'_' + message.hash} className="d-flex align-items-center position-relative message-wrapper my-1" {...swipeProps}
-        style={{ transform: `translateX(-${translateX}px)` }}
+    return <div className="d-flex align-items-center message-wrapper my-1"
+        id={id}
+        data-selected={longPressed}
+        {...swipeHandlers}
+        style={{ transform }}
     >
-        <div className={`cursor-pointer message d-flex flex-column align-items-start ${sent ? "sent" : "received"}`} onClick={handleDisplayTimeStamp}>
+        {longPressed && <>
+            <div className="overlay" onClick={() => setLongPressed(false)}></div>
+            <div className="select-reaction" data-reacted={Object.keys(message.reactions || {}).includes(user!._id)}>
+                {
+                    reactions.map(reaction => (
+                        <span key={reaction}
+                            data-selected={message.reactions?.[user!._id] === reaction}
+                            className="option-reaction"
+                            onClick={handleReaction(reaction)}>
+                            {reaction}
+                        </span>
+                    ))
+                }
+            </div>
+        </>}
+        <div
+            className={`message ${sent ? "sent" : "received"}`}
+            onClick={() => !longPressed && sent && handleDisplayTimeStamp()}
+            {...longPressHandlers}
+        >
+            <div className='reactions' onClick={handleReactionsDialog}>
+                {
+                    message.reactions &&
+                    Object.values(message.reactions as Record<string, Reaction>)
+                        .reduce((all, reaction) => {
+                            const reactionIx = all.findIndex(([_reaction]) => _reaction === reaction)
+
+                            ~reactionIx
+                                ? all[reactionIx][1]++
+                                : all.push([reaction, 1])
+
+                            return all
+                        }, [] as [Reaction, number][])
+                        .map(([reaction, count], i) => (
+                            <span key={`reaction-${i}`} className="d-flex align-items-center px-1">
+                                {reaction}
+                                {count > 1 && <span className="count">{count}</span>}
+                            </span>
+                        ))
+                }
+            </div>
             {
                 message.replyingTo && <div className={`reply mb-0 mt-2`} onClick={handleScrollTo(message.replyingTo!.hash)}>
                     <div className="bg-dark px-3 py-3 mx-2" style={{ borderRadius: '1em' }}>
@@ -110,19 +224,35 @@ export default function Message({ message, sent, i }: Props) {
                                 }</span>
                         )
                     }
-                    {
-                        sent &&
-                        <Icon className={
-                            message.content.text && "mt-1 ms-2"
-                        } style={{ float: 'right', fontSize: '1em', color: status === 'read' ? 'var(--msg-tick-read)' : undefined }} />
-                    }
+                    <div className="d-flex align-items-center" style={{
+                        float: 'right',
+                        marginInlineStart: '1ch',
+                        lineHeight: '1.75em'
+                    }}>
+                        <span style={{ fontSize: '0.6em' }}>{messageTime}</span>
+                        {
+                            sent &&
+                            <Icon className="ms-1" style={{
+                                fontSize: '1em',
+                                color: status === 'read' ? 'var(--msg-tick-read)' : undefined
+                            }} />
+                        }
+                    </div>
                 </span>
             </div>
 
         </div>
-        <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
-        <div className="reply-icon-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties} onClick={() => setReplyingTo(message)}>
-            <Reply />
+        {
+            sent &&
+            <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
+        }
+        <div className="actions-icons-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties}>
+            <span className="ms-2" onClick={() => setLongPressed(true)}>
+                <EmojiSmile />
+            </span>
+            <span className="ms-2" onClick={() => setReplyingTo(message)}>
+                <Reply />
+            </span>
         </div>
     </div>
 }

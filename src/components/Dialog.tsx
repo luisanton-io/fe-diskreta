@@ -1,6 +1,12 @@
 import { Button, Container, Modal } from "react-bootstrap"
-import { useRecoilState } from "recoil"
+import { useRecoilState, useSetRecoilState } from "recoil"
 import { dialogState } from "../atoms/dialog"
+import { Close } from "@mui/icons-material"
+
+export function DialogClose() {
+    const setDialog = useSetRecoilState(dialogState)
+    return <Close className="cursor-pointer position-absolute end-0 me-3" onClick={() => setDialog(null)} style={{ top: '1em' }} />
+}
 
 export default function Dialog() {
     const [Dialog, setDialog] = useRecoilState(dialogState)

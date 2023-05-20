@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import { useRecoilValue, useSetRecoilState } from "recoil"
 import { io } from "socket.io-client"
+import useUpdateMessage from "./useUpdateMessage"
 
 interface TimeoutMap {
     [key: string]: { // chatid
@@ -33,15 +34,17 @@ export default function useSocket() {
 
     const setChats = useSetRecoilState(chatsState)
     const typingTimeouts = useRef<TimeoutMap>({})
+    const updateMessage = useUpdateMessage()
 
     useEffect(() => {
         if (!socket) return
 
         API.get<Queue>("/queues").then(({ data: queue }) => {
-            const { messages = [], status = [] } = queue || {}
+            const { messages = [], status = [], reactions = [] } = queue || {}
             try {
                 messages.forEach(msg => archiveMessage(msg, { showToast: false }))
                 status.forEach(msg => handleMessageStatus(msg))
+                reactions.forEach(reaction => handleMessageReaction(reaction))
             } catch (error) {
                 console.log("Handle dequeue error:", error)
             }
@@ -90,6 +93,26 @@ export default function useSocket() {
 
         }
 
+        const handleMessageReaction = ({ chatId, hash, senderId, reaction }: IncomingReaction, ack?: Function) => {
+
+            console.table({ chatId, hash, senderId, reaction })
+
+            const updater = (message: SentMessage | ReceivedMessage) => {
+                const updatedReaction = message.reactions?.[senderId] === reaction ? undefined : reaction
+
+                return {
+                    ...message,
+                    reactions: {
+                        ...(message.reactions || {}),
+                        [senderId]: updatedReaction
+                    }
+                }
+            }
+
+            updateMessage({ chatId, hash, updater })
+            ack?.()
+        }
+
         const handleRefreshToken = () => {
             socket.disconnect()
             refreshToken()
@@ -117,6 +140,7 @@ export default function useSocket() {
         socket.on('in-msg', handleArchiveMessage)
         socket.on('msg-status', handleMessageStatus)
         socket.on('typing', handleTyping)
+        socket.on('in-reaction', handleMessageReaction)
         socket.on('connect', onConnect)
         socket.on('disconnect', onDisconnect)
         socket.on('connect_error', handleRefreshToken);
@@ -125,12 +149,13 @@ export default function useSocket() {
             socket.off('in-msg', handleArchiveMessage)
             socket.off('msg-status', handleMessageStatus)
             socket.off('typing', handleTyping)
+            socket.off('in-reaction', handleMessageReaction)
             socket.off('connect', onConnect)
             socket.off('disconnect', onDisconnect)
             socket.off('connect_error', handleRefreshToken);
         }
 
-    }, [socket, archiveMessage, handleMessageStatus, setChats])
+    }, [socket, archiveMessage, handleMessageStatus, setChats, updateMessage])
 
     return { socket, connected }
 }

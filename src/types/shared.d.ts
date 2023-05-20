@@ -12,7 +12,8 @@ interface User {
     publicKey: string
 }
 
-type SentMessageStatus = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+type SentMessageStatusWithoutTime = 'outgoing' | 'sent' | 'delivered' | 'read' | 'error'
+type SentMessageStatus = `${SentMessageStatusWithoutTime} ${number}`
 
 type ReceivedMessageStatus = 'new' | 'read'
 
@@ -20,7 +21,8 @@ interface MessageStatusUpdate {
     chatId: string,
     hash: string,
     recipientId: string,
-    status: SentMessageStatus | ReceivedMessageStatus
+    status: SentMessageStatusWithoutTime | ReceivedMessageStatus
+    timestamp?: number
 }
 
 interface Media {
@@ -39,6 +41,7 @@ interface Message {
     timestamp: number
     hash: string,
     replyingTo?: Reply
+    reactions?: Record<string, Reaction | undefined>
 }
 
 type Reply = Pick<Message, 'sender' | 'content' | 'hash'>
@@ -61,7 +64,8 @@ interface Chat {
 }
 interface Queue {
     messages: ReceivedMessage[],
-    status: MessageStatusUpdate[]
+    status: MessageStatusUpdate[],
+    reactions: IncomingReaction[]
 }
 
 interface TypingMsg {
@@ -70,3 +74,13 @@ interface TypingMsg {
 }
 
 type Override<T, R> = Omit<T, keyof R> & R;
+
+interface ReactionPayload {
+    chatId: string,
+    hash: string,
+    senderId: string, // user id
+    recipientId: string, // user id
+    reaction: Reaction
+}
+
+type IncomingReaction = Omit<ReactionPayload, "recipientId">

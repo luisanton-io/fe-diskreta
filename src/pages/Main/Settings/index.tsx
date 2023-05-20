@@ -1,15 +1,14 @@
 import { dialogState } from "atoms/dialog";
+import { DialogClose } from "components/Dialog";
 import { GearWideConnected } from "react-bootstrap-icons";
 import { useSetRecoilState } from "recoil";
 import ManageData from "./Sections/ManageData";
-import Theme from "./Sections/Theme";
 import SessionTimeout from "./Sections/SessionTimeout";
-import { Close } from "@mui/icons-material";
+import Theme from "./Sections/Theme";
 
 function SettingsDialogContent() {
-    const setDialog = useSetRecoilState(dialogState)
     return <div id="settings" className="py-4 position-relative">
-        <Close className="cursor-pointer position-absolute top-4 end-0 me-3" onClick={() => setDialog(null)} />
+        <DialogClose />
         <Theme />
         <SessionTimeout />
         <ManageData />
