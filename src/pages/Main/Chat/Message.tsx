@@ -247,7 +247,7 @@ export default function Message({ message, sent, i }: Props) {
             <span className={`timestamp ${show ? "show" : ''}`}>{displayedTimestamp.replace(',', '')}</span>
         }
         <div className="actions-icons-wrapper" style={{ '--transition': replyIconTransition } as CSSProperties}>
-            <span className="ms-2" onClick={() => setLongPressed(true)}>
+            <span className="d-none d-md-block ms-2" onClick={() => setLongPressed(true)}>
                 <EmojiSmile />
             </span>
             <span className="ms-2" onClick={() => setReplyingTo(message)}>
