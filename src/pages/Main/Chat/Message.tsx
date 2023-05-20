@@ -2,13 +2,17 @@ import { Reply } from '@mui/icons-material';
 import outgoing from '@mui/icons-material/AccessTime';
 import sent from '@mui/icons-material/Done';
 import delivered from '@mui/icons-material/DoneAll';
+import { dialogState } from 'atoms/dialog';
 import { replyingToState } from 'atoms/replyingTo';
+import { userState } from 'atoms/user';
+import { DialogClose } from 'components/Dialog';
 import { MEDIA_PLACEHOLDER } from 'constants/mediaPlaceholder';
 import useDisplayTimestamp from "hooks/useDisplayTimestamp";
 import useLongPress from 'hooks/useLongPress';
 import useSwipe from 'hooks/useSwipe';
+import useUpdateMessage from 'hooks/useUpdateMessage';
 import React, { CSSProperties, useContext, useEffect } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import { ChatContext } from './context/ChatCtx';
 
@@ -25,7 +29,7 @@ interface Props {
 const urlRegexp = /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:\/\S*)?$/;
 const emojiRegex = new RegExp(/^(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){1,2}|(?:\ud83d[\udc00-\ude4f]){1,2}|(?:\ud83d[\ude80-\udeff]){1,2}|(?:\ud83e[\udd00-\udfff]){1,2}|[\u0023-\u0039]\u20e3|[\u200d\u2934-\u2935\u2b05-\u2b07\u2b1b\u2b1c\u2b50\u2b55\u3030\u303d\u3297\u3299]\ufe0f?)+$/);
 
-// const reactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const
+export const reactions = ["👍", "❤️", "😂", "😮", "😢", "🙏"] as const
 
 export default function Message({ message, sent, i }: Props) {
 
@@ -37,10 +41,9 @@ export default function Message({ message, sent, i }: Props) {
     const status = isMessageSent(message) ? message.status?.[message.to[0]._id].split(' ')[0] : message.status
     const Icon = Icons[status as SentMessageStatusWithoutTime | ReceivedMessageStatus]
 
-    const { setSpotlight, handleScrollTo } = useContext(ChatContext)
+    const { socket, recipients, setSpotlight, handleScrollTo } = useContext(ChatContext)
 
     const { deltaX, vSwipe, ...swipeHandlers } = useSwipe()
-
 
     const triggerReply = !vSwipe && deltaX > 50
 
@@ -77,6 +80,65 @@ export default function Message({ message, sent, i }: Props) {
         longPressed && document.querySelector(`#${id}`)!.scrollIntoView({ behavior: 'smooth', "block": "center" })
     }, [longPressed, id])
 
+    const user = useRecoilValue(userState)
+    const updateMessage = useUpdateMessage()
+
+    const handleReaction = (reaction: Reaction) => () => {
+        updateMessage({
+            chatId: message.chatId,
+            hash: message.hash,
+            updater: message => ({
+                ...message,
+                reactions: {
+                    ...(message.reactions || {}),
+                    [user!._id]: message.reactions?.[user!._id] === reaction ? undefined : reaction
+                }
+            })
+        })
+        for (const recipient of recipients) {
+            const reactionPayload: ReactionPayload = {
+                chatId: message.chatId,
+                hash: message.hash,
+                senderId: user!._id,
+                recipientId: recipient._id,
+                reaction
+            }
+
+            socket.emit('out-reaction', reactionPayload)
+        }
+    }
+
+    const setDialog = useSetRecoilState(dialogState)
+
+    const handleReactionsDialog = () => {
+        console.log("handleReactionDialog")
+        // open dialog to display users reactions
+        setDialog(dialog => {
+            return {
+                ...(dialog || {}),
+                onConfirm() {
+                    return null
+                },
+                Content: () => <div id="users-reaction">
+                    <h5 className="mt-4 text-start">Reactions</h5>
+                    <DialogClose />
+                    {
+                        Object.entries(message.reactions || {})
+                            .sort(([, aReaction], [, bReaction]) => {
+                                return reactions.indexOf(aReaction!) - reactions.indexOf(bReaction!)
+                            })
+                            .map(([memberId, reaction]) => {
+                                const nick = recipients.find(r => r._id === memberId)?.nick || user?.nick
+                                return <div className="d-flex w-100 align-items-center p-3">
+                                    <span className="w-25 text-center fs-2">{reaction}</span>
+                                    <span>{nick}</span>
+                                </div>
+                            })
+                    }</div>
+            }
+        })
+    }
+
     const handleSpotlight = () => {
         setSpotlight(s => s && ({ ...s, media: message.content.media!, hash: message.hash }))
     }
@@ -87,12 +149,47 @@ export default function Message({ message, sent, i }: Props) {
         {...swipeHandlers}
         style={{ transform }}
     >
-        <div className="overlay" onClick={() => setLongPressed(false)}></div>
+        {longPressed && <>
+            <div className="overlay" onClick={() => setLongPressed(false)}></div>
+            {
+                console.log(message.reactions)
+            }
+            <div className="select-reaction">
+                {
+                    reactions.map(reaction => (
+                        <span key={reaction} className="option-reaction" onClick={handleReaction(reaction)}>
+                            {reaction}
+                        </span>
+                    ))
+                }
+            </div>
+        </>}
         <div
             className={`message ${sent ? "sent" : "received"}`}
             onClick={() => !longPressed && sent && handleDisplayTimeStamp()}
             {...longPressHandlers}
         >
+            <div className='reactions' onClick={handleReactionsDialog}>
+                {
+                    message.reactions &&
+                    Object.values(message.reactions as Record<string, Reaction>)
+                        .reduce((all, reaction) => {
+                            const reactionIx = all.findIndex(([_reaction]) => _reaction === reaction)
+
+                            ~reactionIx
+                                ? all[reactionIx][1]++
+                                : all.push([reaction, 1])
+
+                            return all
+                        }, [] as [Reaction, number][])
+                        .map(([reaction, count], i) => (
+                            <span key={`reaction-${i}`} className="d-flex align-items-center px-1">
+                                {reaction}
+                                {count > 1 && <span className="count">{count}</span>}
+                            </span>
+                        ))
+                }
+            </div>
             {
                 message.replyingTo && <div className={`reply mb-0 mt-2`} onClick={handleScrollTo(message.replyingTo!.hash)}>
                     <div className="bg-dark px-3 py-3 mx-2" style={{ borderRadius: '1em' }}>

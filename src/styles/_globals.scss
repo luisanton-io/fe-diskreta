@@ -187,6 +187,16 @@ textarea:focus {
                     z-index: 2;
                     backdrop-filter: blur(4px);
                 }
+                .select-reaction {
+                    z-index: 3;
+                    position: absolute;
+                    bottom: calc(100% + 0.5em);
+                    right: 0px;
+                    font-size: 2em;
+                    .option-reaction {
+                        margin-inline: 0.4ch;
+                    }
+                }
                 .message {
                     z-index: 3;
                 }
@@ -217,6 +227,7 @@ textarea:focus {
                     align-items: start;
                     border-bottom-left-radius: 0px;
                     order: 0;
+                    --reactions-right: 0px;
                     + .timestamp {
                         transform: translateX(-20%);
                         margin-right: auto;
@@ -229,11 +240,11 @@ textarea:focus {
 
                 &.sent {
                     background-color: transparent;
-                    // color: black;
                     border: 1px solid white;
                     border-bottom-right-radius: 0px;
                     align-items: flex-end;
                     order: 1;
+                    --reactions-right: 100%;
                     + .timestamp {
                         transform: translateX(20%);
                         margin-left: auto;
@@ -258,6 +269,20 @@ textarea:focus {
                     position: relative;
                     width: calc(100% + 4ch);
                     left: -2ch;
+                }
+
+                .reactions {
+                    position: absolute;
+                    display: flex;
+                    top: 100%;
+                    right: var(--reactions-right);
+                    transform: translate(50%, -75%);
+                    background-color: rgba(13, 13, 13, 0.85);
+                    border-radius: 500px;
+                    .count {
+                        font-size: 0.65em;
+                        padding-inline: 0.5em;
+                    }
                 }
             }
             @media (min-width: 768px) {
@@ -425,6 +450,15 @@ textarea {
         font-size: 1em;
     }
 
+    & + div {
+        display: none !important;
+    }
+}
+
+#users-reaction {
+    // min-height: 25vh;
+    display: grid;
+    place-items: center;
     & + div {
         display: none !important;
     }

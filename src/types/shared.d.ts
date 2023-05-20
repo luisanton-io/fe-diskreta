@@ -41,6 +41,7 @@ interface Message {
     timestamp: number
     hash: string,
     replyingTo?: Reply
+    reactions?: Record<string, Reaction | undefined>
 }
 
 type Reply = Pick<Message, 'sender' | 'content' | 'hash'>
@@ -63,7 +64,8 @@ interface Chat {
 }
 interface Queue {
     messages: ReceivedMessage[],
-    status: MessageStatusUpdate[]
+    status: MessageStatusUpdate[],
+    reactions: IncomingReaction[]
 }
 
 interface TypingMsg {
@@ -72,3 +74,13 @@ interface TypingMsg {
 }
 
 type Override<T, R> = Omit<T, keyof R> & R;
+
+interface ReactionPayload {
+    chatId: string,
+    hash: string,
+    senderId: string, // user id
+    recipientId: string, // user id
+    reaction: Reaction
+}
+
+type IncomingReaction = Omit<ReactionPayload, "recipientId">
