@@ -273,6 +273,9 @@ textarea:focus {
                         transform: translateX(20%);
                         margin-left: auto;
                     }
+                    .reply {
+                        left: 2ch;
+                    }
                 }
 
                 + .timestamp {
