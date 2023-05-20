@@ -77,8 +77,7 @@ export default function Message({ message, sent, i }: Props) {
         selected && document.querySelector(`#${id}`)!.scrollIntoView({ behavior: 'smooth', "block": "center" })
     }, [selected, id])
 
-    // const messageTime = `${new Date(message.timestamp).getHours()}:${new Date(message.timestamp).getMinutes().toString().padStart(2, '0')}`
-    const messageTime = `${new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` //}:${new Date(message.timestamp).getMinutes().toString().padStart(2, '0')}`
+    const messageTime = `${new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
 
     return <div className="d-flex align-items-center message-wrapper my-1"
         id={id}
