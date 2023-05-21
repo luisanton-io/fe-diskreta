@@ -4,7 +4,7 @@ import { pki, random } from "node-forge";
 export default async function generateKeyPair(mnemonic: string) {
     const seed = (await mnemonicToSeed(mnemonic)).toString('hex')
 
-    console.table({ mnemonic, seed })
+    // console.table({ mnemonic, seed })
 
     const bits = 4096
 
