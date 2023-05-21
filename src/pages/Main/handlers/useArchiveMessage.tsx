@@ -64,11 +64,10 @@ export default function useArchiveMessage() {
         setChats(chats => {
 
             if (
-                !chats
-                || Number.isSafeInteger(chats[chatId]?.indexing?.[message.hash]) // optional chaining 'indexing' for retrocompatibility
+                Number.isSafeInteger(chats?.[chatId]?.indexing?.[message.hash]) // optional chaining 'indexing' for retrocompatibility
             ) return chats
 
-            const chatToUpdate = chats[chatId]
+            const chatToUpdate = chats?.[chatId]
 
             return ({
                 ...chats,
