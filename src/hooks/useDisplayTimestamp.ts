@@ -30,7 +30,7 @@ export default function useDisplayTimestamp(message: SentMessage | ReceivedMessa
     const today = new Date().setHours(0, 0, 0, 0)
     const yesterday = today - 86400000
 
-    console.table({ messageDay: statusUpdateDay, today, yesterday })
+    // console.table({ messageDay: statusUpdateDay, today, yesterday })
 
     const displayedTimestamp = status.charAt(0).toUpperCase() + status.slice(1) + ': ' + (
         !!timestamp
