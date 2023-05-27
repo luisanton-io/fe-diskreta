@@ -1,25 +1,25 @@
 import { chatsState } from "atoms/chats";
 import { AES, enc } from "crypto-js";
-import useActiveChat from "hooks/useActiveChat";
 import usePrivateKey from "hooks/usePrivateKey";
 import { util } from "node-forge";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useRecoilState } from "recoil";
-import { useDeepCompareCallback } from "use-deep-compare";
+import { useSetRecoilState } from "recoil";
 
 export default function useArchiveMessage() {
 
     const privateKey = usePrivateKey();
 
-    const [chats, setChats] = useRecoilState(chatsState)
+    const setChats = useSetRecoilState(chatsState)
     const navigate = useNavigate()
 
-    const { activeChatId } = useActiveChat()
+    const activeChatIdRef = useRef<string>()
+    const { activeChatId } = useParams()
 
-    const chatIds = chats && Object.keys(chats)
+    activeChatIdRef.current = activeChatId
 
-    const archiveMessage = useDeepCompareCallback((encryptedMessage: ReceivedMessage, { showToast = true }) => {
+    const archiveMessage = useCallback((encryptedMessage: ReceivedMessage, { showToast = true }) => {
 
         if (!privateKey) return
 
@@ -80,7 +80,7 @@ export default function useArchiveMessage() {
                         ],
                         indexing: {
                             ...chatToUpdate.indexing,
-                            [message.hash]: chatToUpdate.messages.length, // new index corresponds to new length
+                            [message.hash]: chatToUpdate.messages.length, // new index corresponds to old length
                         },
                     }
                     : {
@@ -95,7 +95,7 @@ export default function useArchiveMessage() {
 
         })
 
-        if (showToast && chatId !== activeChatId) {
+        if (showToast && chatId !== activeChatIdRef.current) {
             toast.info(`${message.sender.nick}: ${message.content.text}`, {
                 position: toast.POSITION.TOP_CENTER,
                 onClick: () => {
@@ -105,7 +105,7 @@ export default function useArchiveMessage() {
             })
         }
 
-    }, [privateKey, chatIds, activeChatId, setChats])
+    }, [privateKey, setChats, navigate])
 
     return archiveMessage
 }
