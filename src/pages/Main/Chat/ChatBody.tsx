@@ -40,7 +40,7 @@ export default function ChatBody() {
     }, [hasFocus, socket, connected, user?._id, activeChat, handleMessageStatus])
 
 
-    return <div id="message-container" className="d-flex flex-column flex-grow-1 px-2 pb-2">
+    return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2">
         {
             activeChat.messages.map((message, i, messages) => (<>
                 {
@@ -49,7 +49,7 @@ export default function ChatBody() {
                 }
                 <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
             </>
-            ))//.reverse()
+            )).reverse()
         }
     </div>
 }
