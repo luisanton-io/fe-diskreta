@@ -234,6 +234,8 @@ export default function Message({ message, sent, i }: Props) {
                             sent &&
                             <Icon className="ms-1" style={{
                                 fontSize: '1em',
+                                minWidth: 16,
+                                maxWidth: 16,
                                 color: status === 'read' ? 'var(--msg-tick-read)' : undefined
                             }} />
                         }
