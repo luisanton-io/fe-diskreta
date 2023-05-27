@@ -26,12 +26,22 @@ export default function useDisplayTimestamp(message: SentMessage | ReceivedMessa
     const [status, timestamp] = message.status?.[Object.keys(message.status)[0]].split(' ')
     const time = new Date(parseInt(timestamp))
 
-    const displayedTimestamp = status.charAt(0).toUpperCase() + status.slice(1) + ' ' + (
+    const statusUpdateDay = new Date(parseInt(timestamp)).setHours(0, 0, 0, 0)
+    const today = new Date().setHours(0, 0, 0, 0)
+    const yesterday = today - 86400000
+
+    console.table({ messageDay: statusUpdateDay, today, yesterday })
+
+    const displayedTimestamp = status.charAt(0).toUpperCase() + status.slice(1) + ': ' + (
         !!timestamp
             ? (
-                time.toLocaleDateString() === new Date().toLocaleDateString() // message sent today
+                statusUpdateDay === today
                     ? 'today, ' + time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    : time.toLocaleString([], { hour: '2-digit', minute: '2-digit' })
+                    : statusUpdateDay === yesterday
+                        ? 'yesterday, ' + time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                        : time.toLocaleDateString([], {
+                            weekday: 'long', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })
             )
             : ''
     )
