@@ -3,6 +3,7 @@
 }
 html {
     min-height: 100%;
+    background: black;
 }
 
 body {
@@ -250,11 +251,11 @@ textarea:focus {
                     order: 0;
                     --reactions-right: 0px;
                     --reactionsTranslateX: 25%;
-                    + .timestamp {
-                        transform: translateX(-20%);
-                        margin-right: auto;
-                        order: 1;
-                    }
+                    // + .timestamp {
+                    //     transform: translateX(-20%);
+                    //     margin-right: auto;
+                    //     order: 1;
+                    // }
                     ~ .actions-icons-wrapper {
                         transform: translateX(25%);
                         flex-direction: row-reverse;
@@ -288,7 +289,7 @@ textarea:focus {
 
                     &.show {
                         opacity: 1;
-                        transform: translateX(0%);
+                        transform: translateX(-10%);
                     }
                 }
 
@@ -305,7 +306,7 @@ textarea:focus {
                     top: 100%;
                     right: var(--reactions-right);
                     transform: translate(var(--reactionsTranslateX), -75%);
-                    background-color: rgba(13, 13, 13, 0.85);
+                    background-color: var(--reaction-bg);
                     border-radius: 500px;
                     .count {
                         font-size: 0.65em;
@@ -346,7 +347,7 @@ textarea:focus {
     }
 
     #reply {
-        border: 1px solid white;
+        border: 1px solid var(--theme-color);
         border-bottom: 0px;
         margin-bottom: 0.3em;
 
@@ -364,7 +365,8 @@ textarea:focus {
             content: "";
             width: 1ch;
             height: 100%;
-            background: #ffffff3e;
+            background: var(--theme-color);
+            opacity: 0.25;
         }
         p {
             margin: 0;

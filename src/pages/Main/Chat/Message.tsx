@@ -171,7 +171,7 @@ export default function Message({ message, sent, i }: Props) {
                         .map(([reaction, count], i) => (
                             <span key={`reaction-${i}`} className="d-flex align-items-center px-1">
                                 {reaction}
-                                {count > 1 && <span className="count">{count}</span>}
+                                {count > 1 && <span className="count text-white">{count}</span>}
                             </span>
                         ))
                 }

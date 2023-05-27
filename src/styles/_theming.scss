@@ -1,6 +1,7 @@
 :root {
     --theme-color: white;
     --msg-tick-read: #0dcaf0;
+    --reaction-bg: rgba(13, 13, 13, 0.85);
 }
 
 [data-theme] {
@@ -33,6 +34,7 @@
     --background: #{$sansLight-background};
     --theme-color: rgb(149, 81, 4);
     --theme-color-contrast: rgb(255, 238, 209);
+    --reaction-bg: var(--theme-color-contrast);
 
     color: var(--theme-color);
 
@@ -62,6 +64,9 @@
     #main-right {
         #message-container {
             .message-wrapper {
+                .reactions {
+                    filter: drop-shadow(0px 0px 1px var(--theme-color));
+                }
                 .message.received {
                     background-color: #33250d9a;
                     color: var(--theme-color-contrast);
@@ -71,7 +76,7 @@
                 .message.sent {
                     --tint: #e6b56d40;
                     --msg-tick-read: #ff9900;
-                    background-color: #aeaeae11;
+                    background-color: #fff5e3;
                     color: var(--theme-color);
                     box-shadow: -2px -2px 12px -2px var(--tint), 4px 4px 8px -3px #7c581518;
                     border: 1px solid var(--tint);
