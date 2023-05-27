@@ -43,11 +43,11 @@ export default function ChatBody() {
     return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2">
         {
             activeChat.messages.map((message, i, messages) => (<>
+                <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
                 {
                     (i === 0 || (new Date(messages[i - 1]?.timestamp).getDay() !== new Date(message.timestamp).getDay())) &&
                     <FloatingDate timestamp={message.timestamp} />
                 }
-                <Message i={i} sent={message.sender._id === user!._id} message={message} key={`msg-${i}`} />
             </>
             )).reverse()
         }
