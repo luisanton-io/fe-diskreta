@@ -1,11 +1,12 @@
 import { focusState } from "atoms/focus"
 import { userState } from "atoms/user"
-import { Fragment, useContext, useEffect } from "react"
+import { Fragment, useContext, useEffect, useRef } from "react"
 import { useRecoilValue } from "recoil"
 import { ChatContext } from "./context/ChatCtx"
 import useMessageStatus from "../handlers/useMessageStatus"
 import Message from "./Message"
 import FloatingDate from "./FloatingDate"
+import ScrollToBottom from "./ScrollToBottom"
 
 export default function ChatBody() {
     const hasFocus = useRecoilValue(focusState)
@@ -39,18 +40,24 @@ export default function ChatBody() {
         }
     }, [hasFocus, socket, connected, user?._id, activeChat, handleMessageStatus])
 
+    const scrollerRef = useRef<HTMLDivElement>(null)
 
-    return <div id="message-container" className="d-flex flex-column-reverse flex-grow-1 px-2 pb-2">
-        {
-            activeChat.messages.map((message, i, messages) => (
-                <Fragment key={`msg-${i}`}>
-                    <Message i={i} sent={message.sender._id === user!._id} message={message} />
-                    {
-                        (i === 0 || (new Date(messages[i - 1]?.timestamp).getDay() !== new Date(message.timestamp).getDay())) &&
-                        <FloatingDate timestamp={message.timestamp} />
-                    }
-                </Fragment>
-            )).reverse()
-        }
-    </div>
+    return (
+        <div id="message-container" className="position-relative flex-grow-1 px-2 pb-2">
+            <div className="d-flex flex-column-reverse h-100" style={{ overflowX: 'hidden' }} ref={scrollerRef}>
+                {
+                    activeChat.messages.map((message, i, messages) => (
+                        <Fragment key={`msg-${i}`}>
+                            <Message i={i} sent={message.sender._id === user!._id} message={message} />
+                            {
+                                (i === 0 || (new Date(messages[i - 1]?.timestamp).getDay() !== new Date(message.timestamp).getDay())) &&
+                                <FloatingDate timestamp={message.timestamp} />
+                            }
+                        </Fragment>
+                    )).reverse()
+                }
+            </div>
+            <ScrollToBottom scrollerRef={scrollerRef} />
+        </div>
+    )
 }

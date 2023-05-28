@@ -16,6 +16,7 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { isMessageSent } from 'util/isMessageSent';
 import UsersReaction from './UsersReaction';
 import { ChatContext } from './context/ChatCtx';
+import { isMobile } from 'react-device-detect';
 
 const Icons = {
     outgoing, sent, delivered, read: delivered, error: () => null, new: () => null
@@ -252,7 +253,7 @@ export default function Message({ message, sent, i }: Props) {
             <span className="d-none d-md-block ms-2" onClick={() => setLongPressed(true)}>
                 <EmojiSmile />
             </span>
-            <span className="ms-2" onClick={() => setReplyingTo(message)}>
+            <span className="ms-2" onClick={() => !isMobile && setReplyingTo(message)}>
                 <Reply />
             </span>
         </div>
