@@ -14,19 +14,21 @@ export default function ScrollToBottom({ scrollerRef }: Props) {
         })
     }
 
-    const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
+    const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
 
     useEffect(() => {
+        const scroller = scrollerRef.current
+
         const handleScrolledToBottom = () => {
-            setIsScrolledToBottom(Math.abs(scrollerRef.current!.scrollTop) < 3)
+            setIsScrolledToBottom(Math.abs(scroller!.scrollTop) < 3)
         }
 
-        scrollerRef.current?.addEventListener('scroll', handleScrolledToBottom)
+        scroller?.addEventListener('scroll', handleScrolledToBottom)
 
         return () => {
-            scrollerRef.current?.removeEventListener('scroll', handleScrolledToBottom)
+            scroller?.removeEventListener('scroll', handleScrolledToBottom)
         }
-    }, [scrollerRef.current])
+    }, [scrollerRef])
 
     return (
         <div id="scroll-to-bottom" className="text-white rounded-pill" onClick={scrollToBottom} data-visible={!isScrolledToBottom}>
