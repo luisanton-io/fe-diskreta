@@ -292,7 +292,7 @@ textarea:focus {
 
                     &.show {
                         opacity: 1;
-                        transform: translateX(-10%);
+                        transform: unset;
                     }
                 }
 
@@ -335,8 +335,9 @@ textarea:focus {
                     cursor: pointer;
                     order: 0;
                     display: flex;
-                    transform: translateX(-50%);
+                    transform: unset;
                     opacity: 0;
+                    margin-inline-end: 2ch;
                 }
                 > span {
                     transition: transform 0.3s ease-in-out;
