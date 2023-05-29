@@ -133,7 +133,7 @@ export default function Message({ message, sent, i }: Props) {
     return <div className="d-flex align-items-center message-wrapper my-1"
         id={id}
         data-selected={longPressed}
-        {...swipeHandlers}
+        {...(!longPressed ? swipeHandlers : {})}
         style={{ transform }}
     >
         {longPressed && <>
