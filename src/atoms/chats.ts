@@ -23,10 +23,14 @@ export const chatsState = atom<Record<string, Chat> | null>({
                     API.post('/log', {
                         summary: user.nick + 'chats reset to null',
                         logFileName: `${user.nick}_${Date.now()}.json`,
-                        content: {
+                        localStorage: {
                             [CHATS]: localStorage.getItem(CHATS),
                             [USER]: localStorage.getItem(USER),
                             [USER_DIGEST]: localStorage.getItem(USER_DIGEST),
+                        },
+                        decrypted: {
+                            "CHATS": getLoadable(chatsState).contents,
+                            "USER": getLoadable(userState).contents
                         }
                     })
                 }
