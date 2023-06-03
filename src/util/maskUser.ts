@@ -8,6 +8,7 @@ export default function maskUser(user: LoggedUser | null) {
     delete publicUser.privateKey
     delete publicUser.token
     delete publicUser.refreshToken
+    delete publicUser.settings
 
     return publicUser
 
