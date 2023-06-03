@@ -1,4 +1,4 @@
-import { Close } from "@mui/icons-material";
+import { Close, MicRounded } from "@mui/icons-material";
 import { refreshToken } from "API/refreshToken";
 import { chatsState } from "atoms/chats";
 import { replyingToState } from "atoms/replyingTo";
@@ -7,19 +7,20 @@ import imageCompression from 'browser-image-compression';
 import { MEDIA_PLACEHOLDER } from "constants/mediaPlaceholder";
 import { AES, SHA256 } from "crypto-js";
 import heic2any from "heic2any";
+import { useRecordAudio } from "hooks/useRecordAudio";
 import { pki, random, util } from "node-forge";
 import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { Camera, Send } from "react-bootstrap-icons";
+import { Camera, Send, Stop, Trash } from "react-bootstrap-icons";
 import { toast } from "react-toastify";
 import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
 import { Socket } from "socket.io-client";
 import convertFileToBase64 from "util/convertFileToBase64";
 import maskUser from "util/maskUser";
 import useMessageStatus from "../handlers/useMessageStatus";
-import { ChatContext } from "./context/ChatCtx";
 import { SpotlightProps } from "./Spotlight";
 import Typing from "./Typing";
+import { ChatContext } from "./context/ChatCtx";
 
 export default function MessageInput() {
 
@@ -255,6 +256,31 @@ export default function MessageInput() {
         }
     }, [isTyping, recipients, socket, activeChat.id, user])
 
+    const [audioUrl, setAudioUrl] = useState('')
+    const [isRecording, setIsRecording] = useState(false)
+    const stopRef = useRef<() => Promise<string>>()
+
+    const recordControls = useRecordAudio()
+
+    const handleMic = async () => {
+        if (audioUrl) return setAudioUrl('')
+
+        const { start, stop } = await recordControls()
+        if (isRecording) {
+            stopRef.current?.().then(setAudioUrl)
+            setIsRecording(false)
+        } else {
+            start();
+            setIsRecording(true)
+            stopRef.current = stop
+        }
+
+
+        // setTimeout(() => {
+        // }, 5000)
+
+    }
+
     return <Form onSubmit={handleSendMessage} className="cursor-pointer position-relative d-flex flex-column pt-4" style={{ zIndex: Number(!!media) }}>
         {
             !!activeChat.typing?.length && <Typing />
@@ -277,7 +303,7 @@ export default function MessageInput() {
         }
         <div className="d-flex">
             {
-                !media && (
+                !audioUrl && !media && (
                     <Button variant="outline-light" className="rounded-0" style={{ borderRight: 'transparent' }}>
                         <label htmlFor="media-input">
                             <Camera />
@@ -286,16 +312,50 @@ export default function MessageInput() {
                     </Button>
                 )
             }
-            <textarea id="msg-input" autoComplete="off"
-                className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
-                placeholder="Type a message..."
-                value={text}
-                onChange={e => setText(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
-            />
-            <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={(!text && !media) || !connected}>
-                <Send />
-            </Button>
+            {
+                !audioUrl
+                    ?
+                    !isRecording
+                        ?
+                        <textarea id="msg-input" autoComplete="off"
+                            className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light"
+                            placeholder="Type a message..."
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSendMessage(e)}
+                        />
+                        :
+                        <div className="rounded-0 text-white p-3 bg-transparent flex-grow-1 border-light">
+                            <div className="d-flex align-items-center">
+                                <div className="spinner-grow text-danger me-2" role="status">
+                                    <span className="visually-hidden">Recording...</span>
+                                </div>
+                                <p className="mb-0">Recording...</p>
+                                <Button type="button" onClick={handleMic} className="btn-submit ms-2" variant="outline-info" disabled={!connected}>
+                                    <Stop />
+                                </Button>
+                            </div>
+                        </div>
+
+                    : <>
+                        <audio controls controlsList="nodownload noplaybackrate" src={audioUrl} />
+                        <Button type="button" onClick={handleMic} className="btn-submit ms-2" variant="outline-info" disabled={!connected}>
+                            <Trash />
+                        </Button>
+                    </>
+            }
+            {
+                !isRecording && <>{
+                    (!text && !media && !audioUrl)
+                        ?
+                        <Button type="button" onClick={handleMic} className="btn-submit ms-2" variant="outline-info" disabled={!connected}>
+                            <MicRounded />
+                        </Button>
+                        : <Button type="submit" className="btn-submit ms-2" variant="outline-info" disabled={(!text && !media && !audioUrl) || !connected}>
+                            <Send />
+                        </Button>
+                }</>
+            }
 
         </div>
     </Form>

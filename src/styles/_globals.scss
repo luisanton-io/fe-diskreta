@@ -438,6 +438,13 @@ textarea:focus {
 
     textarea {
         resize: none;
+        + .btn-submit {
+            min-width: 3em;
+            max-width: 3em;
+            padding: unset;
+            display: grid;
+            place-items: center;
+        }
     }
 
     #spotlight {
