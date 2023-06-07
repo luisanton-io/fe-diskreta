@@ -68,7 +68,7 @@ export default function Register() {
                     }, 1000)
 
                 }), {
-                    pending: "Generating your keys. This will take a while...",
+                    pending: "Generating your keys. This will take a while! Please wait and don't leave the page.",
                     error: "Error generating your keys. Please try again.",
                     success: "Your keys have been generated"
                 })
